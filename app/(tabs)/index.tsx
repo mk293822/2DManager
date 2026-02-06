@@ -16,9 +16,15 @@ export default function Index() {
 	const { style } = useBlink(isResult);
 
 	useEffect(() => {
-		setResult(liveData?.result.find((d) => d.open_time === currentTime));
-		setIsResult(result?.twod !== "--");
-	}, [liveData]);
+		if (!liveData) return;
+
+		// compute result first
+		const found = liveData.result.find((d) => d.open_time === currentTime);
+
+		// update state with the computed result
+		setResult(found);
+		setIsResult(found?.twod !== "--");
+	}, [liveData, currentTime]);
 
 	// console.info(liveData?.live.time.split(" ")[1]);
 

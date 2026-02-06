@@ -24,9 +24,17 @@ const History = () => {
 	const { style, visible } = useBlink(isResult);
 
 	useEffect(() => {
-		setResult(data.liveData?.result.find((d) => d.open_time === currentTime));
-		setIsResult(result?.twod !== "--");
-	}, [data.liveData]);
+		if (!data) return;
+
+		// compute result first
+		const found = data.liveData?.result.find(
+			(d) => d.open_time === currentTime,
+		);
+
+		// update state with the computed result
+		setResult(found);
+		setIsResult(found?.twod !== "--");
+	}, [data, currentTime]);
 
 	return (
 		<ScrollView className="bg-gray-100">
