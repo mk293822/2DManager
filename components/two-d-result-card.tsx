@@ -3,11 +3,21 @@ import { TwoDHistoryItem } from "@/types";
 import React from "react";
 import { Text, View } from "react-native";
 
-const TimelyResultCard = ({ data }: { data: TwoDHistoryItem }) => {
+const TwoDResultCard = ({
+	data,
+	main = true,
+}: {
+	data: TwoDHistoryItem;
+	main: boolean;
+}) => {
 	return (
-		<View className="flex-col w-[90%] p-4 items-center bg-gray-600 rounded-2xl">
+		<View
+			className={`flex-col w-[90%] p-4 items-center ${main ? "bg-gray-700" : "bg-gray-600"} rounded-2xl`}
+		>
 			<Text className="text-white font-bold text-3xl w-full text-center">
-				{formatTimeIntl(data.open_time)}
+				{formatTimeIntl(
+					data.open_time === "12:00:00" ? "12:01:00" : data.open_time,
+				)}
 			</Text>
 
 			{/* Row */}
@@ -31,4 +41,4 @@ const TimelyResultCard = ({ data }: { data: TwoDHistoryItem }) => {
 	);
 };
 
-export default TimelyResultCard;
+export default TwoDResultCard;

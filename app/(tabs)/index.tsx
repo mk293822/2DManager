@@ -1,56 +1,80 @@
-import TimelyResultCard from "@/components/timely-result-card";
-import { useAbortableEffect } from "@/hooks/use-abortable-effect";
-import { api } from "@/lib/api";
-import { TwoDResponse } from "@/types";
+import LiveCard from "@/components/live-card";
+import TwoDResultCard from "@/components/two-d-result-card";
+import { useBlink } from "@/hooks/use-blink";
+import useFetchLiveTwoD from "@/hooks/use-fetch-live-two-d";
+import { getTwoDResultTime } from "@/lib/get-twod-result-time";
+import { TwoDHistoryItem } from "@/types";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
-	const [liveData, setLiveData] = useState<TwoDResponse | null>(null);
+	const { liveData } = useFetchLiveTwoD();
+	const currentTime = getTwoDResultTime();
+	const [result, setResult] = useState<TwoDHistoryItem | undefined>();
+	const [isResult, setIsResult] = useState<boolean>(true);
+	const { style } = useBlink(isResult);
 
-	useAbortableEffect((signal) => {
-		async function fetchLive2D() {
-			const { data } = await api.get("/live", { signal });
-			setLiveData(data);
-		}
+	useEffect(() => {
+		setResult(liveData?.result.find((d) => d.open_time === currentTime));
+		setIsResult(result?.twod !== "--");
+	}, [liveData]);
 
-		fetchLive2D();
-	}, []);
+	// console.info(liveData?.live.time.split(" ")[1]);
 
 	return (
-		<SafeAreaView className="flex-1">
-			<ScrollView
-				contentContainerStyle={{
-					flexGrow: 1,
-					alignItems: "center",
-					justifyContent: "center",
-					paddingVertical: 16,
-					paddingBottom: 64,
-				}}
+		<ScrollView
+			contentContainerStyle={{
+				flexGrow: 1,
+				alignItems: "center",
+				justifyContent: "center",
+				paddingBottom: 100,
+			}}
+		>
+			<Text
+				className="text-[10rem] font-extrabold font-serif shadow-lg"
+				style={style}
 			>
-				<Text className="text-[10rem] font-extrabold font-serif shadow-lg">
-					{liveData?.live.twod}
-				</Text>
-				<View className="flex-row gap-2 -mt-4 items-center justify-center">
-					<AntDesign
-						name="check"
-						size={20}
-						color="#16a34a"
+				{isResult ? result?.twod : liveData?.live.twod}
+			</Text>
+
+			<View className="flex-row gap-2 -mt-4 items-center justify-center">
+				<AntDesign
+					name={isResult ? "check" : "history"}
+					size={20}
+					color={isResult ? "#16a34a" : "#1f2937"}
+				/>
+				<Text>Updated</Text>
+				<Text>{isResult ? result?.stock_datetime : liveData?.live.time}</Text>
+			</View>
+
+			<View className="flex-col gap-4 py-4 w-full items-center">
+				{!isResult && (
+					<LiveCard
+						liveData={liveData}
+						style={style}
+						data={result}
+						isLive={!isResult}
 					/>
-					<Text>Updated</Text>
-					<Text>{liveData?.live.time}</Text>
-				</View>
-				<View className="flex-col gap-4 py-4 w-full items-center">
-					{liveData?.result.reverse().map((data, index) => (
-						<TimelyResultCard
+				)}
+
+				{liveData?.result
+					.filter((d) =>
+						isResult
+							? d
+							: d.open_time !==
+								(currentTime === "12:01:00" ? "12:00:00" : currentTime),
+					)
+					.map((data, index) => (
+						<TwoDResultCard
 							key={index}
 							data={data}
+							main={["16:30:00", "12:00:00", "12:01:00"].includes(
+								data.open_time,
+							)}
 						/>
 					))}
-				</View>
-			</ScrollView>
-		</SafeAreaView>
+			</View>
+		</ScrollView>
 	);
 }
