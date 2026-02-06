@@ -6,7 +6,14 @@ import { formatTimeIntl } from "@/lib/time";
 import { TwoDData, TwoDHistoryItem, TwoDResponse } from "@/types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import React, { useEffect, useState } from "react";
-import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import {
+	ActivityIndicator,
+	Modal,
+	Pressable,
+	ScrollView,
+	Text,
+	View,
+} from "react-native";
 
 const History = () => {
 	const options = ["/history", "11:00:00", "12:01:00", "15:00:00", "16:30:00"];
@@ -35,6 +42,17 @@ const History = () => {
 		setResult(found);
 		setIsResult(found?.twod !== "--");
 	}, [data, currentTime]);
+
+	if (!data.liveData)
+		return (
+			<View className="flex-1 items-center justify-center">
+				<ActivityIndicator
+					size={50}
+					color={"#0000ff"}
+					className="my-3"
+				/>
+			</View>
+		);
 
 	return (
 		<ScrollView className="bg-gray-100">

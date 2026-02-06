@@ -6,7 +6,7 @@ import { getTwoDResultTime } from "@/lib/get-twod-result-time";
 import { TwoDHistoryItem } from "@/types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useEffect, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 
 export default function Index() {
 	const { liveData } = useFetchLiveTwoD();
@@ -27,6 +27,17 @@ export default function Index() {
 	}, [liveData, currentTime]);
 
 	// console.info(liveData?.live.time.split(" ")[1]);
+
+	if (!liveData)
+		return (
+			<View className="flex-1 items-center justify-center">
+				<ActivityIndicator
+					size={50}
+					color={"#0000ff"}
+					className="my-3"
+				/>
+			</View>
+		);
 
 	return (
 		<ScrollView

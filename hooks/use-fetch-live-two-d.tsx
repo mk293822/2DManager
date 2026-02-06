@@ -42,7 +42,6 @@ function useFetchLiveTwoD<T = TwoDResponse>(
 				}
 			} finally {
 				setLoading(false);
-				console.info("fetched", url);
 			}
 		},
 		[url, isFocused],
