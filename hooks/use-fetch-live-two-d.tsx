@@ -4,6 +4,11 @@ import { TwoDResponse } from "@/types";
 import { useIsFocused } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 
+type Options = {
+	interval?: number | false; // ms | disable
+	immediate?: boolean; // fetch on focus
+};
+
 type UseFetchLiveTwoD<T> = {
 	liveData: T | null;
 	loading: boolean;
@@ -12,7 +17,13 @@ type UseFetchLiveTwoD<T> = {
 
 function useFetchLiveTwoD<T = TwoDResponse>(
 	url: string = "/live",
+	options: Options = {},
 ): UseFetchLiveTwoD<T> {
+	const {
+		interval = 3000, // default polling
+		immediate = true,
+	} = options;
+
 	const [liveData, setLiveData] = useState<T | null>(null);
 	const [loading, setLoading] = useState(false);
 	const isFocused = useIsFocused();
@@ -20,34 +31,40 @@ function useFetchLiveTwoD<T = TwoDResponse>(
 	const fetchLive2D = useCallback(
 		async (signal: AbortSignal) => {
 			if (!isFocused) return;
+
 			setLoading(true);
 			try {
 				const { data } = await api.get<T>(url, { signal });
 				setLiveData(data);
 			} catch (err) {
-				if (signal.aborted) return;
-				console.error(err);
+				if (!signal.aborted) {
+					console.error(err);
+				}
 			} finally {
 				setLoading(false);
+				console.info("fetched", url);
 			}
 		},
 		[url, isFocused],
 	);
 
-	// 🔁 auto-fetch on every blink visible
 	useAbortableEffect(
 		(signal) => {
 			if (!isFocused) return;
 
-			fetchLive2D(signal); // immediate fetch
-			const id = setInterval(() => fetchLive2D(signal), 1000);
+			if (immediate) {
+				fetchLive2D(signal);
+			}
 
-			return () => clearInterval(id); // cleanup
+			if (interval === false) return;
+
+			const id = setInterval(() => fetchLive2D(signal), interval);
+
+			return () => clearInterval(id);
 		},
-		[fetchLive2D, isFocused],
+		[fetchLive2D, isFocused, interval, immediate],
 	);
 
-	// 🖱 manual fetch
 	const refetch = useCallback(() => {
 		const controller = new AbortController();
 		fetchLive2D(controller.signal);
