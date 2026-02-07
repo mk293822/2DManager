@@ -4,7 +4,7 @@ import TwoDResultCard from "@/components/two-d-result-card";
 import { useBlink } from "@/hooks/use-blink";
 import useFetchLiveTwoD from "@/hooks/use-fetch-live-two-d";
 import { getTwoDResultTime } from "@/lib/get-twod-result-time";
-import { TwoDHistoryItem } from "@/types";
+import { TwoDHistoryItem } from "@/types/two-d-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
@@ -29,8 +29,6 @@ export default function Index() {
 		setResult(found);
 		setIsResult(found?.twod !== "--");
 	}, [liveData, currentTime]);
-
-	// console.info(liveData?.live.time.split(" ")[1]);
 
 	if (!liveData)
 		return (

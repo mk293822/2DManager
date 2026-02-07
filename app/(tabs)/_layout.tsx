@@ -13,8 +13,8 @@ interface Page {
 
 const pages: Page[] = [
 	{ name: "index", title: "Home", icon: "home" },
-	{ name: "history", title: "History", icon: "history" },
 	{ name: "manage", title: "Manage", icon: "appstore" },
+	{ name: "history", title: "History", icon: "history" },
 	{ name: "profile", title: "Profile", icon: "user" },
 ];
 
@@ -86,7 +86,7 @@ const _Layout = () => {
 							},
 
 							headerRight: () => (
-								<View className="flex-row gap-2 pr-4">
+								<View className="flex-row gap-2 pr-4 items-center">
 									<TouchableOpacity
 										activeOpacity={0.5}
 										className="p-2 rounded-full"
@@ -97,6 +97,15 @@ const _Layout = () => {
 											size={22}
 											color="#e5e7eb"
 										/>
+									</TouchableOpacity>
+									<TouchableOpacity
+										activeOpacity={0.5}
+										className="p-2 rounded-full"
+										onPress={() => router.push("/two-d/three-d-result")}
+									>
+										<Text className="text-2xl font-extrabold text-gray-200">
+											3D
+										</Text>
 									</TouchableOpacity>
 
 									<TouchableOpacity

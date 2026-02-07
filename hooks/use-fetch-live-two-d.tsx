@@ -1,6 +1,6 @@
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { api } from "@/lib/api";
-import { TwoDResponse } from "@/types";
+import { TwoDResponse } from "@/types/two-d-types";
 import { useIsFocused } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 

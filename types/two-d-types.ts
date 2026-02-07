@@ -39,3 +39,15 @@ export type TwoDData = {
 	date: string; // e.g., "2021-11-05"
 	child: TwoDChild[];
 };
+
+// three d
+export interface ThreeDResultItem {
+	result: string;
+	datetime: string; // ISO date string (YYYY-MM-DD)
+}
+
+export interface ThreeDResultResponse {
+	data: ThreeDResultItem[];
+	result: number;
+	message: string;
+}

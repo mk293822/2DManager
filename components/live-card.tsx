@@ -1,6 +1,6 @@
 import { getTwoDResultTime } from "@/lib/get-twod-result-time";
 import { formatTimeIntl } from "@/lib/time";
-import { TwoDHistoryItem, TwoDResponse } from "@/types";
+import { TwoDHistoryItem, TwoDResponse } from "@/types/two-d-types";
 import { Text, View } from "react-native";
 
 const LiveCard = ({

@@ -1,5 +1,5 @@
 import { formatTimeIntl } from "@/lib/time";
-import { TwoDHistoryItem } from "@/types";
+import { TwoDHistoryItem } from "@/types/two-d-types";
 import React from "react";
 import { Text, View } from "react-native";
 

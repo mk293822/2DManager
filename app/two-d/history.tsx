@@ -4,7 +4,7 @@ import useFetchLiveTwoD from "@/hooks/use-fetch-live-two-d";
 import { getTwoDResultTime } from "@/lib/get-twod-result-time";
 import { renderStyledValue } from "@/lib/render-styled-value";
 import { formatTimeIntl } from "@/lib/time";
-import { TwoDData, TwoDHistoryItem, TwoDResponse } from "@/types";
+import { TwoDData, TwoDHistoryItem, TwoDResponse } from "@/types/two-d-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import React, { useEffect, useState } from "react";
 import {

@@ -38,6 +38,20 @@ export default function RootLayout() {
 						headerTitleAlign: "center",
 					}}
 				/>
+				<Stack.Screen
+					name="two-d/three-d-result"
+					options={{
+						title: "3D Results History",
+						headerStyle: {
+							backgroundColor: "#0f172a",
+						},
+						headerTintColor: "#e5e7eb",
+						headerTitleStyle: {
+							fontWeight: "900",
+						},
+						headerTitleAlign: "center",
+					}}
+				/>
 			</Stack>
 		</SafeAreaProvider>
 	);

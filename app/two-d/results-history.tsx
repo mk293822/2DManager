@@ -1,6 +1,6 @@
 import useFetchLiveTwoD from "@/hooks/use-fetch-live-two-d";
 import { formatTimeIntl } from "@/lib/time";
-import { TwoDData } from "@/types";
+import { TwoDData } from "@/types/two-d-types";
 import React, { useState } from "react";
 import {
 	ActivityIndicator,
