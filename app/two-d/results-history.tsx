@@ -18,44 +18,42 @@ const ResultsHistory = () => {
 		},
 	);
 	const [refreshing, setRefreshing] = useState(false);
-	// render each child row
+
 	const renderChild = ({ item }: { item: TwoDData["child"][0] }) => (
-		<View className="px-4 py-4 border-b border-gray-200">
+		<View className="px-4 py-4 border-b border-gray-200 bg-white">
 			<View className="flex-row w-full justify-between mt-3">
 				{/* Time */}
 				<View className="w-1/4 items-center">
-					<Text className="text-xs text-gray-500 uppercase tracking-wide">
+					<Text className="text-xs text-gray-400 uppercase tracking-wide">
 						Time
 					</Text>
-					<Text className="text-lg font-semibold text-gray-800">
+					<Text className="text-lg font-bold text-gray-700">
 						{formatTimeIntl(item.time)}
 					</Text>
 				</View>
 
 				{/* Set */}
 				<View className="flex-1 items-center">
-					<Text className="text-xs text-gray-500 uppercase tracking-wide">
+					<Text className="text-xs text-gray-400 uppercase tracking-wide">
 						Set
 					</Text>
-					<Text className="text-xl font-bold text-gray-900">{item.set}</Text>
+					<Text className="text-xl font-bold text-green-600">{item.set}</Text>
 				</View>
 
 				{/* Value */}
 				<View className="flex-1 items-center">
-					<Text className="text-xs text-gray-500 uppercase tracking-wide">
+					<Text className="text-xs text-gray-400 uppercase tracking-wide">
 						Value
 					</Text>
-					<Text className="text-xl font-bold text-gray-900">{item.value}</Text>
+					<Text className="text-xl font-bold text-green-600">{item.value}</Text>
 				</View>
 
 				{/* 2D */}
 				<View className="w-1/7 items-center">
-					<Text className="text-xs text-gray-500 uppercase tracking-wide">
+					<Text className="text-xs text-gray-400 uppercase tracking-wide">
 						2D
 					</Text>
-					<Text className={`text-xl font-bold text-indigo-600`}>
-						{item.twod}
-					</Text>
+					<Text className="text-xl font-bold text-indigo-600">{item.twod}</Text>
 				</View>
 			</View>
 		</View>
@@ -65,7 +63,7 @@ const ResultsHistory = () => {
 	const renderSection = ({ item }: { item: TwoDData }) => (
 		<View className="mb-6 w-full">
 			{/* Date Header */}
-			<View className="bg-gray-600 px-4 py-2 rounded-t-xl">
+			<View className="bg-indigo-900/70 px-4 py-2 rounded-t-xl">
 				<Text className="text-white font-semibold text-sm">📅 {item.date}</Text>
 			</View>
 

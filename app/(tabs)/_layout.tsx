@@ -1,38 +1,51 @@
 import HapticTab from "@/components/haptic-tab";
+import HomePageHeaderRight from "@/components/headers/home-page-header-right";
+import TwoDListsHeaderRight from "@/components/headers/two-d-lists-header-right";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { router, Tabs } from "expo-router";
+import { Tabs } from "expo-router";
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 interface Page {
 	name?: string;
-	title: string;
+	title?: string;
 	icon: keyof typeof AntDesign.glyphMap;
+	headerRight?: () => React.ReactNode;
 }
 
 const pages: Page[] = [
-	{ name: "index", title: "Home", icon: "home" },
+	{
+		name: "index",
+		title: "Home",
+		icon: "home",
+		headerRight: () => <HomePageHeaderRight />,
+	},
+	{
+		name: "two-d-lists",
+		title: "2D Lists",
+		icon: "unordered-list",
+		headerRight: () => <TwoDListsHeaderRight />,
+	},
 	{ name: "manage", title: "Manage", icon: "appstore" },
-	{ name: "history", title: "History", icon: "history" },
+	{
+		name: "commission-users",
+		title: "Cormission Users",
+		icon: "usergroup-add",
+	},
 	{ name: "profile", title: "Profile", icon: "user" },
 ];
 
-const TabIcon = ({ title, focused, icon }: Page & { focused: boolean }) => {
+const TabIcon = ({ focused, icon }: Page & { focused: boolean }) => {
 	return (
 		<View
-			className={`${focused ? "bg-gray-500 flex-1 min-w-28 gap-1 overflow-hidden flex flex-row" : "min-w-16"} mt-6 min-h-[4rem] justify-center items-center rounded-full`}
+			className={`${focused ? "bg-purple-400 flex-1 min-w-24 gap-1 overflow-hidden flex flex-row" : "min-w-16"} mt-6 min-h-[4.2rem] justify-center items-center rounded-full`}
 		>
 			<AntDesign
 				name={icon}
 				size={24}
 				color={"white"}
 			/>
-			{focused && (
-				<Text className={`text-base font-bold mt-0.5 text-gray-200`}>
-					{title}
-				</Text>
-			)}
 		</View>
 	);
 };
@@ -53,14 +66,13 @@ const _Layout = () => {
 					tabBarStyle: {
 						borderRadius: 50,
 						marginHorizontal: 20,
-						marginBottom: 29,
+						marginBottom: 30,
 						height: 60,
 						position: "absolute",
 						overflow: "hidden",
 						borderWidth: 1,
-						paddingHorizontal: 5,
-						backgroundColor: "#1f2937",
-						borderColor: "1f2937",
+						paddingHorizontal: 9,
+						backgroundColor: "rgba(49, 46, 129, 0.75)",
 					},
 				}}
 			>
@@ -71,56 +83,21 @@ const _Layout = () => {
 						options={{
 							tabBarIcon: ({ focused }) => (
 								<TabIcon
-									title={page.title}
 									icon={page.icon}
 									focused={focused}
 								/>
 							),
-							headerStyle: {
-								backgroundColor: "#0f172a",
-							},
 							title: page.title,
+							headerStyle: {
+								backgroundColor: "rgba(49, 46, 129, 0.85)",
+							},
+
 							headerTintColor: "#e5e7eb",
 							headerTitleStyle: {
 								fontWeight: "900",
 							},
 
-							headerRight: () => (
-								<View className="flex-row gap-2 pr-4 items-center">
-									<TouchableOpacity
-										activeOpacity={0.5}
-										className="p-2 rounded-full"
-										onPress={() => router.push("/two-d/results-history")}
-									>
-										<AntDesign
-											name="calendar"
-											size={22}
-											color="#e5e7eb"
-										/>
-									</TouchableOpacity>
-									<TouchableOpacity
-										activeOpacity={0.5}
-										className="p-2 rounded-full"
-										onPress={() => router.push("/two-d/three-d-result")}
-									>
-										<Text className="text-2xl font-extrabold text-gray-200">
-											3D
-										</Text>
-									</TouchableOpacity>
-
-									<TouchableOpacity
-										activeOpacity={0.5}
-										className="p-2 rounded-full"
-										onPress={() => router.push("/two-d/history")}
-									>
-										<AntDesign
-											name="history"
-											size={22}
-											color="#e5e7eb"
-										/>
-									</TouchableOpacity>
-								</View>
-							),
+							headerRight: page.headerRight,
 						}}
 					/>
 				))}

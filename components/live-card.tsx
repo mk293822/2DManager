@@ -1,5 +1,4 @@
 import { getTwoDResultTime } from "@/lib/get-twod-result-time";
-import { formatTimeIntl } from "@/lib/time";
 import { TwoDHistoryItem, TwoDResponse } from "@/types/two-d-types";
 import { Text, View } from "react-native";
 
@@ -15,7 +14,6 @@ const LiveCard = ({
 	style: { opacity: number };
 }) => {
 	const currentTime = getTwoDResultTime();
-
 	const content = isLive ? liveData?.live : data;
 	const displayTime = isLive
 		? currentTime
@@ -26,26 +24,35 @@ const LiveCard = ({
 	if (!content) return null;
 
 	return (
-		<View className="flex-col w-[90%] p-4 items-center bg-gray-600 rounded-2xl">
-			<Text className="text-white font-bold text-3xl w-full text-center">
-				{formatTimeIntl(displayTime)}
+		<View className="flex-col w-[95%] p-4 mb-4 bg-white rounded-2xl shadow-md self-center">
+			{/* Time */}
+			<Text
+				className="text-indigo-700 font-extrabold text-3xl w-full text-center"
+				style={style}
+			>
+				{displayTime}
 			</Text>
 
-			<View className="flex-row w-full justify-between mt-4 border-t-2 border-gray-300 pt-4">
+			{/* Row */}
+			<View className="flex-row w-full justify-between mt-4 border-t border-gray-200 pt-4">
 				<View className="flex-1 items-center">
-					<Text className="text-white/80 font-semibold text-xl">Set</Text>
-					<Text className="text-white font-bold text-xl">{content.set}</Text>
+					<Text className="text-gray-400 font-semibold text-xl">Set</Text>
+					<Text className="text-indigo-700 font-bold text-xl">
+						{content.set}
+					</Text>
 				</View>
 
 				<View className="flex-1 items-center">
-					<Text className="text-white/80 font-semibold text-xl">Value</Text>
-					<Text className="text-white font-bold text-xl">{content.value}</Text>
+					<Text className="text-gray-400 font-semibold text-xl">Value</Text>
+					<Text className="text-green-600 font-bold text-xl">
+						{content.value}
+					</Text>
 				</View>
 
 				<View className="flex-1 items-center">
-					<Text className="text-white/80 font-semibold text-xl">2D</Text>
+					<Text className="text-gray-400 font-semibold text-xl">2D</Text>
 					<Text
-						className="text-white font-bold text-xl"
+						className="text-indigo-700 font-bold text-xl"
 						style={isLive ? style : undefined}
 					>
 						{content.twod}
@@ -55,4 +62,5 @@ const LiveCard = ({
 		</View>
 	);
 };
+
 export default LiveCard;

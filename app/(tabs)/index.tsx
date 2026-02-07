@@ -22,54 +22,49 @@ export default function Index() {
 	useEffect(() => {
 		if (!liveData) return;
 
-		// compute result first
 		const found = liveData.result.find((d) => d.open_time === currentTime);
 
-		// update state with the computed result
 		setResult(found);
 		setIsResult(found?.twod !== "--");
 	}, [liveData, currentTime]);
 
 	if (!liveData)
 		return (
-			<View className="flex-1 items-center justify-center">
+			<View className="flex-1 items-center justify-center bg-gray-100">
 				<ActivityIndicator
 					size={50}
-					color={"#0000ff"}
-					className="my-3"
+					color="#2563eb"
 				/>
 			</View>
 		);
 
 	return (
-		<ScrollView
-			contentContainerStyle={{
-				flexGrow: 1,
-				alignItems: "center",
-				justifyContent: "center",
-				paddingBottom: 100,
-			}}
-		>
-			{isHoliday && <HolidayInfo />}
+		<View className="flex-1 bg-gray-100">
+			<ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
+				{isHoliday && <HolidayInfo />}
 
-			<Text
-				className="text-[10rem] font-extrabold font-serif shadow-lg"
-				style={style}
-			>
-				{isResult ? result?.twod : liveData?.live.twod}
-			</Text>
+				{/* Main 2D Result */}
+				<View className="w-[95%] bg-white rounded-2xl shadow-md p-4 my-4 self-center">
+					<Text
+						className="text-9xl font-extrabold text-indigo-700 p-4 text-center"
+						style={style}
+					>
+						{isResult ? result?.twod : liveData.live.twod}
+					</Text>
+					<View className="flex-row justify-center items-center mt-2">
+						<AntDesign
+							name={isResult ? "check" : "history"}
+							size={20}
+							color={isResult ? "#16a34a" : "#6b7280"}
+						/>
+						<Text className="ml-2 text-gray-600 font-semibold">Updated:</Text>
+						<Text className="ml-1 text-green-600 font-semibold">
+							{isResult ? result?.stock_datetime : liveData.live.time}
+						</Text>
+					</View>
+				</View>
 
-			<View className="flex-row gap-2 -mt-4 items-center justify-center">
-				<AntDesign
-					name={isResult ? "check" : "history"}
-					size={20}
-					color={isResult ? "#16a34a" : "#1f2937"}
-				/>
-				<Text>Updated</Text>
-				<Text>{isResult ? result?.stock_datetime : liveData?.live.time}</Text>
-			</View>
-
-			<View className="flex-col gap-4 py-4 w-full items-center">
+				{/* LiveCard */}
 				{!isResult && (
 					<LiveCard
 						liveData={liveData}
@@ -79,6 +74,7 @@ export default function Index() {
 					/>
 				)}
 
+				{/* 2D Result Cards */}
 				{liveData?.result
 					.filter((d) =>
 						isResult
@@ -95,7 +91,7 @@ export default function Index() {
 							)}
 						/>
 					))}
-			</View>
-		</ScrollView>
+			</ScrollView>
+		</View>
 	);
 }

@@ -1,7 +1,7 @@
 import React from "react";
 import { Text, View } from "react-native";
 
-const History = () => {
+const CommissionUsers = () => {
 	return (
 		<View>
 			<Text>History</Text>
@@ -9,4 +9,4 @@ const History = () => {
 	);
 };
 
-export default History;
+export default CommissionUsers;

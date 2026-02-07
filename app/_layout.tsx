@@ -2,6 +2,26 @@ import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "./global.css";
 
+type Screen = {
+	name: string;
+	title: string;
+};
+
+const screens: Screen[] = [
+	{
+		name: "two-d/history",
+		title: "2D History",
+	},
+	{
+		name: "two-d/results-history",
+		title: "2D Results History",
+	},
+	{
+		name: "two-d/three-d-result",
+		title: "3D Results History",
+	},
+];
+
 export default function RootLayout() {
 	return (
 		<SafeAreaProvider>
@@ -10,48 +30,24 @@ export default function RootLayout() {
 					name="(tabs)"
 					options={{ headerShown: false }}
 				/>
-				<Stack.Screen
-					name="two-d/history"
-					options={{
-						title: "2D History",
-						headerStyle: {
-							backgroundColor: "#0f172a",
-						},
-						headerTintColor: "#e5e7eb",
-						headerTitleStyle: {
-							fontWeight: "900",
-						},
-						headerTitleAlign: "center",
-					}}
-				/>
-				<Stack.Screen
-					name="two-d/results-history"
-					options={{
-						title: "2D Results History",
-						headerStyle: {
-							backgroundColor: "#0f172a",
-						},
-						headerTintColor: "#e5e7eb",
-						headerTitleStyle: {
-							fontWeight: "900",
-						},
-						headerTitleAlign: "center",
-					}}
-				/>
-				<Stack.Screen
-					name="two-d/three-d-result"
-					options={{
-						title: "3D Results History",
-						headerStyle: {
-							backgroundColor: "#0f172a",
-						},
-						headerTintColor: "#e5e7eb",
-						headerTitleStyle: {
-							fontWeight: "900",
-						},
-						headerTitleAlign: "center",
-					}}
-				/>
+				{screens.map((screen, index) => (
+					<Stack.Screen
+						key={index}
+						name={screen.name}
+						options={{
+							title: screen.title,
+							headerStyle: {
+								backgroundColor: "rgba(49, 46, 129, 0.85)",
+							},
+
+							headerTintColor: "#e5e7eb",
+							headerTitleStyle: {
+								fontWeight: "900",
+							},
+							headerTitleAlign: "center",
+						}}
+					/>
+				))}
 			</Stack>
 		</SafeAreaProvider>
 	);
