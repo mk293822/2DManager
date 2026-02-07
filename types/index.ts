@@ -12,7 +12,7 @@ export type TwoDResponse = {
 	result: TwoDHistoryItem[];
 
 	holiday: {
-		status: string;
+		status: number;
 		date: string;
 		name: string | null;
 	};

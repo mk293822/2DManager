@@ -41,7 +41,10 @@ const TIME_RANGES: TimeRange[] = [
 	},
 ];
 
-export function getTwoDResultTime(date = new Date()): string {
+export function getTwoDResultTime(isHoliday: boolean = false): string {
+	if (isHoliday) return "16:30:00";
+
+	const date = new Date();
 	const nowSeconds =
 		date.getHours() * 3600 + date.getMinutes() * 60 + date.getSeconds();
 

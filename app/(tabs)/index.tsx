@@ -1,3 +1,4 @@
+import HolidayInfo from "@/components/holiday-info";
 import LiveCard from "@/components/live-card";
 import TwoDResultCard from "@/components/two-d-result-card";
 import { useBlink } from "@/hooks/use-blink";
@@ -10,7 +11,10 @@ import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 
 export default function Index() {
 	const { liveData } = useFetchLiveTwoD();
-	const currentTime = getTwoDResultTime();
+	// eslint-disable-next-line eqeqeq
+	const isHoliday = liveData?.holiday?.status == 3;
+
+	const currentTime = getTwoDResultTime(isHoliday);
 	const [result, setResult] = useState<TwoDHistoryItem | undefined>();
 	const [isResult, setIsResult] = useState<boolean>(true);
 	const { style } = useBlink(isResult);
@@ -48,6 +52,8 @@ export default function Index() {
 				paddingBottom: 100,
 			}}
 		>
+			{isHoliday && <HolidayInfo />}
+
 			<Text
 				className="text-[10rem] font-extrabold font-serif shadow-lg"
 				style={style}

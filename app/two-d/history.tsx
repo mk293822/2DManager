@@ -1,3 +1,4 @@
+import HolidayInfo from "@/components/holiday-info";
 import { useBlink } from "@/hooks/use-blink";
 import useFetchLiveTwoD from "@/hooks/use-fetch-live-two-d";
 import { getTwoDResultTime } from "@/lib/get-twod-result-time";
@@ -21,9 +22,12 @@ const History = () => {
 	const [open, setOpen] = useState(false);
 	const [value, setValue] = useState(options[0]);
 
-	const currentTime = getTwoDResultTime();
 	const { liveData } = useFetchLiveTwoD<TwoDData[]>(value);
 	const data = useFetchLiveTwoD<TwoDResponse>();
+	// eslint-disable-next-line eqeqeq
+	const isHoliday = data.liveData?.holiday?.status == 3;
+
+	const currentTime = getTwoDResultTime(isHoliday);
 
 	const [result, setResult] = useState<TwoDHistoryItem | undefined>();
 	const [isResult, setIsResult] = useState<boolean>(true);
@@ -56,8 +60,10 @@ const History = () => {
 
 	return (
 		<ScrollView className="bg-gray-100">
+			{isHoliday && <HolidayInfo />}
+
 			{/* HERO RESULT */}
-			<View className="items-center pt-10 pb-6">
+			<View className="items-center pb-6">
 				<Text
 					style={style}
 					className="text-[9rem] font-extrabold text-gray-900 tracking-tight"
