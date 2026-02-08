@@ -1,3 +1,5 @@
+import { AppEvents } from "@/types/event-bus";
+
 type Listener<T> = (payload: T) => void;
 
 class EventBus<T extends Record<string, unknown>> {
@@ -7,6 +9,11 @@ class EventBus<T extends Record<string, unknown>> {
 
 	emit<K extends keyof T>(name: K, payload: T[K]) {
 		this.events[name]?.forEach((cb) => cb(payload));
+	}
+
+	off<K extends keyof T>(name: K, cb: Listener<T[K]>) {
+		if (!this.events[name]) return;
+		this.events[name] = this.events[name]!.filter((h) => h !== cb);
 	}
 
 	on<K extends keyof T>(name: K, cb: Listener<T[K]>) {
@@ -19,4 +26,4 @@ class EventBus<T extends Record<string, unknown>> {
 	}
 }
 
-export const eventBus = new EventBus();
+export const eventBus = new EventBus<AppEvents>();

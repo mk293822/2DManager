@@ -1,7 +1,10 @@
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { api } from "@/lib/api";
+import { eventBus } from "@/lib/event-bus";
+import { EVENT_NAMES } from "@/lib/event-name";
 import { TwoDResponse } from "@/types/two-d-types";
 import { useIsFocused } from "@react-navigation/native";
+import { isAxiosError } from "axios";
 import { useCallback, useState } from "react";
 
 type Options = {
@@ -38,7 +41,19 @@ function useFetchLiveTwoD<T = TwoDResponse>(
 				setLiveData(data);
 			} catch (err) {
 				if (!signal.aborted) {
-					console.error(err);
+					if (isAxiosError(err)) {
+						eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+							title: "Error",
+							description: err.message,
+							type: "error",
+						});
+					} else {
+						eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+							title: "Error",
+							description: "Somethings went wrong!!",
+							type: "error",
+						});
+					}
 				}
 			} finally {
 				setLoading(false);

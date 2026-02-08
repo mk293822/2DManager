@@ -1,4 +1,5 @@
 // TwoDLists.tsx
+import HolidayInfo from "@/components/holiday-info";
 import TwoDListsRow from "@/components/two-d-lists-row";
 import React, { useState } from "react";
 import {
@@ -13,7 +14,7 @@ import {
 const generateData = () => {
 	const data = [];
 	for (let i = 0; i < 100; i++) {
-		const value = Math.floor(Math.random() * (10_000 - 100 + 1) + 100);
+		const value = Math.floor(Math.random() * (1_500 - 100 + 1) + 100);
 		data.push({
 			number: i.toString().padStart(2, "0"),
 			value,
@@ -29,6 +30,7 @@ const TwoDLists = () => {
 	const [filterMode, setFilterMode] = useState<filterModeType>("all");
 	const [limit, setLimit] = useState<number>(1000);
 	const [inputValue, setInputValue] = useState(limit.toString());
+	const isHoliday = false;
 
 	// Filtered data based on mode
 	const filteredData = data.filter((item) => {
@@ -59,6 +61,7 @@ const TwoDLists = () => {
 
 	return (
 		<View className="flex-col">
+			{isHoliday && <HolidayInfo />}
 			{/* Totals */}
 			<View className="mx-4 mt-4 mb-2 p-4 flex-row items-center justify-between rounded-2xl bg-indigo-900/70">
 				<View className="w-1/2 pr-4">
@@ -132,7 +135,7 @@ const TwoDLists = () => {
 			{/* Data list */}
 			<ScrollView
 				className="bg-gray-100 pt-2"
-				contentContainerStyle={{ paddingBottom: 250 }}
+				contentContainerStyle={{ paddingBottom: 350 }}
 			>
 				{chunkedData.length > 0 ? (
 					chunkedData.map((pair, index) => (
