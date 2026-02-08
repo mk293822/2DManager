@@ -1,7 +1,7 @@
+import { EVENT_NAMES } from "@/event-names";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { api } from "@/lib/api";
 import { eventBus } from "@/lib/event-bus";
-import { EVENT_NAMES } from "@/lib/event-name";
 import { TwoDResponse } from "@/types/two-d-types";
 import { useIsFocused } from "@react-navigation/native";
 import { isAxiosError } from "axios";

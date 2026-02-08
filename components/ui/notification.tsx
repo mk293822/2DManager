@@ -1,5 +1,5 @@
+import { EVENT_NAMES } from "@/event-names";
 import { eventBus } from "@/lib/event-bus";
-import { EVENT_NAMES } from "@/lib/event-name";
 import { Notification, NotificationPayload } from "@/types/event-bus";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import React, { useEffect, useRef, useState } from "react";

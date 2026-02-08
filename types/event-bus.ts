@@ -1,5 +1,6 @@
-import { EVENT_NAMES } from "@/lib/event-name";
+import { EVENT_NAMES } from "@/event-names";
 
+// Notifications
 export type NotificationPayload = {
 	title: string;
 	description?: string;
@@ -10,8 +11,16 @@ export type Notification = NotificationPayload & {
 	id: number;
 };
 
-export type NotificationEvents = {
+type NotificationEvents = {
 	[EVENT_NAMES.NOTIFICATION]: NotificationPayload;
 };
 
-export type AppEvents = NotificationEvents;
+// Manage Page Header Right
+export type RangeMode = "today" | "week";
+
+type ManagePageHeaderRightEvents = {
+	[EVENT_NAMES.CHANGE_DATE_RANGE]: RangeMode;
+};
+
+// Event Bus
+export type AppEvents = NotificationEvents & ManagePageHeaderRightEvents;

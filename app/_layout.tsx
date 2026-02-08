@@ -25,8 +25,8 @@ const screens: Screen[] = [
 
 export default function RootLayout() {
 	return (
-		<NotificationProvider>
-			<SafeAreaProvider>
+		<SafeAreaProvider>
+			<NotificationProvider>
 				<Stack>
 					<Stack.Screen
 						name="(tabs)"
@@ -51,7 +51,7 @@ export default function RootLayout() {
 						/>
 					))}
 				</Stack>
-			</SafeAreaProvider>
-		</NotificationProvider>
+			</NotificationProvider>
+		</SafeAreaProvider>
 	);
 }

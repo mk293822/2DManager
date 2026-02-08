@@ -1,5 +1,6 @@
 import HapticTab from "@/components/haptic-tab";
 import HomePageHeaderRight from "@/components/headers/home-page-header-right";
+import ManagePageHeaderRight from "@/components/headers/manate-page-header-right";
 import TwoDListsHeaderRight from "@/components/headers/two-d-lists-header-right";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Tabs } from "expo-router";
@@ -27,7 +28,12 @@ const pages: Page[] = [
 		icon: "unordered-list",
 		headerRight: () => <TwoDListsHeaderRight />,
 	},
-	{ name: "manage", title: "Manage", icon: "appstore" },
+	{
+		name: "manage",
+		title: "Manage",
+		icon: "appstore",
+		headerRight: () => <ManagePageHeaderRight />,
+	},
 	{
 		name: "commission-users",
 		title: "Cormission Users",
@@ -97,6 +103,10 @@ const _Layout = () => {
 								fontWeight: "900",
 							},
 
+							headerRightContainerStyle: {
+								display: "flex",
+								alignItems: "center",
+							},
 							headerRight: page.headerRight,
 						}}
 					/>
