@@ -50,6 +50,21 @@ export default function RootLayout() {
 							}}
 						/>
 					))}
+					<Stack.Screen
+						name="commission-user/[id]"
+						options={{
+							title: "Commission User",
+							headerStyle: {
+								backgroundColor: "rgba(49, 46, 129, 0.85)",
+							},
+
+							headerTintColor: "#e5e7eb",
+							headerTitleStyle: {
+								fontWeight: "900",
+							},
+							headerTitleAlign: "center",
+						}}
+					/>
 				</Stack>
 			</NotificationProvider>
 		</SafeAreaProvider>

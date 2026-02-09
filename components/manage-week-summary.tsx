@@ -170,7 +170,7 @@ const ManageWeekSummary = () => {
 						borderRadius: 16,
 						padding: 16,
 						marginBottom: 16,
-						shadowColor: "#000",
+						boxShadow: "#000",
 						shadowOpacity: 0.1,
 						shadowRadius: 5,
 						elevation: 3,

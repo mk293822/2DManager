@@ -16,7 +16,7 @@ const ManagePageHeaderRight = () => {
 				flexDirection: "row",
 				backgroundColor: "#f3f4f6",
 				borderRadius: 20,
-				padding: 2,
+				padding: 0,
 				marginRight: 8,
 			}}
 		>
