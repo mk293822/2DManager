@@ -21,7 +21,7 @@ const Profile = () => {
 	return (
 		<ScrollView
 			className="flex-1 bg-gray-100 p-4"
-			contentContainerStyle={{ paddingBottom: 100 }}
+			contentContainerStyle={{ paddingBottom: 120 }}
 		>
 			{/* ===== PROFILE HEADER ===== */}
 			<View className="bg-white rounded-2xl shadow p-6 mb-6 items-center">

@@ -26,10 +26,7 @@ const LiveCard = ({
 	return (
 		<View className="flex-col w-[95%] p-4 mb-4 bg-white rounded-2xl shadow-md self-center">
 			{/* Time */}
-			<Text
-				className="text-indigo-700 font-extrabold text-3xl w-full text-center"
-				style={style}
-			>
+			<Text className="text-indigo-700 font-extrabold text-3xl w-full text-center">
 				{displayTime}
 			</Text>
 
