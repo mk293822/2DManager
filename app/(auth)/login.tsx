@@ -5,7 +5,13 @@ import { AxiosError, isCancel } from "axios";
 import { Link } from "expo-router";
 import { navigate } from "expo-router/build/global-state/routing";
 import React, { useState } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+	ScrollView,
+	Text,
+	TextInput,
+	TouchableOpacity,
+	View,
+} from "react-native";
 
 const Login = () => {
 	const { login } = useAuthContext();
@@ -46,7 +52,15 @@ const Login = () => {
 	};
 
 	return (
-		<View className="flex-1 bg-gray-100 justify-center px-6">
+		<ScrollView
+			contentContainerStyle={{
+				flexGrow: 1,
+				justifyContent: "center",
+				padding: 16,
+				backgroundColor: "#f3f4f6",
+			}}
+			keyboardShouldPersistTaps="handled"
+		>
 			<View className="bg-white rounded-2xl p-6 gap-5 shadow-sm">
 				{/* Title */}
 				<View className="gap-1">
@@ -106,7 +120,7 @@ const Login = () => {
 					</Link>
 				</View>
 			</View>
-		</View>
+		</ScrollView>
 	);
 };
 

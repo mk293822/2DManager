@@ -13,12 +13,7 @@ export interface UseAuthInterface {
 	authLoading: boolean;
 	isAuthenticated: boolean;
 	login: (phone_number: string, password: string) => void;
-	register: (
-		name: string,
-		phone_number: string,
-		password: string,
-		password_confirmation: string,
-	) => void;
+	register: (name: string, phone_number: string, password: string) => void;
 	logout: () => void;
 	fetchUser: () => void;
 }
@@ -55,19 +50,17 @@ export function useAuth(): UseAuthInterface {
 	);
 
 	const register = useCallback(
-		async (
-			name: string,
-			phone_number: string,
-			password: string,
-			password_confirmation: string,
-		) => {
-			await api.post("/users/register/", {
+		async (name: string, phone_number: string, password: string) => {
+			const { data } = await api.post("/users/register/", {
 				name,
 				phone_number,
 				password,
-				password_confirmation,
 			});
-			return fetchUser();
+			await setTokens(data.access, data.refresh);
+			const user = data.user;
+			if (user) {
+				setUser(user);
+			} else return fetchUser();
 		},
 		[fetchUser],
 	);

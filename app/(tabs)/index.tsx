@@ -57,7 +57,7 @@ export default function Index() {
 						className="text-9xl font-extrabold text-indigo-700 p-4 text-center"
 						style={style}
 					>
-						{isResult ? result?.twod : liveData.live.twod}
+						{isResult ? result?.twod : liveData.live?.twod}
 					</Text>
 					<View className="flex-row justify-center items-center mt-2">
 						<AntDesign
@@ -67,7 +67,7 @@ export default function Index() {
 						/>
 						<Text className="ml-2 text-gray-600 font-semibold">Updated:</Text>
 						<Text className="ml-1 text-green-600 font-semibold">
-							{isResult ? result?.stock_datetime : liveData.live.time}
+							{isResult ? result?.stock_datetime : liveData.live?.time}
 						</Text>
 					</View>
 				</View>
@@ -84,7 +84,7 @@ export default function Index() {
 
 				{/* 2D Result Cards */}
 				{liveData?.result
-					.filter((d) =>
+					?.filter((d) =>
 						isResult
 							? d
 							: d.open_time !==
