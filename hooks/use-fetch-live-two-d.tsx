@@ -1,6 +1,6 @@
 import { EVENT_NAMES } from "@/event-names";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
-import { api } from "@/lib/api";
+import { two_d_api } from "@/lib/api";
 import { eventBus } from "@/lib/event-bus";
 import { TwoDResponse } from "@/types/two-d-types";
 import { useIsFocused } from "@react-navigation/native";
@@ -37,7 +37,7 @@ function useFetchLiveTwoD<T = TwoDResponse>(
 
 			setLoading(true);
 			try {
-				const { data } = await api.get<T>(url, { signal });
+				const { data } = await two_d_api.get<T>(url, { signal });
 				setLiveData(data);
 			} catch (err) {
 				if (!signal.aborted) {

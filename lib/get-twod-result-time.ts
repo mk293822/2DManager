@@ -1,7 +1,9 @@
+type resultTime = "11:00:00" | "12:01:00" | "15:00:00" | "16:30:00";
+
 type TimeRange = {
 	start: number; // inclusive (seconds)
 	end: number; // exclusive (seconds)
-	result: string;
+	result: resultTime;
 };
 
 const toSeconds = (h: number, m = 0, s = 0) => h * 3600 + m * 60 + s;
@@ -26,6 +28,13 @@ const TIME_RANGES: TimeRange[] = [
 		result: "16:30:00",
 	},
 
+	// 13:00 → 15:00
+	{
+		start: toSeconds(13, 0),
+		end: toSeconds(15, 0),
+		result: "15:00:00",
+	},
+
 	// 11:00 → 12:59
 	{
 		start: toSeconds(11, 0),
@@ -41,7 +50,7 @@ const TIME_RANGES: TimeRange[] = [
 	},
 ];
 
-export function getTwoDResultTime(isHoliday: boolean = false): string {
+export function getTwoDResultTime(isHoliday: boolean = false): resultTime {
 	if (isHoliday) return "16:30:00";
 
 	const date = new Date();

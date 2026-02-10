@@ -1,23 +1,40 @@
+import { useAuthContext } from "@/hooks/use-auth-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { Link } from "expo-router";
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
-/* ================= MOCK PROFILE DATA ================= */
-
-const profile = {
-	name: "Minkhant",
-	role: "Admin",
-	phone: "+95 9 123 456 789",
-	email: "admin@example.com",
-	totalSold: 45_800_000,
-	totalCommission: 2_290_000,
-};
-
-const formatKs = (num: number) => `${num.toLocaleString()} Ks`;
-
-/* ================= COMPONENT ================= */
-
 const Profile = () => {
+	const { isAuthenticated, user, logout, fetchUser } = useAuthContext();
+
+	if (!isAuthenticated) {
+		return (
+			<View className="flex-1 bg-gray-100 justify-center px-6 pb-24">
+				<View className="bg-white rounded-2xl p-6 gap-4 shadow-sm items-center">
+					<Text className="text-xl font-bold">You’re not logged in</Text>
+
+					<Text className="text-gray-500 text-center">
+						Please login to view your profile
+					</Text>
+
+					<Link
+						href="/(auth)/login"
+						asChild
+					>
+						<TouchableOpacity
+							activeOpacity={0.85}
+							className="bg-indigo-400 py-3 px-10 rounded-lg mt-2"
+						>
+							<Text className="text-white font-bold text-lg text-center">
+								Login
+							</Text>
+						</TouchableOpacity>
+					</Link>
+				</View>
+			</View>
+		);
+	}
+
 	return (
 		<ScrollView
 			className="flex-1 bg-gray-100 p-4"
@@ -27,33 +44,13 @@ const Profile = () => {
 			<View className="bg-white rounded-2xl shadow p-6 mb-6 items-center">
 				<View className="w-20 h-20 rounded-full bg-indigo-600 items-center justify-center mb-3">
 					<Text className="text-white text-3xl font-extrabold">
-						{profile.name.charAt(0)}
+						{user?.name.charAt(0)}
 					</Text>
 				</View>
 
 				<Text className="text-indigo-700 font-extrabold text-2xl">
-					{profile.name}
+					{user?.name}
 				</Text>
-				<Text className="text-gray-500 mt-1">{profile.role}</Text>
-			</View>
-
-			{/* ===== STATS CARD ===== */}
-			<View className="bg-white rounded-2xl shadow p-6 mb-6">
-				<Text className="text-indigo-700 font-extrabold text-xl mb-4">
-					Statistics
-				</Text>
-
-				<View className="flex-row justify-between py-2 border-b border-gray-100">
-					<Text className="text-gray-600">Total Sold</Text>
-					<Text className="font-semibold">{formatKs(profile.totalSold)}</Text>
-				</View>
-
-				<View className="flex-row justify-between py-2">
-					<Text className="text-gray-600">Total Commission</Text>
-					<Text className="font-semibold text-indigo-600">
-						{formatKs(profile.totalCommission)}
-					</Text>
-				</View>
 			</View>
 
 			{/* ===== ACCOUNT INFO ===== */}
@@ -64,26 +61,47 @@ const Profile = () => {
 
 				<View className="flex-row items-center gap-3 py-2">
 					<AntDesign
+						name="idcard"
+						size={18}
+						color="#4f46e5"
+					/>
+					<Text className="text-gray-700">{user?.uuid}</Text>
+				</View>
+				<View className="flex-row items-center gap-3 py-2">
+					<AntDesign
 						name="phone"
 						size={18}
 						color="#4f46e5"
 					/>
-					<Text className="text-gray-700">{profile.phone}</Text>
+					<Text className="text-gray-700">{user?.phone_number}</Text>
+				</View>
+			</View>
+
+			{/* ===== STATS CARD ===== */}
+			<View className="bg-white rounded-2xl shadow p-6 mb-6">
+				<Text className="text-indigo-700 font-extrabold text-xl mb-4">
+					Account Status
+				</Text>
+
+				<View className="flex-row justify-between py-2 border-b border-gray-100">
+					<Text className="text-gray-600">Status</Text>
+					<Text className="font-semibold">
+						{user?.is_active ? "Active" : "Inactive"}
+					</Text>
 				</View>
 
-				<View className="flex-row items-center gap-3 py-2">
-					<AntDesign
-						name="mail"
-						size={18}
-						color="#4f46e5"
-					/>
-					<Text className="text-gray-700">{profile.email}</Text>
+				<View className="flex-row justify-between py-2">
+					<Text className="text-gray-600">Role</Text>
+					<Text className="font-semibold text-indigo-600">
+						{user?.is_staff ? "Admin" : "User"}
+					</Text>
 				</View>
 			</View>
 
 			{/* ===== ACTIONS ===== */}
 			<View className="bg-white rounded-2xl shadow p-6 mb-6">
 				<TouchableOpacity
+					onPress={fetchUser}
 					activeOpacity={0.8}
 					className="flex-row items-center justify-between py-3"
 				>
@@ -113,6 +131,7 @@ const Profile = () => {
 			{/* ===== LOGOUT ===== */}
 			<View className="bg-white border border-red-200 rounded-2xl p-6">
 				<TouchableOpacity
+					onPress={logout}
 					activeOpacity={0.85}
 					className="bg-red-600 rounded-xl py-3 items-center"
 				>

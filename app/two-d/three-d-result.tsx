@@ -1,8 +1,8 @@
+import { three_d_api } from "@/lib/api";
 import type {
 	ThreeDResultItem,
 	ThreeDResultResponse,
 } from "@/types/two-d-types";
-import axios from "axios";
 import React, { useCallback, useEffect, useState } from "react";
 import {
 	ActivityIndicator,
@@ -12,12 +12,7 @@ import {
 	View,
 } from "react-native";
 
-const THREE_D_RESULT_URL =
-	"https://api.2dboss.com/api/v2/v1/2dstock/threed-result";
-
 const ThreeDResult = () => {
-	// https://api.2dboss.com/api/v2/v1/2dstock/threed-result
-
 	const [refreshing, setRefreshing] = useState(false);
 	const [data, setData] = useState<ThreeDResultResponse | null>(null);
 	const [loading, setLoading] = useState<boolean>(true);
@@ -29,7 +24,7 @@ const ThreeDResult = () => {
 			setError(null);
 
 			const response =
-				await axios.get<ThreeDResultResponse>(THREE_D_RESULT_URL);
+				await three_d_api.get<ThreeDResultResponse>("/threed-result");
 
 			setData(response.data);
 		} catch (err) {

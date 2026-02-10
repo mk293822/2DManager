@@ -16,16 +16,24 @@ export default function Index() {
 
 	const currentTime = getTwoDResultTime(isHoliday);
 	const [result, setResult] = useState<TwoDHistoryItem | undefined>();
-	const [isResult, setIsResult] = useState<boolean>(true);
+	const [isResult, setIsResult] = useState<boolean>(false);
 	const { style } = useBlink(isResult);
 
 	useEffect(() => {
 		if (!liveData) return;
 
-		const found = liveData.result.find((d) => d.open_time === currentTime);
+		const found = liveData.result.find(
+			(d) =>
+				d.open_time === (currentTime === "12:01:00" ? "12:00:00" : currentTime),
+		);
 
-		setResult(found);
-		setIsResult(found?.twod !== "--");
+		if (currentTime !== "11:00:00" && currentTime !== "15:00:00") {
+			setResult(found);
+			setIsResult(found?.twod !== "--");
+		} else {
+			setResult(undefined);
+			setIsResult(false);
+		}
 	}, [liveData, currentTime]);
 
 	if (!liveData)
