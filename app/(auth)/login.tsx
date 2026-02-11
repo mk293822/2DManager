@@ -113,7 +113,7 @@ const Login = () => {
 				<View className="flex-row justify-center gap-1 mt-2">
 					<Text className="text-gray-600">Don’t have an account?</Text>
 					<Link
-						href="/(auth)/register"
+						href="/register"
 						className="text-indigo-500 font-semibold"
 					>
 						Register

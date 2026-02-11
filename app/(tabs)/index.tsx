@@ -3,7 +3,7 @@ import LiveCard from "@/components/live-card";
 import TwoDResultCard from "@/components/two-d-result-card";
 import { useBlink } from "@/hooks/use-blink";
 import useFetchLiveTwoD from "@/hooks/use-fetch-live-two-d";
-import { getTwoDResultTime } from "@/lib/get-twod-result-time";
+import { getTwoDResultTime, toSeconds } from "@/lib/get-twod-result-time";
 import { TwoDHistoryItem } from "@/types/two-d-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useEffect, useState } from "react";
@@ -15,26 +15,30 @@ export default function Index() {
 	const isHoliday = liveData?.holiday?.status == 3;
 
 	const currentTime = getTwoDResultTime(isHoliday);
-	const [result, setResult] = useState<TwoDHistoryItem | undefined>();
-	const [isResult, setIsResult] = useState<boolean>(false);
-	const { style } = useBlink(isResult);
+	const [mainResult, setMainResult] = useState<TwoDHistoryItem | undefined>();
+	const [isBlinking, setIsBlinking] = useState<boolean>(false);
+	const [showLiveCard, setShowLiveCard] = useState<boolean>(false);
+	const { style } = useBlink(isBlinking);
 
 	useEffect(() => {
 		if (!liveData) return;
 
-		const found = liveData.result.find(
+		setShowLiveCard(
+			!liveData.result.some(
+				(d) => d.open_time === "16:30:00" && d.twod !== "--",
+			),
+		);
+		const m_Result = liveData.result.find(
 			(d) =>
-				d.open_time === (currentTime === "12:01:00" ? "12:00:00" : currentTime),
+				(toSeconds(liveData.live.time.split(" ")[1]) < toSeconds("13:00:00")
+					? (d.open_time === "12:00:00" ? "12:01:00" : d.open_time) ===
+						"12:01:00"
+					: d.open_time === "16:30:00") && d.twod !== "--",
 		);
 
-		if (currentTime !== "11:00:00" && currentTime !== "15:00:00") {
-			setResult(found);
-			setIsResult(found?.twod !== "--");
-		} else {
-			setResult(undefined);
-			setIsResult(false);
-		}
-	}, [liveData, currentTime]);
+		setMainResult(m_Result);
+		setIsBlinking(!m_Result);
+	}, [liveData]);
 
 	if (!liveData)
 		return (
@@ -57,35 +61,36 @@ export default function Index() {
 						className="text-9xl font-extrabold text-indigo-700 p-4 text-center"
 						style={style}
 					>
-						{isResult ? result?.twod : liveData.live?.twod}
+						{isBlinking ? liveData.live?.twod : mainResult?.twod}
 					</Text>
 					<View className="flex-row justify-center items-center mt-2">
 						<AntDesign
-							name={isResult ? "check" : "history"}
+							name={isBlinking ? "history" : "check"}
 							size={20}
-							color={isResult ? "#16a34a" : "#6b7280"}
+							color={isBlinking ? "#6b7280" : "#16a34a"}
 						/>
 						<Text className="ml-2 text-gray-600 font-semibold">Updated:</Text>
 						<Text className="ml-1 text-green-600 font-semibold">
-							{isResult ? result?.stock_datetime : liveData.live?.time}
+							{isBlinking ? liveData.live?.time : mainResult?.stock_datetime}
 						</Text>
 					</View>
 				</View>
 
 				{/* LiveCard */}
-				{!isResult && (
+				{showLiveCard && (
 					<LiveCard
 						liveData={liveData}
 						style={style}
-						data={result}
-						isLive={!isResult}
+						data={mainResult}
+						isLive={isBlinking}
+						currentTime={currentTime}
 					/>
 				)}
 
 				{/* 2D Result Cards */}
 				{liveData?.result
 					?.filter((d) =>
-						isResult
+						!showLiveCard
 							? d
 							: d.open_time !==
 								(currentTime === "12:01:00" ? "12:00:00" : currentTime),
@@ -94,9 +99,6 @@ export default function Index() {
 						<TwoDResultCard
 							key={index}
 							data={data}
-							main={["16:30:00", "12:00:00", "12:01:00"].includes(
-								data.open_time,
-							)}
 						/>
 					))}
 			</ScrollView>

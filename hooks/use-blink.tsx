@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export function useBlink(isResult: boolean = true) {
+export function useBlink(isBlinking: boolean = true) {
 	const [visible, setVisible] = useState(true);
 	const style = { opacity: visible ? 1 : 0 };
 
@@ -8,13 +8,13 @@ export function useBlink(isResult: boolean = true) {
 		let blinkInterval: number | undefined;
 
 		const updateBlink = () => {
-			if (!isResult && !blinkInterval) {
+			if (isBlinking && !blinkInterval) {
 				// Start blinking
 				blinkInterval = setInterval(() => {
 					setVisible(false);
 					setTimeout(() => setVisible(true), 1000); // blink duration
 				}, 3000);
-			} else if (isResult && blinkInterval) {
+			} else if (!isBlinking && blinkInterval) {
 				// Stop blinking
 				clearInterval(blinkInterval);
 				blinkInterval = undefined;
@@ -29,7 +29,7 @@ export function useBlink(isResult: boolean = true) {
 			clearInterval(timer);
 			if (blinkInterval) clearInterval(blinkInterval);
 		};
-	}, [isResult]);
+	}, [isBlinking]);
 
 	return { visible, style };
 }

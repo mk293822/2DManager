@@ -155,7 +155,7 @@ const Register = () => {
 				<View className="flex-row justify-center gap-1 mt-2">
 					<Text className="text-gray-600">Already have an account?</Text>
 					<Link
-						href="/(auth)/login"
+						href="/login"
 						className="text-indigo-500 font-semibold"
 					>
 						Login

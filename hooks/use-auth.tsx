@@ -91,7 +91,7 @@ export function useAuth(): UseAuthInterface {
 		} finally {
 			setUser(null); // immediate UI logout
 			await clearTokens(); // remove tokens locally
-			router.replace("/(auth)/login"); // redirect safely
+			router.replace("/login"); // redirect safely
 		}
 	}, []);
 

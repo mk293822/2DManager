@@ -65,7 +65,7 @@ const TabsLayout = () => {
 
 	useEffect(() => {
 		if (!authLoading && !isAuthenticated) {
-			router.replace("/(auth)/login");
+			router.replace("/login");
 		}
 	}, [authLoading, isAuthenticated]);
 

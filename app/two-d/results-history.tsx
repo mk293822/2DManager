@@ -1,5 +1,5 @@
 import useFetchLiveTwoD from "@/hooks/use-fetch-live-two-d";
-import { formatTimeIntl } from "@/lib/time";
+import { formatTimeIntl } from "@/lib/helpers";
 import { TwoDData } from "@/types/two-d-types";
 import React, { useState } from "react";
 import {

@@ -1,100 +1,39 @@
-import { DayData, NumberData, SessionStats } from "@/types/manage-types";
+import { formatDateDisplay, formatKs } from "@/lib/helpers";
+import {
+	Section,
+	SectionSummaries,
+	SectionSummary,
+} from "@/types/manage-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import React, { useMemo, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import React, { useState } from "react";
+import { Pressable, Text, TouchableOpacity, View } from "react-native";
 import {
 	DatePickerModal,
 	enGB,
 	registerTranslation,
 } from "react-native-paper-dates";
 
-/* ================= CONSTANTS ================= */
-
-const PER_NUMBER_LIMIT = 1000;
-const COMMISSION_RATE = 0.05;
-const WINNER_NUMBERS = ["01", "05", "12"];
-
-/* ================= HELPERS ================= */
-
-const formatKs = (num: number) => `${num.toLocaleString()} Ks`;
-
-const generateSessionData = (): NumberData[] => {
-	return Array.from({ length: 100 }).map((_, i) => ({
-		number: i.toString().padStart(2, "0"),
-		value: Math.floor(Math.random() * 10_000),
-		resold: Math.floor(Math.random() * 2000),
-	}));
-};
-
-const calculateSessionStats = (data: NumberData[]): SessionStats => {
-	const totalSold = data.reduce((s, i) => s + i.value, 0);
-	const exceedTotal = data
-		.filter((i) => i.value > PER_NUMBER_LIMIT)
-		.reduce((s, i) => s + i.value, 0);
-	const resoldTotal = data.reduce((s, i) => s + i.resold, 0);
-	const commission = totalSold * COMMISSION_RATE;
-	const payoutToWinners = data
-		.filter((i) => WINNER_NUMBERS.includes(i.number))
-		.reduce((s, i) => s + i.value, 0);
-
-	return {
-		totalSold,
-		exceedTotal,
-		resoldTotal,
-		commission,
-		payoutToWinners,
-		profitLoss: totalSold - (commission + payoutToWinners + resoldTotal),
-	};
-};
-
-const generateDayData = (label: string): DayData => {
-	const morning = calculateSessionStats(generateSessionData());
-	const evening = calculateSessionStats(generateSessionData());
-
-	return {
-		date: label,
-		morning,
-		evening,
-		summary: {
-			totalSold: morning.totalSold + evening.totalSold,
-			exceedTotal: morning.exceedTotal + evening.exceedTotal,
-			resoldTotal: morning.resoldTotal + evening.resoldTotal,
-			commission: morning.commission + evening.commission,
-			profitLoss: morning.profitLoss + evening.profitLoss,
-		},
-	};
-};
-
-const DAYS: string[] = [
-	"Sunday",
-	"Monday",
-	"Tuesday",
-	"Wednesday",
-	"Thursday",
-	"Friday",
-	"Saturday",
-];
-
-const formatDateDisplay = (date: Date) => {
-	const dayName = DAYS[date.getDay()];
-	const month = date.toLocaleString("default", { month: "short" });
-	const day = date.getDate();
-	const year = date.getFullYear();
-	return `${dayName}, ${month} ${day}, ${year}`;
-};
-
 /* ================= COMPONENT ================= */
 
-const ManageDaySummary = () => {
+const ManageDaySummary = ({
+	sections,
+}: {
+	sections: SectionSummaries | undefined;
+}) => {
 	const [selectedDate, setSelectedDate] = useState(new Date());
 	const [showPicker, setShowPicker] = useState(false);
 
-	const dayData = useMemo(
-		() => generateDayData(selectedDate.toDateString()),
-		[selectedDate],
-	);
-
 	registerTranslation("en-GB", enGB);
+
+	const changeSectionName = (section: Section) => {
+		if (section === "morning_section") return "Morning";
+		else return "Evening";
+	};
+
+	const sectionList: { key: Section; data: SectionSummary | undefined }[] = [
+		{ key: "morning_section", data: sections?.morning },
+		{ key: "evening_section", data: sections?.evening },
+	];
 
 	return (
 		<>
@@ -141,75 +80,120 @@ const ManageDaySummary = () => {
 				/>
 			)}
 
-			{/* ===== SUMMARY CARD ===== */}
-			<View className="bg-white rounded-2xl shadow p-6 mb-6">
-				<Text className="text-indigo-700 font-extrabold text-2xl mb-1">
-					Summary
-				</Text>
-				<Text className="text-gray-500 mb-4">
-					{formatDateDisplay(selectedDate)}
-				</Text>
-				{/* Total Sold, Exceed, Resold */}
-				{[
-					["Total Sold", dayData.summary.totalSold],
-					["Exceed Total", dayData.summary.exceedTotal],
-					["Resold", dayData.summary.resoldTotal],
-					["Commission Total", dayData.summary.commission],
-				].map(([label, value]) => (
-					<View
-						key={label}
-						className="flex-row justify-between py-2 border-b border-gray-100"
-					>
-						<Text className="text-gray-600">{label}</Text>
-						<Text className="font-semibold">{formatKs(value as number)}</Text>
-					</View>
-				))}
-				<View className="flex-row justify-between pt-3">
-					<Text className="font-semibold">Profit / Loss</Text>
-					<Text
-						className={`font-extrabold ${dayData.summary.profitLoss >= 0 ? "text-green-500" : "text-red-500"}`}
-					>
-						{formatKs(dayData.summary.profitLoss)}
-					</Text>
-				</View>
-			</View>
-
-			{/* ===== SESSION CARDS ===== */}
-			{[
-				{ title: "Morning Session", data: dayData.morning },
-				{ title: "Evening Session", data: dayData.evening },
-			].map((session) => (
-				<View
-					key={session.title}
-					className="bg-white rounded-2xl shadow p-6 mb-6"
-				>
-					<Text className="text-indigo-700 font-extrabold text-xl mb-4">
-						{session.title}
-					</Text>
-					{[
-						["Total Sold", session.data.totalSold],
-						["Exceed Total", session.data.exceedTotal],
-						["Resold", session.data.resoldTotal],
-						["Commission", session.data.commission],
-					].map(([label, value]) => (
-						<View
-							key={label}
-							className="flex-row justify-between py-2 border-b border-gray-100"
-						>
-							<Text className="text-gray-600">{label}</Text>
-							<Text className="font-semibold">{formatKs(value as number)}</Text>
-						</View>
-					))}
-					<View className="flex-row justify-between pt-3">
-						<Text className="font-semibold">Profit / Loss</Text>
-						<Text
-							className={`font-extrabold ${session.data.profitLoss >= 0 ? "text-green-500" : "text-red-500"}`}
-						>
-							{formatKs(session.data.profitLoss)}
+			{sections && (
+				<>
+					{/* ===== SUMMARY CARD ===== */}
+					<View className="bg-white rounded-2xl shadow p-6 mb-6">
+						<Text className="text-indigo-700 font-extrabold text-2xl mb-1">
+							Summary
 						</Text>
+						<Text className="text-gray-500 mb-4">
+							{formatDateDisplay(selectedDate)}
+						</Text>
+						{/* Total Sold, Exceed, Resold */}
+						{[
+							["Total Sold", sections.summary.total_amount],
+							["Total Resold", sections.summary.total_resold],
+							["Total Commission", sections.summary.total_commission],
+							["Total Draw Amount", sections.summary.draw_total_amount],
+						].map(([label, value]) => (
+							<View
+								key={label}
+								className="flex-row justify-between py-2 border-b border-gray-100"
+							>
+								<Text className="text-gray-600">{label}</Text>
+								<Text className="font-semibold">
+									{formatKs(value as number)}
+								</Text>
+							</View>
+						))}
+						<View className="flex-row justify-between pt-3">
+							<Text className="font-semibold">Profit / Loss</Text>
+							<Text
+								className={`font-extrabold ${sections?.summary?.profit_or_loss >= 0 ? "text-green-500" : "text-red-500"}`}
+							>
+								{formatKs(sections.summary.profit_or_loss)}
+							</Text>
+						</View>
 					</View>
-				</View>
-			))}
+
+					{/* ===== SESSION CARDS ===== */}
+					{sectionList.map(({ key, data }) =>
+						data ? (
+							<View
+								key={data.id}
+								className="bg-white rounded-2xl shadow p-6 mb-6"
+							>
+								<Text className="text-indigo-700 font-extrabold text-xl mb-4">
+									{changeSectionName(data.section)}
+								</Text>
+								{[
+									["Total Sold", data.total_amount],
+									["Total Resold", data.total_resold],
+									["Total Commission", data.total_commission],
+									["Total Draw Amount", data.draw_total_amount],
+								].map(([label, value]) => (
+									<View
+										key={label}
+										className="flex-row justify-between py-2 border-b border-gray-100"
+									>
+										<Text className="text-gray-600">{label}</Text>
+										<Text className="font-semibold">
+											{formatKs(value as number)}
+										</Text>
+									</View>
+								))}
+								<View className="flex-row justify-between py-2 border-b border-gray-100">
+									<Text className="text-gray-600">Draw Number</Text>
+									<Text className="font-extrabold text-indigo-700">
+										{data.draw_number}
+									</Text>
+								</View>
+								<View className="flex-row justify-between py-2 border-b border-gray-100">
+									<Text className="text-gray-600">Draw Times</Text>
+									<Text className="font-extrabold text-red-700">
+										&times; {data.draw_times}
+									</Text>
+								</View>
+								<View className="flex-row justify-between pt-3">
+									<Text className="font-semibold">Profit / Loss</Text>
+									<Text
+										className={`font-extrabold ${data.profit_or_loss >= 0 ? "text-green-500" : "text-red-500"}`}
+									>
+										{formatKs(data.profit_or_loss)}
+									</Text>
+								</View>
+							</View>
+						) : (
+							<View
+								key={key}
+								className="bg-white rounded-2xl shadow p-6 mb-6 items-center"
+							>
+								<Text className="text-gray-400 font-extrabold text-xl mb-2">
+									No Data for {changeSectionName(key)} section!
+								</Text>
+
+								<Text className="text-gray-500 text-sm text-center mb-4">
+									This session has no records yet.{" "}
+								</Text>
+
+								<TouchableOpacity
+									activeOpacity={0.85}
+									onPress={() => {
+										// navigate or open modal
+										console.log("Create section", key);
+									}}
+									className="bg-indigo-600 px-6 py-3 rounded-xl shadow"
+								>
+									<Text className="text-white font-bold">
+										Create {changeSectionName(key)} Section
+									</Text>
+								</TouchableOpacity>
+							</View>
+						),
+					)}
+				</>
+			)}
 		</>
 	);
 };

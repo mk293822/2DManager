@@ -18,7 +18,7 @@ const Profile = () => {
 					</Text>
 
 					<Link
-						href="/(auth)/login"
+						href="/login"
 						asChild
 					>
 						<TouchableOpacity

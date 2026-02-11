@@ -1,14 +1,8 @@
-import { formatTimeIntl } from "@/lib/time";
+import { formatTimeIntl } from "@/lib/helpers";
 import { TwoDHistoryItem } from "@/types/two-d-types";
 import { Text, View } from "react-native";
 
-const TwoDResultCard = ({
-	data,
-	main = true,
-}: {
-	data: TwoDHistoryItem;
-	main: boolean;
-}) => {
+const TwoDResultCard = ({ data }: { data: TwoDHistoryItem }) => {
 	return (
 		<View className="flex-col w-[95%] p-4 mb-4 bg-white rounded-2xl shadow-md self-center">
 			{/* Time */}

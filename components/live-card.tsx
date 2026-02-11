@@ -1,4 +1,5 @@
-import { getTwoDResultTime } from "@/lib/get-twod-result-time";
+import { resultTime } from "@/lib/get-twod-result-time";
+import { formatTimeIntl } from "@/lib/helpers";
 import { TwoDHistoryItem, TwoDResponse } from "@/types/two-d-types";
 import { Text, View } from "react-native";
 
@@ -7,19 +8,20 @@ const LiveCard = ({
 	isLive = false,
 	liveData,
 	style,
+	currentTime,
 }: {
 	data?: TwoDHistoryItem;
 	isLive?: boolean;
 	liveData: TwoDResponse | null;
 	style: { opacity: number };
+	currentTime: resultTime;
 }) => {
-	const currentTime = getTwoDResultTime();
 	const content = isLive ? liveData?.live : data;
 	const displayTime = isLive
-		? currentTime
+		? formatTimeIntl(currentTime)
 		: data && "open_time" in data
 			? data.open_time
-			: currentTime;
+			: formatTimeIntl(currentTime);
 
 	if (!content) return null;
 

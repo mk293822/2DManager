@@ -1,27 +1,27 @@
-export interface NumberData {
-	number: string;
-	value: number;
-	resold: number;
-}
-
-export interface SessionStats {
-	totalSold: number;
-	exceedTotal: number;
-	resoldTotal: number;
-	commission: number;
-	payoutToWinners: number;
-	profitLoss: number;
-}
-
-export interface DayData {
+export type Section = "morning_section" | "evening_section";
+export type SectionSummary = {
+	id: string;
+	manager: string;
+	section: Section;
+	draw_number: string;
+	draw_times: string;
+	total_amount: number;
+	total_commission: number;
+	total_resold: number;
 	date: string;
-	morning: SessionStats;
-	evening: SessionStats;
+	profit_or_loss: number;
+	draw_total_amount: number;
+};
+
+export type SectionSummaries = {
 	summary: {
-		totalSold: number;
-		exceedTotal: number;
-		resoldTotal: number;
-		commission: number;
-		profitLoss: number;
+		total_amount: number;
+		total_commission: number;
+		total_resold: number;
+		profit_or_loss: number;
+		date: string; // or Date if you convert it
+		draw_total_amount: number;
 	};
-}
+	morning: SectionSummary;
+	evening: SectionSummary;
+};

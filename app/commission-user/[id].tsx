@@ -26,7 +26,7 @@ const CommissionUser = () => {
 			{
 				text: "Delete",
 				style: "destructive",
-				onPress: () => router.push("/(tabs)/commission-users"),
+				onPress: () => router.push("/commission-users"),
 			},
 		]);
 	};
