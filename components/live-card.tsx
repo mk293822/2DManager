@@ -18,10 +18,10 @@ const LiveCard = ({
 }) => {
 	const content = isLive ? liveData?.live : data;
 	const displayTime = isLive
-		? formatTimeIntl(currentTime)
+		? currentTime
 		: data && "open_time" in data
 			? data.open_time
-			: formatTimeIntl(currentTime);
+			: currentTime;
 
 	if (!content) return null;
 
@@ -29,7 +29,7 @@ const LiveCard = ({
 		<View className="flex-col w-[95%] p-4 mb-4 bg-white rounded-2xl shadow-md self-center">
 			{/* Time */}
 			<Text className="text-indigo-700 font-extrabold text-3xl w-full text-center">
-				{displayTime}
+				{formatTimeIntl(displayTime)}
 			</Text>
 
 			{/* Row */}
