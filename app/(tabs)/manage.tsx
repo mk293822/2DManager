@@ -6,7 +6,7 @@ import { api } from "@/lib/api";
 import { eventBus } from "@/lib/event-bus";
 import { formatDateDisplay, formatDateRequest } from "@/lib/helpers";
 import { RangeMode } from "@/types/event-bus";
-import { Section, SectionSummaries } from "@/types/manage-types";
+import { SectionName, SectionSummaries } from "@/types/manage-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -101,7 +101,7 @@ const Manage = () => {
 	);
 
 	const handleCreateSection = async (
-		section: Section = "morning_section",
+		section: SectionName = "morning_section",
 		date: Date = selectedDate,
 	) => {
 		setLoading(true);

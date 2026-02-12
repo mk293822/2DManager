@@ -1,4 +1,4 @@
-import { Section } from "@/types/manage-types";
+import { SectionName } from "@/types/manage-types";
 
 export const DAYS: string[] = [
 	"Sunday",
@@ -39,7 +39,7 @@ export const formatDateRequest = (date: Date) => {
 	return `${year}-${month}-${day}`;
 };
 
-export const changeSectionName = (section: Section) =>
+export const changeSectionName = (section: SectionName) =>
 	section === "morning_section" ? "Morning" : "Evening";
 
 export const getTotalArray = (data: any): [string, number][] => [

@@ -1,22 +1,18 @@
 import { EVENT_NAMES } from "@/event-names";
 import { eventBus } from "@/lib/event-bus";
 import { formatDateDisplay, formatKs, getTotalArray } from "@/lib/helpers";
-import {
-	Section,
-	SectionSummaries,
-	SectionSummary,
-} from "@/types/manage-types";
+import { Section, SectionName, SectionSummaries } from "@/types/manage-types";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
-/* ===== Single Section Card ===== */
+/* ===== Single SectionName Card ===== */
 const SectionCard = ({
 	name,
 	data,
 	date,
 }: {
 	name: string;
-	data: SectionSummary | null;
+	data: Section | null;
 	date: string;
 }) => {
 	if (!data) {
@@ -47,14 +43,18 @@ const SectionCard = ({
 				<Text className="text-gray-500">Draw Number</Text>
 				<Text className="font-semibold">{data.draw_number ?? "--"}</Text>
 			</View>
+
 			<View className="flex-row justify-between py-0.5">
 				<Text className="text-gray-500">Draw Times</Text>
 				<Text className="font-semibold">&times; {data.draw_times}</Text>
 			</View>
+
 			<View className="flex-row justify-between mt-1">
 				<Text className="font-semibold">Profit / Loss</Text>
 				<Text
-					className={`font-bold ${data.profit_or_loss >= 0 ? "text-green-600" : "text-red-600"}`}
+					className={`font-bold ${
+						data.profit_or_loss >= 0 ? "text-green-600" : "text-red-600"
+					}`}
 				>
 					{formatKs(data.profit_or_loss)}
 				</Text>
@@ -69,13 +69,16 @@ const DayCard = ({
 	handleCreateSection,
 }: {
 	section: SectionSummaries;
-	handleCreateSection: (section: Section, date: Date) => void;
+	handleCreateSection: (section: SectionName, date: Date) => void;
 }) => {
 	const { summary, morning_section, evening_section } = section;
 	const date = new Date(summary.date);
 
 	const handleToggle = () => {
-		eventBus.emit(EVENT_NAMES.CHANGE_DATE_RANGE, { range: "day", date: date });
+		eventBus.emit(EVENT_NAMES.CHANGE_DATE_RANGE, {
+			range: "day",
+			date,
+		});
 	};
 
 	if (!morning_section && !evening_section) {
@@ -116,24 +119,23 @@ const DayCard = ({
 
 	return (
 		<View className="bg-white rounded-3xl p-4 mb-6 shadow-md">
-			{/* Date Header */}
 			<View className="flex-row justify-between items-center mb-4 px-1">
-				<Text className="text-indigo-600 font-bold text-xl ">
+				<Text className="text-indigo-600 font-bold text-xl">
 					{formatDateDisplay(new Date(summary.date))}
 				</Text>
 				<TouchableOpacity
 					activeOpacity={0.85}
 					onPress={handleToggle}
 				>
-					<Text className="text-indigo-600 underline font-semibold text-center">
+					<Text className="text-indigo-600 underline font-semibold">
 						Details
 					</Text>
 				</TouchableOpacity>
 			</View>
 
-			{/* Summary */}
 			<View className="bg-gray-100 rounded-2xl p-4 mb-4 shadow-sm">
 				<Text className="font-semibold text-gray-700 mb-2">Summary</Text>
+
 				{getTotalArray(summary).map(([label, value]) => (
 					<View
 						key={label}
@@ -143,17 +145,19 @@ const DayCard = ({
 						<Text className="font-semibold">{formatKs(value as number)}</Text>
 					</View>
 				))}
+
 				<View className="flex-row justify-between mt-2">
 					<Text className="font-semibold">Profit / Loss</Text>
 					<Text
-						className={`font-bold ${summary.profit_or_loss >= 0 ? "text-green-600" : "text-red-600"}`}
+						className={`font-bold ${
+							summary.profit_or_loss >= 0 ? "text-green-600" : "text-red-600"
+						}`}
 					>
 						{formatKs(summary.profit_or_loss)}
 					</Text>
 				</View>
 			</View>
 
-			{/* Morning and Evening Sections */}
 			<SectionCard
 				name="Morning"
 				data={morning_section}
@@ -174,7 +178,7 @@ const ManageWeekSummary = ({
 	handleCreateSection,
 }: {
 	sections: SectionSummaries[];
-	handleCreateSection: (section: Section, date: Date) => void;
+	handleCreateSection: (section: SectionName, date: Date) => void;
 }) => {
 	if (!sections || sections.length === 0) {
 		return (
@@ -185,8 +189,7 @@ const ManageWeekSummary = ({
 					</Text>
 
 					<Text className="text-gray-400 text-center text-sm mb-6">
-						It looks like there are no records yet. You can create new sections
-						or reload to refresh.
+						It looks like there are no records yet.
 					</Text>
 				</View>
 			</View>
@@ -197,9 +200,9 @@ const ManageWeekSummary = ({
 		<>
 			{sections.map((s, idx) => (
 				<DayCard
-					handleCreateSection={handleCreateSection}
 					key={idx}
 					section={s}
+					handleCreateSection={handleCreateSection}
 				/>
 			))}
 		</>

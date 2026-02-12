@@ -4,11 +4,7 @@ import {
 	formatKs,
 	getTotalArray,
 } from "@/lib/helpers";
-import {
-	Section,
-	SectionSummaries,
-	SectionSummary,
-} from "@/types/manage-types";
+import { Section, SectionName, SectionSummaries } from "@/types/manage-types";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
@@ -53,9 +49,9 @@ const SectionCard = ({
 	data,
 	handleCreateSection,
 }: {
-	section: Section;
-	data: SectionSummary | undefined;
-	handleCreateSection: (section: Section) => void;
+	section: SectionName;
+	data: Section | undefined;
+	handleCreateSection: (section: SectionName) => void;
 }) => {
 	if (!data) {
 		return (
@@ -122,11 +118,11 @@ const ManageDaySummary = ({
 }: {
 	sections: SectionSummaries;
 	selectedDate: Date;
-	handleCreateSection: (section: Section) => void;
+	handleCreateSection: (section: SectionName) => void;
 }) => {
 	if (!sections) return null;
 
-	const sectionList: Section[] = ["morning_section", "evening_section"];
+	const sectionList: SectionName[] = ["morning_section", "evening_section"];
 
 	return (
 		<>
