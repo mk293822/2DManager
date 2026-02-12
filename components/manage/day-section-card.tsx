@@ -1,3 +1,4 @@
+import { useManagePageContext } from "@/hooks/use-manage-page-context";
 import { changeSectionName, formatKs, getTotalArray } from "@/lib/helpers";
 import { Section, SectionName } from "@/types/manage-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -8,14 +9,11 @@ import EditManageSectionModal from "../edit-manage-section-modal";
 const DaySectionCard = ({
 	section,
 	data,
-	handleCreateSection,
-	onSave,
 }: {
 	section: SectionName;
 	data: Section | undefined;
-	handleCreateSection: (section: SectionName) => void;
-	onSave: (section: Omit<Section, "id" | "manager" | "section">) => void;
 }) => {
+	const { onSave, handleCreateSection } = useManagePageContext();
 	const [openModal, setOpemModal] = useState(false);
 
 	if (!data) {

@@ -1,11 +1,9 @@
-import { EVENT_NAMES } from "@/event-names";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { api } from "@/lib/api";
-import { eventBus } from "@/lib/event-bus";
 import { formatDateRequest } from "@/lib/helpers";
 import { RangeMode } from "@/types/event-bus";
 import { Section, SectionName, SectionSummaries } from "@/types/manage-types";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 export type useManageHookType = {
 	sections: SectionSummaries[] | null;
@@ -68,36 +66,6 @@ const useManageHook = (): useManageHookType => {
 		},
 		[selectedDate, rangeMode],
 	);
-
-	// Range change (event bus — still works, but props would be better)
-	useEffect(() => {
-		let controller: AbortController | null = null;
-
-		const handler = async ({
-			range,
-			date = new Date(),
-		}: {
-			date?: Date;
-			range: RangeMode;
-		}) => {
-			controller?.abort();
-			controller = new AbortController();
-
-			setRangeMode(range);
-			setSelectedDate(date);
-			setSections(null);
-
-			await fetchSection(controller.signal, range, date);
-		};
-
-		eventBus.on(EVENT_NAMES.CHANGE_DATE_RANGE, handler);
-
-		return () => {
-			controller?.abort();
-			eventBus.off(EVENT_NAMES.CHANGE_DATE_RANGE, handler);
-		};
-	}, [fetchSection]);
-
 	// Date change
 	useAbortableEffect(
 		(signal) => {

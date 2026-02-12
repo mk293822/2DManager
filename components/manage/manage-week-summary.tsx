@@ -1,18 +1,15 @@
+import { useManagePageContext } from "@/hooks/use-manage-page-context";
 import { formatDateDisplay } from "@/lib/helpers";
-import { SectionName, SectionSummaries } from "@/types/manage-types";
+import { SectionSummaries } from "@/types/manage-types";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import WeekSectionCard from "./week-section-card";
 import WeekSummaryCard from "./week-summary-card";
 
 /* ===== Week Summary ===== */
-const ManageWeekSummary = ({
-	sections,
-	handleCreateSection,
-}: {
-	sections: SectionSummaries[];
-	handleCreateSection: (section: SectionName, date: Date) => void;
-}) => {
+const ManageWeekSummary = ({ sections }: { sections: SectionSummaries[] }) => {
+	const { handleCreateSection } = useManagePageContext();
+
 	if (!sections || sections.length === 0) {
 		return (
 			<View className="flex-1 items-center justify-center bg-gray-100 p-6">

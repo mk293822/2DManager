@@ -25,7 +25,6 @@ const Manage = () => {
 		setError,
 
 		// Functions
-		onSave,
 		handleCreateSection,
 		fetchSection,
 	} = useManagePageContext();
@@ -97,16 +96,11 @@ const Manage = () => {
 
 				{rangeMode === "day" ? (
 					<ManageDaySummary
-						onSave={onSave}
 						selectedDate={selectedDate}
 						sections={sections[0]}
-						handleCreateSection={handleCreateSection}
 					/>
 				) : (
-					<ManageWeekSummary
-						handleCreateSection={handleCreateSection}
-						sections={sections}
-					/>
+					<ManageWeekSummary sections={sections} />
 				)}
 			</ScrollView>
 		</PaperProvider>
