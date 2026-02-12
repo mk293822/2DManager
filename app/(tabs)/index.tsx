@@ -6,6 +6,7 @@ import useFetchLiveTwoD from "@/hooks/use-fetch-live-two-d";
 import { getTwoDResultTime, toSeconds } from "@/lib/get-twod-result-time";
 import { TwoDHistoryItem } from "@/types/two-d-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { navigate } from "expo-router/build/global-state/routing";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 
@@ -22,6 +23,7 @@ export default function Index() {
 
 	useEffect(() => {
 		if (!liveData) return;
+		if (!liveData.result) navigate("/error-page");
 
 		setShowLiveCard(
 			!liveData.result.some(
