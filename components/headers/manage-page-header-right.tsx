@@ -7,7 +7,7 @@ import { Text, TouchableOpacity, View } from "react-native";
 
 const ManagePageHeaderRight = () => {
 	const handleToggle = (value: RangeMode) => {
-		eventBus.emit(EVENT_NAMES.CHANGE_DATE_RANGE, value);
+		eventBus.emit(EVENT_NAMES.CHANGE_DATE_RANGE, { range: value });
 	};
 
 	return (

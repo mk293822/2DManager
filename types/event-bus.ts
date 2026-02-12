@@ -19,7 +19,10 @@ type NotificationEvents = {
 export type RangeMode = "day" | "week";
 
 type ManagePageHeaderRightEvents = {
-	[EVENT_NAMES.CHANGE_DATE_RANGE]: RangeMode;
+	[EVENT_NAMES.CHANGE_DATE_RANGE]: {
+		range: RangeMode;
+		date?: Date;
+	};
 };
 
 // Event Bus

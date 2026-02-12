@@ -92,8 +92,8 @@ export default function Index() {
 					?.filter((d) =>
 						!showLiveCard
 							? d
-							: d.open_time !==
-								(currentTime === "12:01:00" ? "12:00:00" : currentTime),
+							: (d.open_time === "12:00:00" ? "12:01:00" : d.open_time) !==
+								currentTime,
 					)
 					.map((data, index) => (
 						<TwoDResultCard

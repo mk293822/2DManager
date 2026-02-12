@@ -1,4 +1,6 @@
-const DAYS: string[] = [
+import { Section } from "@/types/manage-types";
+
+export const DAYS: string[] = [
 	"Sunday",
 	"Monday",
 	"Tuesday",
@@ -29,3 +31,20 @@ export const formatDateDisplay = (date: Date) => {
 	const year = date.getFullYear();
 	return `${dayName}, ${month} ${day}, ${year}`;
 };
+
+export const formatDateRequest = (date: Date) => {
+	const year = date.getFullYear();
+	const month = (date.getMonth() + 1).toString().padStart(2, "0");
+	const day = date.getDate().toString().padStart(2, "0");
+	return `${year}-${month}-${day}`;
+};
+
+export const changeSectionName = (section: Section) =>
+	section === "morning_section" ? "Morning" : "Evening";
+
+export const getTotalArray = (data: any): [string, number][] => [
+	["Total Sold", data.total_amount],
+	["Total Resold", data.total_resold],
+	["Total Commission", data.total_commission],
+	["Total Draw Amount", data.draw_total_amount],
+];

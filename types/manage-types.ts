@@ -22,6 +22,6 @@ export type SectionSummaries = {
 		date: string; // or Date if you convert it
 		draw_total_amount: number;
 	};
-	morning: SectionSummary;
-	evening: SectionSummary;
+	morning_section: SectionSummary;
+	evening_section: SectionSummary;
 };
