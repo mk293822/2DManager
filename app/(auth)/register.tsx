@@ -2,8 +2,7 @@ import { EVENT_NAMES } from "@/event-names";
 import { useAuthContext } from "@/hooks/use-auth-context";
 import { eventBus } from "@/lib/event-bus";
 import { AxiosError, isCancel } from "axios";
-import { Link } from "expo-router";
-import { navigate } from "expo-router/build/global-state/routing";
+import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
 	ActivityIndicator,
@@ -21,6 +20,7 @@ const Register = () => {
 	const [password, setPassword] = useState("");
 	const [passwordConfirm, setPasswordConfirm] = useState("");
 	const [loading, setLoading] = useState(false);
+	const router = useRouter();
 
 	const handleRegister = async () => {
 		setLoading(true);
@@ -44,7 +44,7 @@ const Register = () => {
 
 			setPhoneNumber("");
 			setName("");
-			navigate("/profile");
+			router.replace("/profile");
 		} catch (err) {
 			if (isCancel(err)) return;
 			if (err instanceof AxiosError) {

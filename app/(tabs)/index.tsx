@@ -6,7 +6,7 @@ import useFetchLiveTwoD from "@/hooks/use-fetch-live-two-d";
 import { getTwoDResultTime, toSeconds } from "@/lib/get-twod-result-time";
 import { TwoDHistoryItem } from "@/types/two-d-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { navigate } from "expo-router/build/global-state/routing";
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 
@@ -20,10 +20,14 @@ export default function Index() {
 	const [isBlinking, setIsBlinking] = useState<boolean>(false);
 	const [showLiveCard, setShowLiveCard] = useState<boolean>(false);
 	const { style } = useBlink(isBlinking);
+	const router = useRouter();
 
 	useEffect(() => {
 		if (!liveData) return;
-		if (!liveData.result) navigate("/error-page");
+		if (liveData.result === undefined) {
+			router.replace("/error-page");
+			return;
+		}
 
 		setShowLiveCard(
 			!liveData.result.some(
@@ -40,7 +44,7 @@ export default function Index() {
 
 		setMainResult(m_Result);
 		setIsBlinking(!m_Result);
-	}, [liveData]);
+	}, [liveData, router]);
 
 	if (!liveData)
 		return (
