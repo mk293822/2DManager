@@ -4,7 +4,7 @@ export type Section = {
 	manager: string;
 	section: SectionName;
 	draw_number: string;
-	draw_times: string;
+	draw_times: number;
 	total_amount: number;
 	total_commission: number;
 	total_resold: number;

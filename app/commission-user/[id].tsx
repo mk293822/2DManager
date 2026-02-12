@@ -1,4 +1,4 @@
-import ManageDaySummary from "@/components/manage-day-summary";
+import ManageDaySummary from "@/components/manage/manage-day-summary";
 import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";

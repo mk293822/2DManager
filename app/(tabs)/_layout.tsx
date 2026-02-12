@@ -1,7 +1,6 @@
 import HapticTab from "@/components/haptic-tab";
 import CommissionPageHeaderRight from "@/components/headers/commission-page-header-right";
 import HomePageHeaderRight from "@/components/headers/home-page-header-right";
-import ManagePageHeaderRight from "@/components/headers/manage-page-header-right";
 import TwoDListsHeaderRight from "@/components/headers/two-d-lists-header-right";
 import { useAuthContext } from "@/hooks/use-auth-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -29,12 +28,6 @@ const pages: Page[] = [
 		title: "2D Lists",
 		icon: "unordered-list",
 		headerRight: () => <TwoDListsHeaderRight />,
-	},
-	{
-		name: "manage",
-		title: "Manage",
-		icon: "appstore",
-		headerRight: () => <ManagePageHeaderRight />,
 	},
 	{
 		name: "commission-users",
@@ -104,7 +97,50 @@ const TabsLayout = () => {
 					},
 				}}
 			>
-				{pages.map((page) => (
+				{pages.slice(0, 2).map((page) => (
+					<Tabs.Screen
+						key={page.name}
+						name={page.name}
+						options={{
+							tabBarIcon: ({ focused }) => (
+								<TabIcon
+									icon={page.icon}
+									focused={focused}
+								/>
+							),
+							title: page.title,
+							headerStyle: {
+								backgroundColor: "rgba(49, 46, 129, 0.85)",
+							},
+
+							headerTintColor: "#e5e7eb",
+							headerTitleStyle: {
+								fontWeight: "900",
+							},
+
+							headerRightContainerStyle: {
+								display: "flex",
+								alignItems: "center",
+							},
+							headerRight: page.headerRight,
+						}}
+					/>
+				))}
+				<Tabs.Screen
+					key="manage"
+					name="manage"
+					options={{
+						headerShown: false,
+						title: "Manage",
+						tabBarIcon: ({ focused }) => (
+							<TabIcon
+								icon="appstore"
+								focused={focused}
+							/>
+						),
+					}}
+				/>
+				{pages.slice(2).map((page) => (
 					<Tabs.Screen
 						key={page.name}
 						name={page.name}
