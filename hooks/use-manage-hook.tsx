@@ -17,7 +17,10 @@ export type useManageHookType = {
 	setRangeMode: React.Dispatch<React.SetStateAction<RangeMode>>;
 
 	handleCreateSection: (section: SectionName, date?: Date) => void;
-	onSave: (section: Omit<Section, "id" | "manager" | "section">) => void;
+	onSave: (
+		form: Omit<Section, "id" | "manager" | "section" | "date">,
+		id: string,
+	) => void;
 	fetchSection: (
 		signal: AbortSignal,
 		mode?: RangeMode,
@@ -111,8 +114,42 @@ const useManageHook = (): useManageHookType => {
 	};
 
 	const onSave = async (
-		section: Omit<Section, "id" | "manager" | "section">,
-	) => {};
+		form: Omit<Section, "id" | "manager" | "section" | "date">,
+		id: string,
+	) => {
+		setLoading(true);
+		try {
+			const { data } = await api.put<SectionSummaries>(
+				`/manager/sections/${id}/`,
+				{
+					...form,
+				},
+			);
+			setSections((prev) => {
+				if (!prev) return [data];
+
+				const idx = prev.findIndex((d) => d.summary.date === data.summary.date);
+
+				if (idx !== -1) {
+					// Replace existing day
+					const newSections = [...prev];
+					newSections[idx] = data;
+					return [...newSections].sort(
+						(a, b) =>
+							new Date(a.summary.date).getTime() -
+							new Date(b.summary.date).getTime(),
+					);
+				}
+
+				// Add new day if not found
+				return [...prev, data];
+			});
+		} catch {
+			setError("Failed to update section");
+		} finally {
+			setLoading(false);
+		}
+	};
 
 	return {
 		sections,

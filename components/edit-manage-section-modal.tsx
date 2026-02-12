@@ -11,34 +11,38 @@ import {
 import AppModal from "./ui/app-modal";
 
 type EditManageSectionModalProps = {
-	section: Omit<Section, "id" | "manager">;
-	onSave: (updated: Omit<Section, "id" | "manager" | "section">) => void;
+	sectionObj: Section;
+	onSave: (
+		form: Omit<Section, "id" | "manager" | "section" | "date">,
+		id: string,
+	) => Promise<void>;
 	onClose: () => void;
 	open: boolean;
 };
 
 const EditManageSectionModal = ({
-	section,
+	sectionObj,
 	onSave,
 	onClose,
 	open,
 }: EditManageSectionModalProps) => {
-	const [form, setForm] = useState(section);
+	const { id, manager, section, date, ...payload } = sectionObj;
+	const [form, setForm] = useState(payload);
 
 	const handleChange = (key: keyof typeof form, value: string | number) => {
 		setForm((prev) => ({ ...prev, [key]: value }));
 	};
 
-	const handleSave = () => {
-		onSave(form);
+	const handleSave = async () => {
+		await onSave(form, id);
 		onClose();
 	};
 
 	return (
 		<AppModal open={open}>
-			<View className="bg-white w-full flex-col rounded-2xl p-6 py-8 shadow-lg">
+			<View className="bg-gray-100 w-full flex-col rounded-2xl p-6 py-8 shadow-lg">
 				<Text className="text-xl font-bold text-indigo-700 mb-4">
-					Edit {changeSectionName(section.section)} Section
+					Edit {changeSectionName(section)} Section
 				</Text>
 
 				<ScrollView
@@ -107,15 +111,6 @@ const EditManageSectionModal = ({
 						className="border border-gray-300 rounded-lg px-3 py-2"
 					/>
 
-					{/* Date */}
-					<Text className="font-semibold text-gray-700">Date</Text>
-					<TextInput
-						value={form.date}
-						onChangeText={(text) => handleChange("date", text)}
-						className="border border-gray-300 rounded-lg px-3 py-2"
-						placeholder="YYYY-MM-DD"
-					/>
-
 					{/* Profit / Loss */}
 					<Text className="font-semibold text-gray-700">Profit / Loss</Text>
 					<TextInput
@@ -129,17 +124,20 @@ const EditManageSectionModal = ({
 				</ScrollView>
 
 				{/* Buttons */}
-				<View className="flex-row items-center justify-end mt-4 gap-3">
+				<View
+					className="w-full flex-row items-center mt-4 gap-2"
+					style={{ justifyContent: "flex-end" }}
+				>
 					<TouchableOpacity
 						onPress={onClose}
-						className="px-4 py-2 rounded-lg bg-gray-300"
+						className="px-4 py-2 rounded-lg bg-white border border-gray-300"
 					>
 						<Text className="font-semibold text-gray-700">Cancel</Text>
 					</TouchableOpacity>
 
 					<TouchableOpacity
 						onPress={handleSave}
-						className="px-4 py-2 rounded-lg bg-indigo-600"
+						className="px-4 py-2 rounded-lg bg-indigo-600 border border-indigo-600"
 					>
 						<Text className="font-semibold text-white">Save</Text>
 					</TouchableOpacity>

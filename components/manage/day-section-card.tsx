@@ -145,7 +145,7 @@ const DaySectionCard = ({
 				open={openModal}
 				onSave={onSave}
 				onClose={() => setOpemModal(false)}
-				section={data}
+				sectionObj={data}
 			/>
 		</View>
 	);
