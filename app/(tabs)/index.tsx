@@ -34,9 +34,14 @@ export default function Index() {
 				(d) => d.open_time === "16:30:00" && d.twod !== "--",
 			),
 		);
+		const date = new Date();
 		const m_Result = liveData.result.find(
 			(d) =>
-				(toSeconds(liveData.live.time.split(" ")[1]) < toSeconds("13:00:00")
+				(toSeconds(
+					liveData.live.time !== "--"
+						? liveData.live.time.split(" ")[1]
+						: `${date.getHours()}:${date.getMinutes()}:${date.getSeconds}`,
+				) < toSeconds("13:00:00")
 					? (d.open_time === "12:00:00" ? "12:01:00" : d.open_time) ===
 						"12:01:00"
 					: d.open_time === "16:30:00") && d.twod !== "--",

@@ -8,7 +8,7 @@ import {
 	TouchableOpacity,
 	View,
 } from "react-native";
-import AppModal from "./ui/app-modal";
+import AppModal from "../ui/app-modal";
 
 type EditManageSectionModalProps = {
 	sectionObj: Section;

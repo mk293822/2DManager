@@ -24,6 +24,6 @@ export type SectionSummary = {
 
 export type SectionSummaries = {
 	summary: SectionSummary;
-	morning_section: Section;
-	evening_section: Section;
+	morning_section: Section | null;
+	evening_section: Section | null;
 };

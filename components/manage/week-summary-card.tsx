@@ -1,5 +1,4 @@
-import { EVENT_NAMES } from "@/event-names";
-import { eventBus } from "@/lib/event-bus";
+import { useManagePageContext } from "@/hooks/use-manage-page-context";
 import { formatDateDisplay, formatKs, getTotalArray } from "@/lib/helpers";
 import { SectionSummary } from "@/types/manage-types";
 import React from "react";
@@ -11,11 +10,11 @@ type Props = {
 };
 
 const WeekSummaryCard = ({ summary, date }: Props) => {
+	const { setRangeMode, setSelectedDate } = useManagePageContext();
+
 	const handleToggle = () => {
-		eventBus.emit(EVENT_NAMES.CHANGE_DATE_RANGE, {
-			range: "day",
-			date,
-		});
+		setSelectedDate(date);
+		setRangeMode("day");
 	};
 	return (
 		<>
@@ -25,6 +24,7 @@ const WeekSummaryCard = ({ summary, date }: Props) => {
 				</Text>
 				<TouchableOpacity
 					activeOpacity={0.85}
+					hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
 					onPress={handleToggle}
 				>
 					<Text className="text-indigo-600 underline font-semibold">

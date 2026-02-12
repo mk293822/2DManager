@@ -4,17 +4,20 @@ import { Section, SectionName } from "@/types/manage-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import React, { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
-import EditManageSectionModal from "../edit-manage-section-modal";
+import DeleteManageSectionModal from "./delete-manage-section-modal";
+import EditManageSectionModal from "./edit-manage-section-modal";
 
 const DaySectionCard = ({
 	section,
 	data,
 }: {
 	section: SectionName;
-	data: Section | undefined;
+	data: Section | null;
 }) => {
-	const { onSave, handleCreateSection } = useManagePageContext();
-	const [openModal, setOpemModal] = useState(false);
+	const { onSave, handleCreateSection, onConfirmDelete } =
+		useManagePageContext();
+	const [openModal, setOpenModal] = useState(false);
+	const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
 	if (!data) {
 		return (
@@ -50,7 +53,7 @@ const DaySectionCard = ({
 						}}
 					>
 						<TouchableOpacity
-							onPress={() => setOpemModal(true)}
+							onPress={() => setOpenModal(true)}
 							activeOpacity={0.85}
 							hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
 							className="p-2.5"
@@ -83,6 +86,7 @@ const DaySectionCard = ({
 						}}
 					>
 						<TouchableOpacity
+							onPress={() => setOpenDeleteModal(true)}
 							activeOpacity={0.85}
 							hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
 							className="p-2.5"
@@ -144,8 +148,16 @@ const DaySectionCard = ({
 			<EditManageSectionModal
 				open={openModal}
 				onSave={onSave}
-				onClose={() => setOpemModal(false)}
+				onClose={() => setOpenModal(false)}
 				sectionObj={data}
+			/>
+			<DeleteManageSectionModal
+				section_id={data.id}
+				open={openDeleteModal}
+				onClose={() => setOpenDeleteModal(false)}
+				sectionName={data.section}
+				onConfirmDelete={onConfirmDelete}
+				date={data.date}
 			/>
 		</View>
 	);

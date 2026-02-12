@@ -20,12 +20,13 @@ export type useManageHookType = {
 	onSave: (
 		form: Omit<Section, "id" | "manager" | "section" | "date">,
 		id: string,
-	) => void;
+	) => Promise<void>;
 	fetchSection: (
 		signal: AbortSignal,
 		mode?: RangeMode,
 		date?: Date,
 	) => Promise<void>;
+	onConfirmDelete: (id: string, date: string) => Promise<void>;
 };
 
 const useManageHook = (): useManageHookType => {
@@ -151,6 +152,33 @@ const useManageHook = (): useManageHookType => {
 		}
 	};
 
+	const onConfirmDelete = async (id: string, date: string) => {
+		setLoading(true);
+		try {
+			await api.delete(`/manager/sections/${id}/`);
+			setSections((prev) => {
+				if (!prev) return null;
+
+				return prev.map((day) => {
+					if (day.summary.date !== date) return day;
+
+					// Update morning/evening section
+					return {
+						summary: day.summary,
+						morning_section:
+							day.morning_section?.id === id ? null : day.morning_section,
+						evening_section:
+							day.evening_section?.id === id ? null : day.evening_section,
+					};
+				});
+			});
+		} catch {
+			setError("Failed to update section");
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	return {
 		sections,
 		loading,
@@ -167,6 +195,7 @@ const useManageHook = (): useManageHookType => {
 		handleCreateSection,
 		onSave,
 		fetchSection,
+		onConfirmDelete,
 	};
 };
 

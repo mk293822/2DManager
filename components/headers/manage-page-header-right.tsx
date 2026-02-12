@@ -5,19 +5,21 @@ import React, { useEffect, useRef } from "react";
 import { Animated, Text, TouchableOpacity, View } from "react-native";
 
 const ManagePageHeaderRight = () => {
-	const { rangeMode, setRangeMode } = useManagePageContext();
+	const { rangeMode, setRangeMode, fetchSection } = useManagePageContext();
 	const translateX = useRef(
 		new Animated.Value(rangeMode === "day" ? 0 : 1),
 	).current;
 
 	// Animate when rangeMode changes
 	useEffect(() => {
+		const { signal } = new AbortController();
+		fetchSection(signal, rangeMode);
 		Animated.timing(translateX, {
 			toValue: rangeMode === "day" ? 0 : 1,
 			duration: 200,
 			useNativeDriver: true,
 		}).start();
-	}, [rangeMode]);
+	}, [rangeMode, fetchSection]);
 
 	const toggleWidth = 60; // width of each pill
 	const translateStyle = {
@@ -68,6 +70,7 @@ const ManagePageHeaderRight = () => {
 							justifyContent: "center",
 							alignItems: "center",
 							paddingVertical: 6,
+							paddingRight: 2,
 						}}
 					>
 						<Text

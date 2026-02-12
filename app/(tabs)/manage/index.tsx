@@ -25,7 +25,6 @@ const Manage = () => {
 		setError,
 
 		// Functions
-		handleCreateSection,
 		fetchSection,
 	} = useManagePageContext();
 

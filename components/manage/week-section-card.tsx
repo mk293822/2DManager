@@ -38,12 +38,16 @@ const WeekSectionCard = ({
 
 			<View className="flex-row justify-between py-0.5">
 				<Text className="text-gray-500">Draw Number</Text>
-				<Text className="font-semibold">{data.draw_number ?? "--"}</Text>
+				<Text className="font-semibold text-indigo-700">
+					{data.draw_number ?? "--"}
+				</Text>
 			</View>
 
 			<View className="flex-row justify-between py-0.5">
 				<Text className="text-gray-500">Draw Times</Text>
-				<Text className="font-semibold">&times; {data.draw_times}</Text>
+				<Text className="font-semibold text-red-700">
+					&times; {data.draw_times}
+				</Text>
 			</View>
 
 			<View className="flex-row justify-between mt-1">
