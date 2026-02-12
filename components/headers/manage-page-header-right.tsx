@@ -20,7 +20,7 @@ const ManagePageHeaderRight = () => {
 				marginRight: 8,
 			}}
 		>
-			{(["today", "week"] as RangeMode[]).map((item) => (
+			{(["day", "week"] as RangeMode[]).map((item) => (
 				<TouchableOpacity
 					key={item}
 					onPress={() => handleToggle(item)}
@@ -34,7 +34,7 @@ const ManagePageHeaderRight = () => {
 					}}
 				>
 					<Text style={{ color: "#4f46e5", fontWeight: "bold" }}>
-						{item === "today" ? "Today" : "Week"}
+						{item === "day" ? "Day" : "Week"}
 					</Text>
 				</TouchableOpacity>
 			))}

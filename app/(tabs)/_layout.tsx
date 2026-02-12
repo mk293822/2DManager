@@ -1,7 +1,7 @@
 import HapticTab from "@/components/haptic-tab";
 import CommissionPageHeaderRight from "@/components/headers/commission-page-header-right";
 import HomePageHeaderRight from "@/components/headers/home-page-header-right";
-import ManagePageHeaderRight from "@/components/headers/manate-page-header-right";
+import ManagePageHeaderRight from "@/components/headers/manage-page-header-right";
 import TwoDListsHeaderRight from "@/components/headers/two-d-lists-header-right";
 import { useAuthContext } from "@/hooks/use-auth-context";
 import AntDesign from "@expo/vector-icons/AntDesign";

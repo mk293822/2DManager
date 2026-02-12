@@ -98,7 +98,7 @@ api.interceptors.response.use(
 					refresh: refreshToken,
 				});
 
-				await SecureStore.setItemAsync("accessToken", data.access);
+				await setTokens(data.access, data.refresh);
 				processQueue(null, data.access);
 
 				if (originalRequest.headers) {

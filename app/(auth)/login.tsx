@@ -6,6 +6,7 @@ import { Link } from "expo-router";
 import { navigate } from "expo-router/build/global-state/routing";
 import React, { useState } from "react";
 import {
+	ActivityIndicator,
 	ScrollView,
 	Text,
 	TextInput,
@@ -17,8 +18,10 @@ const Login = () => {
 	const { login } = useAuthContext();
 	const [phoneNumber, setPhoneNumber] = useState("");
 	const [password, setPassword] = useState("");
+	const [loading, setLoading] = useState(false);
 
 	const handleLogin = async () => {
+		setLoading(true);
 		try {
 			await login(phoneNumber, password);
 			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
@@ -48,6 +51,7 @@ const Login = () => {
 			}
 		} finally {
 			setPassword("");
+			setLoading(false);
 		}
 	};
 
@@ -101,12 +105,22 @@ const Login = () => {
 				{/* Login Button */}
 				<TouchableOpacity
 					onPress={handleLogin}
+					disabled={loading}
 					activeOpacity={0.85}
 					className="bg-indigo-400 py-3 rounded-lg mt-2"
 				>
-					<Text className="text-white font-bold text-lg text-center">
-						Login
-					</Text>
+					{loading ? (
+						<View className="flex-1 items-center justify-center bg-gray-100">
+							<ActivityIndicator
+								size={20}
+								color="#2563eb"
+							/>
+						</View>
+					) : (
+						<Text className="text-white font-bold text-lg text-center">
+							Login
+						</Text>
+					)}
 				</TouchableOpacity>
 
 				{/* Footer */}

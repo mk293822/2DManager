@@ -16,7 +16,7 @@ type NotificationEvents = {
 };
 
 // Manage Page Header Right
-export type RangeMode = "today" | "week";
+export type RangeMode = "day" | "week";
 
 type ManagePageHeaderRightEvents = {
 	[EVENT_NAMES.CHANGE_DATE_RANGE]: RangeMode;

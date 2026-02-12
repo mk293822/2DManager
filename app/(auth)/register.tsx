@@ -6,6 +6,7 @@ import { Link } from "expo-router";
 import { navigate } from "expo-router/build/global-state/routing";
 import React, { useState } from "react";
 import {
+	ActivityIndicator,
 	ScrollView,
 	Text,
 	TextInput,
@@ -19,8 +20,10 @@ const Register = () => {
 	const [phoneNumber, setPhoneNumber] = useState("");
 	const [password, setPassword] = useState("");
 	const [passwordConfirm, setPasswordConfirm] = useState("");
+	const [loading, setLoading] = useState(false);
 
 	const handleRegister = async () => {
+		setLoading(true);
 		if (password !== passwordConfirm) {
 			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
 				title: "Passwords doesn't match!",
@@ -28,6 +31,7 @@ const Register = () => {
 				type: "error",
 			});
 			setPasswordConfirm("");
+			setLoading(false);
 			return;
 		}
 		try {
@@ -62,6 +66,7 @@ const Register = () => {
 		} finally {
 			setPassword("");
 			setPasswordConfirm("");
+			setLoading(false);
 		}
 	};
 
@@ -146,9 +151,18 @@ const Register = () => {
 					activeOpacity={0.85}
 					className="bg-indigo-400 py-3 rounded-lg mt-2"
 				>
-					<Text className="text-white font-bold text-lg text-center">
-						Register
-					</Text>
+					{loading ? (
+						<View className="flex-1 items-center justify-center bg-gray-100">
+							<ActivityIndicator
+								size={20}
+								color="#2563eb"
+							/>
+						</View>
+					) : (
+						<Text className="text-white font-bold text-lg text-center">
+							Register
+						</Text>
+					)}
 				</TouchableOpacity>
 
 				{/* Footer */}
