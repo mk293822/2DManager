@@ -37,7 +37,7 @@ const ManagePageHeaderRight = () => {
 		<View
 			style={{
 				flexDirection: "row",
-				backgroundColor: "#e0e7ff",
+				backgroundColor: "#f3f4f6",
 				borderRadius: 24,
 				padding: 2.5,
 				width: toggleWidth * 2,

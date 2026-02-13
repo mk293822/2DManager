@@ -1,5 +1,4 @@
-import ManageDaySummary from "@/components/manage/manage-day-summary";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { Provider as PaperProvider } from "react-native-paper";
@@ -19,6 +18,7 @@ const formatKs = (num: number) => `${num.toLocaleString()} Ks`;
 
 const CommissionUser = () => {
 	const { id } = useLocalSearchParams();
+	const router = useRouter();
 
 	const handleDeleteUser = () => {
 		Alert.alert("Delete User", "This action cannot be undone. Are you sure?", [
@@ -26,7 +26,7 @@ const CommissionUser = () => {
 			{
 				text: "Delete",
 				style: "destructive",
-				onPress: () => router.push("/commission-users"),
+				onPress: () => router.replace("/commission-users"),
 			},
 		]);
 	};
@@ -60,7 +60,7 @@ const CommissionUser = () => {
 				</View>
 
 				{/* ===== REUSED MANAGE SUMMARY ===== */}
-				<ManageDaySummary />
+				{/* <ManageDaySummary /> */}
 
 				{/* ===== DANGER ZONE ===== */}
 				<View className="bg-red-100 border border-red-400 rounded-2xl p-6 mt-2">

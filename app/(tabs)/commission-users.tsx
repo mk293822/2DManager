@@ -1,5 +1,5 @@
 // app/commission-users.tsx
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
@@ -27,6 +27,7 @@ const users: User[] = [
 const formatKs = (num: number) => `${num.toLocaleString()} Ks`;
 
 const CommissionUsers = () => {
+	const router = useRouter();
 	return (
 		<ScrollView
 			className="flex-1 bg-gray-100 p-4"

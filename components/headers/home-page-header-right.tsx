@@ -1,9 +1,10 @@
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 const HomePageHeaderRight = () => {
+	const router = useRouter();
 	return (
 		<View
 			style={{

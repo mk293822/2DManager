@@ -23,7 +23,7 @@ const DaySectionCard = ({
 		return (
 			<View className="bg-white rounded-2xl shadow p-6 mb-6 items-center">
 				<Text className="text-gray-400 font-extrabold text-xl mb-2">
-					No Data for {changeSectionName(section)} section!
+					No Data for {changeSectionName(section)} Section!
 				</Text>
 				<Text className="text-gray-500 text-sm text-center mb-4">
 					This session has no records yet.
@@ -33,7 +33,7 @@ const DaySectionCard = ({
 					onPress={() => handleCreateSection(section)}
 					className="bg-indigo-600 px-6 py-3 rounded-xl shadow"
 				>
-					<Text className="text-white font-bold">Create Section</Text>
+					<Text className="text-white font-bold">Create</Text>
 				</TouchableOpacity>
 			</View>
 		);
@@ -41,11 +41,11 @@ const DaySectionCard = ({
 
 	return (
 		<View className="bg-white rounded-2xl shadow p-6 mb-6">
-			<View className="flex-row justify-between items-center mb-4">
+			<View className="flex-row justify-between items-center mb-2">
 				<Text className="text-indigo-700 font-extrabold text-xl">
 					{changeSectionName(data.section)}
 				</Text>
-				<View className="flex-row items-center justify-end gap-5">
+				<View className="flex-row items-center justify-end gap-3">
 					<View
 						style={{
 							position: "relative",
@@ -67,10 +67,10 @@ const DaySectionCard = ({
 							<View
 								style={{
 									position: "absolute",
-									top: -8,
-									bottom: -8,
-									left: -8,
-									right: -8,
+									top: -0,
+									bottom: -0,
+									left: -0,
+									right: -0,
 									borderWidth: 1,
 									borderColor: "#4338ca",
 									borderStyle: "dashed",
@@ -100,10 +100,10 @@ const DaySectionCard = ({
 							<View
 								style={{
 									position: "absolute",
-									top: -8,
-									bottom: -8,
-									left: -8,
-									right: -8,
+									top: -0,
+									bottom: -0,
+									left: -0,
+									right: -0,
 									borderWidth: 1,
 									borderColor: "#b91c1c",
 									borderStyle: "dashed",
