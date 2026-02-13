@@ -44,7 +44,9 @@ export default function Index() {
 				) < toSeconds("13:00:00")
 					? (d.open_time === "12:00:00" ? "12:01:00" : d.open_time) ===
 						"12:01:00"
-					: d.open_time === "16:30:00") && d.twod !== "--",
+					: d.open_time === "16:30:00") &&
+				d.history_id &&
+				d.twod !== "--",
 		);
 
 		setMainResult(m_Result);
