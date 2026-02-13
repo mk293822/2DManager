@@ -5,7 +5,7 @@ import { RangeMode } from "@/types/event-bus";
 import { Section, SectionName, SectionSummaries } from "@/types/manage-types";
 import { useCallback, useState } from "react";
 
-export type useManageHookType = {
+export type UseManageHookType = {
 	sections: SectionSummaries[] | null;
 	loading: boolean;
 	error: string | null;
@@ -29,7 +29,7 @@ export type useManageHookType = {
 	onConfirmDelete: (id: string, date: string) => Promise<void>;
 };
 
-const useManageHook = (): useManageHookType => {
+const useManageHook = (): UseManageHookType => {
 	const [rangeMode, setRangeMode] = useState<RangeMode>("day");
 	const [sections, setSections] = useState<SectionSummaries[] | null>(null);
 	const [loading, setLoading] = useState(false);
