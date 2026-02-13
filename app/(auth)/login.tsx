@@ -110,7 +110,7 @@ const Login = () => {
 					className="bg-indigo-400 py-3 rounded-lg mt-2"
 				>
 					{loading ? (
-						<View className="flex-1 items-center justify-center bg-gray-100">
+						<View className="flex-1 items-center bg-indigo-400 justify-center">
 							<ActivityIndicator
 								size={20}
 								color="#2563eb"
