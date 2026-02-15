@@ -1,4 +1,5 @@
-import { useManagePageContext } from "@/hooks/use-manage-page-context";
+import { useManagePageDataContext } from "@/hooks/manage/use-data-context";
+import { useManagePageToggleContext } from "@/hooks/manage/user-toggle-context";
 import { formatDateDisplay, formatKs, getTotalArray } from "@/lib/helpers";
 import { SectionSummary } from "@/types/manage-types";
 import React from "react";
@@ -10,7 +11,8 @@ type Props = {
 };
 
 const WeekSummaryCard = ({ summary, date }: Props) => {
-	const { setRangeMode, setSelectedDate } = useManagePageContext();
+	const { setSelectedDate } = useManagePageDataContext();
+	const { setRangeMode } = useManagePageToggleContext();
 
 	const handleToggle = () => {
 		setSelectedDate(date);

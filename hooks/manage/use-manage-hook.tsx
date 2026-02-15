@@ -82,7 +82,6 @@ const useManageHook = (): UseManageHookType => {
 		section: SectionName = "morning_section",
 		date: Date = selectedDate,
 	) => {
-		setLoading(true);
 		try {
 			const { data } = await api.post<SectionSummaries>("/manager/sections/", {
 				section: section,
@@ -109,8 +108,6 @@ const useManageHook = (): UseManageHookType => {
 			});
 		} catch {
 			setError("Failed to create section");
-		} finally {
-			setLoading(false);
 		}
 	};
 

@@ -1,11 +1,13 @@
 // components/headers/manage-page-header-right.tsx
-import { useManagePageContext } from "@/hooks/use-manage-page-context";
+import { useManagePageDataContext } from "@/hooks/manage/use-data-context";
+import { useManagePageToggleContext } from "@/hooks/manage/user-toggle-context";
 import { RangeMode } from "@/types/event-bus";
 import React, { useEffect, useRef } from "react";
 import { Animated, Text, TouchableOpacity, View } from "react-native";
 
 const ManagePageHeaderRight = () => {
-	const { rangeMode, setRangeMode, fetchSection } = useManagePageContext();
+	const { rangeMode, setRangeMode } = useManagePageToggleContext();
+	const { fetchSection } = useManagePageDataContext();
 	const translateX = useRef(
 		new Animated.Value(rangeMode === "day" ? 0 : 1),
 	).current;

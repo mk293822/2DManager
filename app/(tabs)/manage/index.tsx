@@ -1,7 +1,8 @@
 import ManageDatePickerHeader from "@/components/manage/manage-date-picker-header";
 import ManageDaySummary from "@/components/manage/manage-day-summary";
 import ManageWeekSummary from "@/components/manage/manage-week-summary";
-import { useManagePageContext } from "@/hooks/use-manage-page-context";
+import { useManagePageDataContext } from "@/hooks/manage/use-data-context";
+import { useManagePageToggleContext } from "@/hooks/manage/user-toggle-context";
 import {
 	ActivityIndicator,
 	Pressable,
@@ -13,12 +14,12 @@ import { Provider as PaperProvider } from "react-native-paper";
 import { enGB, registerTranslation } from "react-native-paper-dates";
 
 const Manage = () => {
+	const { rangeMode } = useManagePageToggleContext();
 	const {
 		error,
 		loading,
 		sections,
 		selectedDate,
-		rangeMode,
 
 		// setStates
 		setSelectedDate,
@@ -26,7 +27,7 @@ const Manage = () => {
 
 		// Functions
 		fetchSection,
-	} = useManagePageContext();
+	} = useManagePageDataContext();
 
 	registerTranslation("en-GB", enGB);
 

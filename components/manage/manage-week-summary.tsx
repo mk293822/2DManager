@@ -1,14 +1,25 @@
-import { useManagePageContext } from "@/hooks/use-manage-page-context";
+import { useManagePageDataContext } from "@/hooks/manage/use-data-context";
 import { formatDateDisplay } from "@/lib/helpers";
-import { SectionSummaries } from "@/types/manage-types";
-import React from "react";
+import { SectionName, SectionSummaries } from "@/types/manage-types";
+import React, { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import WeekSectionCard from "./week-section-card";
 import WeekSummaryCard from "./week-summary-card";
 
 /* ===== Week Summary ===== */
 const ManageWeekSummary = ({ sections }: { sections: SectionSummaries[] }) => {
-	const { handleCreateSection } = useManagePageContext();
+	const { handleCreateSection } = useManagePageDataContext();
+	const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({});
+
+	// use a map keyed by date + section type
+	const createSection = async (section: SectionName, date: Date) => {
+		const key = `${date.toISOString()}_${section}`; // unique per button
+		setLoadingMap((prev) => ({ ...prev, [key]: true }));
+
+		await handleCreateSection(section, date);
+
+		setLoadingMap((prev) => ({ ...prev, [key]: false }));
+	};
 
 	if (!sections || sections.length === 0) {
 		return (
@@ -50,21 +61,35 @@ const ManageWeekSummary = ({ sections }: { sections: SectionSummaries[] }) => {
 							<View className="flex-row gap-3">
 								<TouchableOpacity
 									activeOpacity={0.85}
-									onPress={() => handleCreateSection("morning_section", date)}
-									className="bg-indigo-500 px-4 py-3 rounded-xl shadow flex-1 items-center"
+									onPress={() => createSection("morning_section", date)}
+									disabled={Object.entries(loadingMap).length > 0}
+									className={`px-4 py-3 rounded-xl shadow flex-1 items-center ${
+										loadingMap[`${date.toISOString()}_morning_section`]
+											? "bg-gray-400"
+											: "bg-indigo-500"
+									}`}
 								>
 									<Text className="text-white font-semibold text-center">
-										Create Morning
+										{loadingMap[`${date.toISOString()}_morning_section`]
+											? "Creating…"
+											: "Create Morning"}
 									</Text>
 								</TouchableOpacity>
 
 								<TouchableOpacity
 									activeOpacity={0.85}
-									onPress={() => handleCreateSection("evening_section", date)}
-									className="bg-indigo-500 px-4 py-3 rounded-xl shadow flex-1 items-center"
+									onPress={() => createSection("evening_section", date)}
+									disabled={Object.entries(loadingMap).length > 0}
+									className={`px-4 py-3 rounded-xl shadow flex-1 items-center ${
+										loadingMap[`${date.toISOString()}_evening_section`]
+											? "bg-gray-400"
+											: "bg-indigo-500"
+									}`}
 								>
 									<Text className="text-white font-semibold text-center">
-										Create Evening
+										{loadingMap[`${date.toISOString()}_evening_section`]
+											? "Creating…"
+											: "Create Evening"}
 									</Text>
 								</TouchableOpacity>
 							</View>
