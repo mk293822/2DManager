@@ -1,13 +1,13 @@
-// components/headers/commission-page-header-right.tsx
+import { useCommissionUserDataContext } from "@/hooks/use-commission-user-data-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import React, { useState } from "react";
+import { TouchableOpacity, View } from "react-native";
+import CreateCommissionUserModal from "../commission-user/create-commission-user-modal";
 
-type Props = {
-	onAddUser?: () => void; // optional callback when button pressed
-};
+const CommissionPageHeaderRight = () => {
+	const [open, setOpen] = useState(false);
+	const { handleCreateCommissionUser } = useCommissionUserDataContext();
 
-const CommissionPageHeaderRight: React.FC<Props> = ({ onAddUser }) => {
 	return (
 		<View
 			style={{
@@ -17,25 +17,24 @@ const CommissionPageHeaderRight: React.FC<Props> = ({ onAddUser }) => {
 			}}
 		>
 			<TouchableOpacity
-				activeOpacity={0.7}
-				onPress={onAddUser}
+				hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+				onPress={() => setOpen(true)}
 				style={{
-					flexDirection: "row",
-					alignItems: "center",
-					backgroundColor: "#f3f4f6", // indigo
-					paddingHorizontal: 14,
-					paddingVertical: 6,
-					borderRadius: 20,
+					padding: 6,
+					borderRadius: 999,
 				}}
 			>
 				<AntDesign
 					name="plus"
-					size={16}
-					color="#4f46e5"
-					style={{ marginRight: 6 }}
+					size={22}
+					color="#fff"
 				/>
-				<Text style={{ color: "#4f46e5", fontWeight: "600" }}>Add User</Text>
 			</TouchableOpacity>
+			<CreateCommissionUserModal
+				open={open}
+				handleCreateCommissionUser={handleCreateCommissionUser}
+				onClose={() => setOpen(false)}
+			/>
 		</View>
 	);
 };

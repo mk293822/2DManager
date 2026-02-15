@@ -1,14 +1,14 @@
 // app/manage/layout.tsx
-import ManagePageHeaderRight from "@/components/headers/manage-page-header-right";
-import ManagePageContextProvider from "@/contexts/manage-page-context-provider";
+import CommissionPageHeaderRight from "@/components/headers/commission-page-header-right";
+import CommissionUserDataContextProvider from "@/contexts/commission-user-data-context-provider";
 import { Stack } from "expo-router";
 import { Text, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-export default function ManageLayout() {
+export default function CommissionUsersLayout() {
 	return (
 		<SafeAreaProvider>
-			<ManagePageContextProvider>
+			<CommissionUserDataContextProvider>
 				<Stack>
 					<Stack.Screen
 						name="index"
@@ -22,11 +22,11 @@ export default function ManageLayout() {
 											fontSize: 20,
 										}}
 									>
-										Manage
+										Commission Users
 									</Text>
 								</View>
 							),
-							headerRight: () => <ManagePageHeaderRight />,
+							headerRight: () => <CommissionPageHeaderRight />,
 							headerStyle: {
 								backgroundColor: "rgba(49, 46, 129, 0.85)",
 							},
@@ -35,7 +35,7 @@ export default function ManageLayout() {
 						}}
 					/>
 				</Stack>
-			</ManagePageContextProvider>
+			</CommissionUserDataContextProvider>
 		</SafeAreaProvider>
 	);
 }

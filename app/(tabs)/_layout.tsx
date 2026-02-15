@@ -1,5 +1,4 @@
 import HapticTab from "@/components/haptic-tab";
-import CommissionPageHeaderRight from "@/components/headers/commission-page-header-right";
 import HomePageHeaderRight from "@/components/headers/home-page-header-right";
 import TwoDListsHeaderRight from "@/components/headers/two-d-lists-header-right";
 import { useAuthContext } from "@/hooks/use-auth-context";
@@ -28,12 +27,6 @@ const pages: Page[] = [
 		title: "2D Lists",
 		icon: "unordered-list",
 		headerRight: () => <TwoDListsHeaderRight />,
-	},
-	{
-		name: "commission-users",
-		title: "Cormission Users",
-		icon: "usergroup-add",
-		headerRight: () => <CommissionPageHeaderRight />,
 	},
 	{ name: "profile", title: "Profile", icon: "user" },
 ];
@@ -127,14 +120,24 @@ const TabsLayout = () => {
 					/>
 				))}
 				<Tabs.Screen
-					key="manage"
 					name="manage"
 					options={{
 						headerShown: false,
-						title: "Manage",
 						tabBarIcon: ({ focused }) => (
 							<TabIcon
 								icon="appstore"
+								focused={focused}
+							/>
+						),
+					}}
+				/>
+				<Tabs.Screen
+					name="commission-users"
+					options={{
+						headerShown: false,
+						tabBarIcon: ({ focused }) => (
+							<TabIcon
+								icon="usergroup-add"
 								focused={focused}
 							/>
 						),

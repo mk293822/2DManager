@@ -1,7 +1,9 @@
+import { User } from "./main";
+
 export type SectionName = "morning_section" | "evening_section";
 export type Section = {
 	id: string;
-	manager: string;
+	manager: User;
 	section: SectionName;
 	draw_number: string;
 	draw_times: number;
