@@ -11,27 +11,6 @@ import {
 	View,
 } from "react-native";
 
-type User = {
-	id: number;
-	name: string;
-	totalSold: number;
-};
-
-const users: User[] = [
-	{ id: 1, name: "John Doe", totalSold: 12500 },
-	{ id: 2, name: "Jane Smith", totalSold: 9800 },
-	{ id: 3, name: "Alice Johnson", totalSold: 15000 },
-	{ id: 4, name: "Bob Brown", totalSold: 7600 },
-	{ id: 5, name: "John Doe", totalSold: 12500 },
-	{ id: 6, name: "Jane Smith", totalSold: 9800 },
-	{ id: 7, name: "Alice Johnson", totalSold: 15000 },
-	{ id: 8, name: "Bob Brown", totalSold: 7600 },
-	{ id: 9, name: "John Doe", totalSold: 12500 },
-	{ id: 10, name: "Jane Smith", totalSold: 9800 },
-	{ id: 11, name: "Alice Johnson", totalSold: 15000 },
-	{ id: 12, name: "Bob Brown", totalSold: 7600 },
-];
-
 const CommissionUsers = () => {
 	const router = useRouter();
 	const { commissionUsers, loading, error, reset } =
@@ -90,7 +69,7 @@ const CommissionUsers = () => {
 					key={user.id}
 					onPress={() =>
 						router.push({
-							pathname: "/commission-user/[id]",
+							pathname: "/commission-users/[id]",
 							params: { id: String(user.id) },
 						})
 					}

@@ -10,6 +10,15 @@ export const DAYS: string[] = [
 	"Saturday",
 ];
 
+export const formatSmartNumber = (num: number | string) => {
+	const n = Number(num);
+	if (Number.isNaN(n)) return "0";
+	// limit to 3 decimal places
+	const str = n.toFixed(3);
+	// remove trailing zeros and possible trailing dot
+	return str.replace(/\.?0+$/, "");
+};
+
 export const formatKs = (num: number) => `${num.toLocaleString()} Ks`;
 
 export function formatTimeIntl(time: string = "00:00:00"): string {

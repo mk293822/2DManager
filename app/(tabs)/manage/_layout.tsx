@@ -1,5 +1,5 @@
 // app/manage/layout.tsx
-import ManagePageHeaderRight from "@/components/headers/manage-page-header-right";
+import ManagePageHeaderRight from "@/components/header-rights/manage-page";
 import ManagePageToggleContextProvider from "@/contexts/manage/data-context-provider";
 import ManagePageDataContextProvider from "@/contexts/manage/toggle-context-provider";
 import { Stack } from "expo-router";

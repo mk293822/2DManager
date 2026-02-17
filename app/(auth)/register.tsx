@@ -155,7 +155,7 @@ const Register = () => {
 						<View className="flex-1 items-center justify-center bg-indigo-400">
 							<ActivityIndicator
 								size={20}
-								color="#2563eb"
+								color="#fff"
 							/>
 						</View>
 					) : (

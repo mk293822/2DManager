@@ -1,4 +1,3 @@
-import { CommissionUserType } from "@/types/commission-user-types";
 import React, { useState } from "react";
 import {
 	ScrollView,
@@ -12,9 +11,10 @@ import AppModal from "../ui/app-modal";
 type Props = {
 	open: boolean;
 	onClose: () => void;
-	handleCreateCommissionUser: (
-		payload: Omit<CommissionUserType, "id" | "manager">,
-	) => Promise<void>;
+	handleCreateCommissionUser: (payload: {
+		name: string;
+		phone_number: string;
+	}) => Promise<void>;
 };
 
 const CreateCommissionUserModal = ({
@@ -22,7 +22,7 @@ const CreateCommissionUserModal = ({
 	onClose,
 	handleCreateCommissionUser,
 }: Props) => {
-	const [form, setForm] = useState<Omit<CommissionUserType, "id" | "manager">>({
+	const [form, setForm] = useState<{ name: string; phone_number: string }>({
 		name: "",
 		phone_number: "",
 	});

@@ -1,6 +1,6 @@
 import HapticTab from "@/components/haptic-tab";
-import HomePageHeaderRight from "@/components/headers/home-page-header-right";
-import TwoDListsHeaderRight from "@/components/headers/two-d-lists-header-right";
+import HomePageHeaderRight from "@/components/header-rights/home-page";
+import TwoDListsHeaderRight from "@/components/header-rights/two-d-lists";
 import { useAuthContext } from "@/hooks/use-auth-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Tabs, useRouter } from "expo-router";

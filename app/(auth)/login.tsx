@@ -113,7 +113,7 @@ const Login = () => {
 						<View className="flex-1 items-center bg-indigo-400 justify-center">
 							<ActivityIndicator
 								size={20}
-								color="#2563eb"
+								color="#fff"
 							/>
 						</View>
 					) : (
