@@ -9,13 +9,11 @@ const CommissionUserSectionCard = ({
 }: {
 	sale: ComUserSectionSaleType;
 }) => {
-	if (!sale?.section_summary) return null;
+	if (!sale || !sale?.section_summary) return null;
 
 	const section = sale.section_summary;
 
 	const isProfit = sale.profit_or_loss >= 0;
-
-	if (!section) return;
 
 	return (
 		<View className="bg-white rounded-2xl shadow p-6 mb-6">

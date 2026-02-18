@@ -34,7 +34,7 @@ const pages: Page[] = [
 const TabIcon = ({ focused, icon }: Page & { focused: boolean }) => {
 	return (
 		<View
-			className={`${focused ? "bg-purple-400 flex-1 min-w-24 gap-1 overflow-hidden flex flex-row" : "min-w-16"} mt-6 min-h-[4.2rem] justify-center items-center rounded-full`}
+			className={`${focused ? "bg-purple-400 flex-1 min-w-24 gap-1 overflow-hidden flex flex-row" : "min-w-16"} mt-6 min-h-[3.6rem] justify-center items-center rounded-full`}
 		>
 			<AntDesign
 				name={icon}
@@ -85,7 +85,7 @@ const TabsLayout = () => {
 						position: "absolute",
 						overflow: "hidden",
 						borderWidth: 1,
-						paddingHorizontal: 9,
+						paddingHorizontal: 14,
 						backgroundColor: "rgba(49, 46, 129, 0.75)",
 					},
 				}}

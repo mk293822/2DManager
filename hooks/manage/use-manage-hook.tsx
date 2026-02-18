@@ -75,7 +75,7 @@ const useManageHook = (): UseManageHookType => {
 		(signal) => {
 			fetchSection(signal);
 		},
-		[selectedDate],
+		[selectedDate, rangeMode],
 	);
 
 	const handleCreateSection = async (

@@ -28,20 +28,6 @@ const CommissionUserDetailsHeaderRight = () => {
 					color="#fff"
 				/>
 			</TouchableOpacity>
-			<TouchableOpacity
-				hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-				onPress={() => setOpen(true)}
-				style={{
-					padding: 6,
-					borderRadius: 999,
-				}}
-			>
-				<AntDesign
-					name="delete"
-					size={22}
-					color="#fff"
-				/>
-			</TouchableOpacity>
 			{/* <CreateCommissionUserModal
 				open={open}
 				handleCreateCommissionUser={handleCreateCommissionUser}

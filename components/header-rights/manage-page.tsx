@@ -1,5 +1,4 @@
 // components/headers/manage-page-header-right.tsx
-import { useManagePageDataContext } from "@/hooks/manage/use-data-context";
 import { useManagePageToggleContext } from "@/hooks/manage/user-toggle-context";
 import { RangeMode } from "@/types/event-bus";
 import React, { useEffect, useRef } from "react";
@@ -7,21 +6,18 @@ import { Animated, Text, TouchableOpacity, View } from "react-native";
 
 const ManagePageHeaderRight = () => {
 	const { rangeMode, setRangeMode } = useManagePageToggleContext();
-	const { fetchSection } = useManagePageDataContext();
 	const translateX = useRef(
 		new Animated.Value(rangeMode === "day" ? 0 : 1),
 	).current;
 
 	// Animate when rangeMode changes
 	useEffect(() => {
-		const { signal } = new AbortController();
-		fetchSection(signal, rangeMode);
 		Animated.timing(translateX, {
 			toValue: rangeMode === "day" ? 0 : 1,
 			duration: 200,
 			useNativeDriver: true,
 		}).start();
-	}, [rangeMode, fetchSection]);
+	}, [rangeMode]);
 
 	const toggleWidth = 60; // width of each pill
 	const translateStyle = {

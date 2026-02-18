@@ -62,7 +62,10 @@ const ManageWeekSummary = ({ sections }: { sections: SectionSummaries[] }) => {
 								<TouchableOpacity
 									activeOpacity={0.85}
 									onPress={() => createSection("morning_section", date)}
-									disabled={Object.entries(loadingMap).length > 0}
+									disabled={
+										loadingMap[`${date.toISOString()}_morning_section`] ||
+										loadingMap[`${date.toISOString()}_evening_section`]
+									}
 									className={`px-4 py-3 rounded-xl shadow flex-1 items-center ${
 										loadingMap[`${date.toISOString()}_morning_section`]
 											? "bg-gray-400"
@@ -79,7 +82,10 @@ const ManageWeekSummary = ({ sections }: { sections: SectionSummaries[] }) => {
 								<TouchableOpacity
 									activeOpacity={0.85}
 									onPress={() => createSection("evening_section", date)}
-									disabled={Object.entries(loadingMap).length > 0}
+									disabled={
+										loadingMap[`${date.toISOString()}_morning_section`] ||
+										loadingMap[`${date.toISOString()}_evening_section`]
+									}
 									className={`px-4 py-3 rounded-xl shadow flex-1 items-center ${
 										loadingMap[`${date.toISOString()}_evening_section`]
 											? "bg-gray-400"

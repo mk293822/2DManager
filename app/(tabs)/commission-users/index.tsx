@@ -1,5 +1,4 @@
-// app/commission-users.tsx
-import { useCommissionUserDataContext } from "@/hooks/use-commission-user-data-context";
+import { useCommissionUserPageContext } from "@/hooks/commission-users/use-commission-user-context";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
@@ -14,7 +13,18 @@ import {
 const CommissionUsers = () => {
 	const router = useRouter();
 	const { commissionUsers, loading, error, reset } =
-		useCommissionUserDataContext();
+		useCommissionUserPageContext();
+
+	if (loading) {
+		return (
+			<View className="flex-1 items-center justify-center bg-gray-100 p-4">
+				<ActivityIndicator
+					size={50}
+					color="#2563eb"
+				/>
+			</View>
+		);
+	}
 
 	if (error) {
 		return (
@@ -32,18 +42,7 @@ const CommissionUsers = () => {
 		);
 	}
 
-	if (loading || !commissionUsers) {
-		return (
-			<View className="flex-1 items-center justify-center bg-gray-100 p-4">
-				<ActivityIndicator
-					size={50}
-					color="#2563eb"
-				/>
-			</View>
-		);
-	}
-
-	if (commissionUsers.length === 0) {
+	if (!commissionUsers || commissionUsers.length === 0) {
 		return (
 			<View className="flex-1 items-center justify-center bg-gray-100 p-4">
 				<Text className="text-gray-500 font-semibold text-2xl text-center mb-4">
@@ -69,14 +68,13 @@ const CommissionUsers = () => {
 					key={user.id}
 					onPress={() =>
 						router.push({
-							pathname: "/commission-users/[id]",
+							pathname: "/commission-user-details/[id]",
 							params: { id: String(user.id) },
 						})
 					}
 					activeOpacity={0.8}
 					className="bg-white rounded-2xl shadow p-4 mb-4 flex-row items-center justify-between"
 				>
-					{/* User info */}
 					<View>
 						<Text className="text-indigo-700 font-extrabold text-lg">
 							{user.name}

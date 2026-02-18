@@ -1,3 +1,7 @@
+import {
+	ComUserSectionSaleSummary,
+	ComUserSectionSaleType,
+} from "@/types/commission-user-types";
 import { SectionName } from "@/types/manage-types";
 
 export const DAYS: string[] = [
@@ -57,3 +61,26 @@ export const getTotalArray = (data: any): [string, number][] => [
 	["Total Commission", data.total_commission],
 	["Total Draw Amount", data.draw_total_amount],
 ];
+
+export function calculateTotals(
+	sections: (ComUserSectionSaleType | null | undefined)[],
+): ComUserSectionSaleSummary {
+	return sections.reduce(
+		(acc, section) => {
+			if (!section) return acc;
+
+			acc.total_amount += section.total_amount ?? 0;
+			acc.total_commission += section.total_commission ?? 0;
+			acc.profit_or_loss += section.profit_or_loss ?? 0;
+			acc.total_draw_amount += section.total_draw_amount ?? 0;
+
+			return acc;
+		},
+		{
+			total_amount: 0,
+			total_commission: 0,
+			profit_or_loss: 0,
+			total_draw_amount: 0,
+		},
+	);
+}

@@ -1,11 +1,12 @@
 import HolidayInfo from "@/components/holiday-info";
 import { useBlink } from "@/hooks/use-blink";
 import useFetchLiveTwoD from "@/hooks/use-fetch-live-two-d";
-import { getTwoDResultTime } from "@/lib/get-twod-result-time";
+import { getTwoDResultTime, toSeconds } from "@/lib/get-twod-result-time";
 import { formatTimeIntl } from "@/lib/helpers";
 import { renderStyledValue } from "@/lib/render-styled-value";
 import { TwoDData, TwoDHistoryItem, TwoDResponse } from "@/types/two-d-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
 	ActivityIndicator,
@@ -26,25 +27,36 @@ const History = () => {
 	const data = useFetchLiveTwoD<TwoDResponse>();
 	// eslint-disable-next-line eqeqeq
 	const isHoliday = data.liveData?.holiday?.status == 3;
-
 	const currentTime = getTwoDResultTime(isHoliday);
-
-	const [result, setResult] = useState<TwoDHistoryItem | undefined>();
-	const [isResult, setIsResult] = useState<boolean>(true);
-
-	const { style, visible } = useBlink(isResult);
+	const [mainResult, setMainResult] = useState<TwoDHistoryItem | undefined>();
+	const [isBlinking, setIsBlinking] = useState<boolean>(false);
+	const { style } = useBlink(isBlinking);
+	const router = useRouter();
 
 	useEffect(() => {
-		if (!data) return;
+		if (!data || !data.liveData) return;
+		if (data.liveData.result === undefined) {
+			router.replace("/error-page");
+			return;
+		}
 
-		// compute result first
-		const found = data.liveData?.result.find(
-			(d) => d.open_time === currentTime,
+		const date = new Date();
+		const m_Result = data.liveData.result.find(
+			(d) =>
+				(toSeconds(
+					data.liveData?.live.time !== "--"
+						? (data.liveData?.live.time.split(" ")[1] ?? "00:00:00")
+						: `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`,
+				) < toSeconds("13:00:00")
+					? (d.open_time === "12:00:00" ? "12:01:00" : d.open_time) ===
+						"12:01:00"
+					: d.open_time === "16:30:00") &&
+				d.history_id &&
+				d.twod !== "--",
 		);
 
-		// update state with the computed result
-		setResult(found);
-		setIsResult(found?.twod !== "--");
+		setMainResult(m_Result);
+		setIsBlinking(!m_Result);
 	}, [data, currentTime]);
 
 	if (!data.liveData)
@@ -68,18 +80,18 @@ const History = () => {
 					style={style}
 					className="text-[9rem] font-extrabold text-gray-900 tracking-tight"
 				>
-					{isResult ? result?.twod : data.liveData?.live.twod}
+					{isBlinking ? data.liveData.live?.twod : mainResult?.twod}
 				</Text>
 
 				<View className="flex-row items-center gap-2 mt-2">
 					<AntDesign
-						name={!visible ? "history" : "check"}
+						name={isBlinking ? "history" : "check"}
 						size={16}
-						color={!visible ? "#374151" : "#16a34a"}
+						color={isBlinking ? "#6b7280" : "#16a34a"}
 					/>
 					<Text className="text-sm text-gray-600">
 						Updated{" "}
-						{isResult ? result?.stock_datetime : data.liveData?.live.time}
+						{isBlinking ? data.liveData.live?.time : mainResult?.stock_datetime}
 					</Text>
 				</View>
 			</View>

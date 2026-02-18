@@ -1,11 +1,14 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
-import { ScrollView, Text, View } from "react-native";
-import { Provider as PaperProvider } from "react-native-paper";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+	ActivityIndicator,
+	Provider as PaperProvider,
+} from "react-native-paper";
 
 import CommissionUserSectionsList from "@/components/commission-user/section-sale-list";
+import { useCommissionUserDetailsContext } from "@/hooks/commission-user-details/use-details-context";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
-import { useCommissionUserDataContext } from "@/hooks/use-commission-user-data-context";
 
 const CommissionUserScreen = () => {
 	const { id } = useLocalSearchParams<{ id?: string | string[] }>();
@@ -13,8 +16,8 @@ const CommissionUserScreen = () => {
 
 	const userId = Array.isArray(id) ? id[0] : id;
 
-	const { fetch_com_user_details, commissionUserDetails } =
-		useCommissionUserDataContext();
+	const { fetch_com_user_details, commissionUserDetails, loading } =
+		useCommissionUserDetailsContext();
 
 	useAbortableEffect(
 		(signal) => {
@@ -27,16 +30,31 @@ const CommissionUserScreen = () => {
 		[userId],
 	);
 
+	if (loading)
+		return (
+			<View className="flex-1 items-center justify-center bg-gray-100">
+				<ActivityIndicator
+					size={50}
+					color="#2563eb"
+				/>
+			</View>
+		);
+
 	if (!commissionUserDetails) return null;
 
 	return (
 		<PaperProvider>
 			<ScrollView
 				className="flex-1 bg-gray-100"
-				contentContainerStyle={{ paddingBottom: 120 }}
+				contentContainerStyle={{
+					paddingTop: 16,
+					paddingBottom: 120,
+					paddingHorizontal: 16,
+					gap: 16,
+				}}
 			>
 				{/* ===== USER INFO CARD ===== */}
-				<View className="bg-white rounded-2xl shadow p-6 m-4">
+				<View className="bg-white rounded-2xl shadow p-6">
 					<Text className="text-indigo-700 font-extrabold text-2xl mb-1">
 						{commissionUserDetails.name}
 					</Text>
@@ -61,10 +79,27 @@ const CommissionUserScreen = () => {
 				</View>
 
 				{/* ===== SECTION SALES ===== */}
-				<View className="px-4">
-					<CommissionUserSectionsList
-						sales={commissionUserDetails.section_sales}
-					/>
+				<CommissionUserSectionsList
+					sales={commissionUserDetails.section_sales}
+				/>
+				<View className="bg-red-100 border border-red-400 rounded-2xl p-6">
+					<Text className="text-red-600 font-extrabold text-lg mb-2">
+						Danger Zone
+					</Text>
+
+					<Text className="text-gray-500 mb-4">
+						Deleting this user will permanently remove all related data and
+						commissions.
+					</Text>
+
+					<TouchableOpacity
+						activeOpacity={0.85}
+						className="bg-red-600 rounded-xl py-3 items-center"
+					>
+						<Text className="text-white font-extrabold text-base">
+							Delete User
+						</Text>
+					</TouchableOpacity>
 				</View>
 			</ScrollView>
 		</PaperProvider>

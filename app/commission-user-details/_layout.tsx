@@ -1,20 +1,26 @@
 // app/manage/layout.tsx
-import CommissionPageHeaderRight from "@/components/header-rights/commission-page";
-import CommissionUserPageProvider from "@/contexts/commission-user-page-provider";
+import CommissionUserDetailsHeaderRight from "@/components/header-rights/commission-user-details";
+import CommissionUserDetailsPageProvider from "@/contexts/commission-user-details-page-provider";
 import { Stack } from "expo-router";
 import { Text, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-export default function CommissionUsersLayout() {
+export default function CommissionUsersDetailsLayout() {
 	return (
 		<SafeAreaProvider>
-			<CommissionUserPageProvider>
+			<CommissionUserDetailsPageProvider>
 				<Stack>
 					<Stack.Screen
-						name="index"
+						name="[id]"
 						options={{
 							headerTitle: () => (
-								<View style={{ minHeight: 64, justifyContent: "center" }}>
+								<View
+									style={{
+										minHeight: 64,
+										justifyContent: "center",
+										paddingBottom: 6,
+									}}
+								>
 									<Text
 										style={{
 											color: "#e5e7eb",
@@ -22,11 +28,11 @@ export default function CommissionUsersLayout() {
 											fontSize: 20,
 										}}
 									>
-										Commission Users
+										Commission User
 									</Text>
 								</View>
 							),
-							headerRight: () => <CommissionPageHeaderRight />,
+							headerRight: () => <CommissionUserDetailsHeaderRight />,
 							headerStyle: {
 								backgroundColor: "rgba(49, 46, 129, 0.85)",
 							},
@@ -35,7 +41,7 @@ export default function CommissionUsersLayout() {
 						}}
 					/>
 				</Stack>
-			</CommissionUserPageProvider>
+			</CommissionUserDetailsPageProvider>
 		</SafeAreaProvider>
 	);
 }

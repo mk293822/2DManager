@@ -5,7 +5,7 @@ export function useManagePageToggleContext() {
 	const context = useContext(ManagePageToggleContext);
 	if (!context)
 		throw new Error(
-			"useManagePageDataContext must be used inside ManagePageDataContextProvider",
+			"useManagePageToggleContext must be used inside ManagePageToggleContextProvider",
 		);
 	return context;
 }
