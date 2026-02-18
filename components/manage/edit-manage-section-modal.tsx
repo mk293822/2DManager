@@ -34,6 +34,7 @@ const EditManageSectionModal = ({
 	};
 
 	const handleSave = async () => {
+		console.log(form);
 		await onSave(form, id);
 		onClose();
 	};

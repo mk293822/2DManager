@@ -127,7 +127,11 @@ const DaySectionCard = ({
 			<View className="flex-row justify-between py-2 border-b border-gray-100">
 				<Text className="text-gray-600">Draw Number</Text>
 				<Text className="font-extrabold text-indigo-700">
-					{data.draw_number ?? "--"}
+					{data.draw_number
+						? data.draw_number !== ""
+							? data.draw_number
+							: "--"
+						: "--"}
 				</Text>
 			</View>
 			<View className="flex-row justify-between py-2 border-b border-gray-100">
@@ -137,7 +141,7 @@ const DaySectionCard = ({
 				</Text>
 			</View>
 			<View className="flex-row justify-between pt-3">
-				<Text className="font-semibold">Profit / Loss {data.date}</Text>
+				<Text className="font-semibold">Profit / Loss</Text>
 				<Text
 					className={`font-extrabold ${data.profit_or_loss >= 0 ? "text-green-500" : "text-red-500"}`}
 				>

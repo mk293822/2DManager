@@ -1,6 +1,12 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+	Pressable,
+	ScrollView,
+	Text,
+	TouchableOpacity,
+	View,
+} from "react-native";
 import {
 	ActivityIndicator,
 	Provider as PaperProvider,
@@ -16,8 +22,14 @@ const CommissionUserScreen = () => {
 
 	const userId = Array.isArray(id) ? id[0] : id;
 
-	const { fetch_com_user_details, commissionUserDetails, loading } =
-		useCommissionUserDetailsContext();
+	const {
+		fetchCommissionUserDetails,
+		commissionUserDetails,
+		loading,
+		error,
+		reset,
+		createComUserSection,
+	} = useCommissionUserDetailsContext();
 
 	useAbortableEffect(
 		(signal) => {
@@ -25,10 +37,15 @@ const CommissionUserScreen = () => {
 				router.replace("/commission-users");
 				return;
 			}
-			fetch_com_user_details(signal, userId);
+			fetchCommissionUserDetails(signal, userId);
 		},
 		[userId],
 	);
+
+	if (!userId) {
+		router.replace("/commission-users");
+		return;
+	}
 
 	if (loading)
 		return (
@@ -39,6 +56,22 @@ const CommissionUserScreen = () => {
 				/>
 			</View>
 		);
+
+	if (error) {
+		return (
+			<View className="flex-1 items-center justify-center bg-white p-4">
+				<Text className="text-red-600 font-semibold text-center mb-4">
+					{error}
+				</Text>
+				<Pressable
+					onPress={() => reset(userId)}
+					className="bg-indigo-600 px-6 py-3 rounded-lg"
+				>
+					<Text className="text-white font-semibold">Reload</Text>
+				</Pressable>
+			</View>
+		);
+	}
 
 	if (!commissionUserDetails) return null;
 
@@ -81,6 +114,8 @@ const CommissionUserScreen = () => {
 				{/* ===== SECTION SALES ===== */}
 				<CommissionUserSectionsList
 					sales={commissionUserDetails.section_sales}
+					createComUserSection={createComUserSection}
+					userId={userId}
 				/>
 				<View className="bg-red-100 border border-red-400 rounded-2xl p-6">
 					<Text className="text-red-600 font-extrabold text-lg mb-2">

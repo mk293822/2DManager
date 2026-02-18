@@ -1,12 +1,26 @@
 import { api } from "@/lib/api";
-import { CommissionUserType } from "@/types/commission-user-types";
+import { formatDateRequest } from "@/lib/helpers";
+import {
+	CommissionUserType,
+	ComUserSectionSaleType,
+} from "@/types/commission-user-types";
+import { SectionName } from "@/types/manage-types";
 import { useState } from "react";
 
 export type ComUserDetailsHookTypes = {
 	loading: boolean;
 	error: string | null;
-	fetch_com_user_details: (signal: AbortSignal, id: string) => Promise<void>;
+	fetchCommissionUserDetails: (
+		signal: AbortSignal,
+		id: string,
+	) => Promise<void>;
 	commissionUserDetails: CommissionUserType | null;
+	reset: (id: string | undefined) => void;
+	createComUserSection: (
+		id: string,
+		section: SectionName,
+		date?: Date,
+	) => Promise<void>;
 };
 
 const useCommissionUserDetailsHook = () => {
@@ -14,13 +28,17 @@ const useCommissionUserDetailsHook = () => {
 	const [error, setError] = useState<string | null>(null);
 	const [commissionUserDetails, setCommissionUserDetails] =
 		useState<CommissionUserType | null>(null);
-	const fetch_com_user_details = async (signal: AbortSignal, id: string) => {
+
+	const fetchCommissionUserDetails = async (
+		signal: AbortSignal,
+		id: string,
+	) => {
 		try {
 			setLoading(true);
 			setError(null);
 
 			const { data } = await api.get<CommissionUserType>(
-				`/commission_users/${id}/`,
+				`/commission_users/${id}?date=${formatDateRequest(new Date())}&type=day`,
 				{ signal },
 			);
 
@@ -41,11 +59,72 @@ const useCommissionUserDetailsHook = () => {
 			}
 		}
 	};
+
+	const reset = (id: string | undefined) => {
+		setError(null);
+		const { signal } = new AbortController();
+		if (id) fetchCommissionUserDetails(signal, id);
+	};
+
+	const createComUserSection = async (
+		id: string,
+		section: SectionName,
+		date: Date = new Date(),
+	) => {
+		try {
+			setLoading(true);
+			setError(null);
+
+			const { data } = await api.post<ComUserSectionSaleType>(
+				`/commission_users/${id}/section_sales/`,
+				{
+					section: section,
+					date: formatDateRequest(date),
+				},
+			);
+
+			setCommissionUserDetails((prev) => {
+				if (!prev) return prev;
+
+				// Copy previous state
+				const updated = { ...prev };
+
+				// Check which section was created
+				if (data.section_summary.section === "morning_section") {
+					updated.section_sales.morning_section = data;
+				} else if (data.section_summary.section === "evening_section") {
+					updated.section_sales.evening_section = data;
+				}
+
+				// Update the summary totals
+				updated.section_sales.summary.total_amount += data.total_amount;
+				updated.section_sales.summary.total_commission += data.total_commission;
+				updated.section_sales.summary.profit_or_loss += data.profit_or_loss;
+				updated.section_sales.summary.total_draw_amount +=
+					data.total_draw_amount;
+
+				return updated;
+			});
+		} catch (err: any) {
+			if (err.name === "CanceledError" || err.name === "AbortError") {
+				// Request was cancelled → do nothing
+				return;
+			}
+
+			setError("Failed to load commission users. Please try again.");
+			setCommissionUserDetails(null);
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	return {
 		loading,
 		error,
 		commissionUserDetails,
-		fetch_com_user_details,
+		fetchCommissionUserDetails,
+		reset,
+		createComUserSection,
 	};
 };
 

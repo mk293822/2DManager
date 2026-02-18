@@ -1,26 +1,57 @@
 import { changeSectionName, formatKs, formatSmartNumber } from "@/lib/helpers";
 import { ComUserSectionSaleType } from "@/types/commission-user-types";
+import { SectionName } from "@/types/manage-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 const CommissionUserSectionCard = ({
 	sale,
+	createComUserSection,
+	userId,
+	date,
+	section,
 }: {
 	sale: ComUserSectionSaleType;
+	createComUserSection: (
+		id: string,
+		section: SectionName,
+		date?: Date,
+	) => Promise<void>;
+	userId: string;
+	date: Date;
+	section: SectionName;
 }) => {
-	if (!sale || !sale?.section_summary) return null;
+	const section_summary = sale?.section_summary;
 
-	const section = sale.section_summary;
+	const isProfit = sale?.profit_or_loss >= 0;
 
-	const isProfit = sale.profit_or_loss >= 0;
+	if (!sale || !section_summary) {
+		return (
+			<View className="bg-white rounded-2xl shadow p-6 mb-6 items-center">
+				<Text className="text-gray-400 font-extrabold text-xl mb-2">
+					No Data for {changeSectionName(section)} Section!
+				</Text>
+				<Text className="text-gray-500 text-sm text-center mb-4">
+					This session has no records yet.
+				</Text>
+				<TouchableOpacity
+					activeOpacity={0.85}
+					onPress={() => createComUserSection(userId, section, date)}
+					className="bg-indigo-600 px-6 py-3 rounded-xl shadow"
+				>
+					<Text className="text-white font-bold">Create</Text>
+				</TouchableOpacity>
+			</View>
+		);
+	}
 
 	return (
 		<View className="bg-white rounded-2xl shadow p-6 mb-6">
 			{/* Header */}
 			<View className="flex-row justify-between items-center mb-2">
 				<Text className="text-indigo-700 font-extrabold text-xl">
-					{changeSectionName(section.section)}
+					{changeSectionName(section_summary.section)}
 				</Text>
 				<View className="flex-row items-center justify-end gap-3">
 					<TouchableOpacity
@@ -77,13 +108,17 @@ const CommissionUserSectionCard = ({
 			<View className="flex-row justify-between py-2 border-b border-gray-100">
 				<Text className="text-gray-600">Draw Number</Text>
 				<Text className="font-extrabold text-indigo-700">
-					{section.draw_number ?? "--"}
+					{section_summary.draw_number
+						? section_summary.draw_number !== ""
+							? section_summary.draw_number
+							: "--"
+						: "--"}
 				</Text>
 			</View>
 			<View className="flex-row justify-between py-2 border-b border-gray-100">
 				<Text className="text-gray-600">Draw Times</Text>
 				<Text className="font-extrabold text-red-700">
-					&times; {section.draw_times}
+					&times; {section_summary.draw_times}
 				</Text>
 			</View>
 
