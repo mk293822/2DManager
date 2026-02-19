@@ -16,7 +16,7 @@ import CommissionUserSectionsList from "@/components/commission-user/section-sal
 import { useCommissionUserDetailsContext } from "@/hooks/commission-user-details/use-details-context";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 
-const CommissionUserScreen = () => {
+const CommissionUserPage = () => {
 	const { id } = useLocalSearchParams<{ id?: string | string[] }>();
 	const router = useRouter();
 
@@ -141,4 +141,4 @@ const CommissionUserScreen = () => {
 	);
 };
 
-export default CommissionUserScreen;
+export default CommissionUserPage;

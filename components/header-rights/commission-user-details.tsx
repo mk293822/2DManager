@@ -1,9 +1,14 @@
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 
 const CommissionUserDetailsHeaderRight = () => {
 	const [open, setOpen] = useState(false);
+	const { id } = useLocalSearchParams<{ id?: string | string[] }>();
+
+	const userId = Array.isArray(id) ? id[0] : id;
+	const router = useRouter();
 
 	return (
 		<View
@@ -28,11 +33,26 @@ const CommissionUserDetailsHeaderRight = () => {
 					color="#fff"
 				/>
 			</TouchableOpacity>
-			{/* <CreateCommissionUserModal
-				open={open}
-				handleCreateCommissionUser={handleCreateCommissionUser}
-				onClose={() => setOpen(false)}
-			/> */}
+
+			<TouchableOpacity
+				hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+				onPress={() =>
+					router.push({
+						pathname: "/commission-user-details/section-sales",
+						params: { id: userId },
+					})
+				}
+				style={{
+					padding: 6,
+					borderRadius: 999,
+				}}
+			>
+				<AntDesign
+					name="bars"
+					size={28}
+					color="#fff"
+				/>
+			</TouchableOpacity>
 		</View>
 	);
 };

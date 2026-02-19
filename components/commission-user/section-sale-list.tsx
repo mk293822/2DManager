@@ -16,7 +16,7 @@ type Props = {
 };
 
 const SectionSaleList = ({ sales, createComUserSection, userId }: Props) => {
-	const date = new Date();
+	const date = new Date(sales.summary.date);
 	const sectionList: SectionName[] = ["morning_section", "evening_section"];
 
 	return (

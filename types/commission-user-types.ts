@@ -20,6 +20,7 @@ export type ComUserSectionSaleSummary = {
 	total_commission: number;
 	profit_or_loss: number;
 	total_draw_amount: number;
+	date: string;
 };
 
 export type ComUserSectionSaleType = {

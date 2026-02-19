@@ -16,7 +16,7 @@ export type UseManageHookType = {
 	setError: React.Dispatch<React.SetStateAction<string | null>>;
 	setRangeMode: React.Dispatch<React.SetStateAction<RangeMode>>;
 
-	handleCreateSection: (section: SectionName, date?: Date) => void;
+	handleCreateSection: (section: SectionName, date?: Date) => Promise<void>;
 	onEditSave: (
 		form: Omit<Section, "id" | "manager" | "section" | "date">,
 		id: string,
