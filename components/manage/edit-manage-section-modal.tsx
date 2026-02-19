@@ -12,7 +12,7 @@ import AppModal from "../ui/app-modal";
 
 type EditManageSectionModalProps = {
 	sectionObj: Section;
-	onSave: (
+	onEditSave: (
 		form: Omit<Section, "id" | "manager" | "section" | "date">,
 		id: string,
 	) => Promise<void>;
@@ -22,7 +22,7 @@ type EditManageSectionModalProps = {
 
 const EditManageSectionModal = ({
 	sectionObj,
-	onSave,
+	onEditSave,
 	onClose,
 	open,
 }: EditManageSectionModalProps) => {
@@ -34,8 +34,7 @@ const EditManageSectionModal = ({
 	};
 
 	const handleSave = async () => {
-		console.log(form);
-		await onSave(form, id);
+		await onEditSave(form, id);
 		onClose();
 	};
 

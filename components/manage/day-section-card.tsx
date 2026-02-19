@@ -14,7 +14,7 @@ const DaySectionCard = ({
 	section: SectionName;
 	data: Section | null;
 }) => {
-	const { onSave, handleCreateSection, onConfirmDelete } =
+	const { onEditSave, handleCreateSection, onConfirmDelete } =
 		useManagePageDataContext();
 	const [openModal, setOpenModal] = useState(false);
 	const [openDeleteModal, setOpenDeleteModal] = useState(false);
@@ -151,7 +151,7 @@ const DaySectionCard = ({
 
 			<EditManageSectionModal
 				open={openModal}
-				onSave={onSave}
+				onEditSave={onEditSave}
 				onClose={() => setOpenModal(false)}
 				sectionObj={data}
 			/>

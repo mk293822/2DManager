@@ -17,7 +17,7 @@ export type UseManageHookType = {
 	setRangeMode: React.Dispatch<React.SetStateAction<RangeMode>>;
 
 	handleCreateSection: (section: SectionName, date?: Date) => void;
-	onSave: (
+	onEditSave: (
 		form: Omit<Section, "id" | "manager" | "section" | "date">,
 		id: string,
 	) => Promise<void>;
@@ -111,7 +111,7 @@ const useManageHook = (): UseManageHookType => {
 		}
 	};
 
-	const onSave = async (
+	const onEditSave = async (
 		form: Omit<Section, "id" | "manager" | "section" | "date">,
 		id: string,
 	) => {
@@ -190,7 +190,7 @@ const useManageHook = (): UseManageHookType => {
 
 		// functions
 		handleCreateSection,
-		onSave,
+		onEditSave,
 		fetchSection,
 		onConfirmDelete,
 	};

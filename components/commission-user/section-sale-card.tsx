@@ -54,26 +54,38 @@ const CommissionUserSectionCard = ({
 					{changeSectionName(section_summary.section)}
 				</Text>
 				<View className="flex-row items-center justify-end gap-3">
-					<TouchableOpacity
-						activeOpacity={0.85}
-						className="p-2.5"
+					<View
+						style={{
+							position: "relative",
+						}}
 					>
-						<AntDesign
-							name="edit"
-							size={18}
-							color="#4338ca"
-						/>
-					</TouchableOpacity>
-					<TouchableOpacity
-						activeOpacity={0.85}
-						className="p-2.5"
-					>
-						<AntDesign
-							name="delete"
-							size={18}
-							color="#b91c1c"
-						/>
-					</TouchableOpacity>
+						<TouchableOpacity
+							activeOpacity={0.85}
+							hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+							className="p-2.5"
+						>
+							<AntDesign
+								name="delete"
+								color={"#b91c1c"}
+								size={18}
+							/>
+
+							<View
+								style={{
+									position: "absolute",
+									top: -0,
+									bottom: -0,
+									left: -0,
+									right: -0,
+									borderWidth: 1,
+									borderColor: "#b91c1c",
+									borderStyle: "dashed",
+									borderRadius: 4,
+								}}
+								pointerEvents="none"
+							/>
+						</TouchableOpacity>
+					</View>
 				</View>
 			</View>
 
