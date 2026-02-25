@@ -40,15 +40,6 @@ const TwoDLists = () => {
 		return true;
 	});
 
-	// Total sum of filtered data
-	const total = filteredData.reduce((acc, item) => acc + item.value, 0);
-
-	// Exceed sum
-	const exceed = filteredData.reduce(
-		(acc, item) => (item.value > limit ? acc + item.value : acc),
-		0,
-	);
-
 	// Chunk filteredData into pairs safely
 	const chunkedData: { left: (typeof data)[0]; right?: (typeof data)[0] }[] =
 		[];
@@ -62,22 +53,6 @@ const TwoDLists = () => {
 	return (
 		<View className="flex-col">
 			{isHoliday && <HolidayInfo />}
-			{/* Totals */}
-			<View className="mx-4 mt-4 mb-2 p-4 flex-row items-center justify-between rounded-2xl bg-indigo-900/70">
-				<View className="w-1/2 pr-4">
-					<Text className="text-gray-300 text-sm mb-1">Total</Text>
-					<Text className="text-2xl font-extrabold text-green-400">
-						{total.toLocaleString()} Ks
-					</Text>
-				</View>
-				<Text className="border-r border-gray-200 h-full w-0"></Text>
-				<View className="w-1/2 pl-4">
-					<Text className="text-gray-300 text-sm mb-1">Exceed</Text>
-					<Text className="text-2xl font-extrabold text-orange-400">
-						{exceed.toLocaleString()} Ks
-					</Text>
-				</View>
-			</View>
 
 			{/* Filter buttons and limit input */}
 			<View className="mx-4 mt-2 mb-2 flex-row justify-between items-center">
@@ -118,7 +93,7 @@ const TwoDLists = () => {
 					<Text className="text-white font-semibold text-sm">Limit:</Text>
 					<TextInput
 						className="min-w-24 max-w-28 h-12 text-center bg-indigo-900/70 rounded-full text-white items-center justify-center font-semibold text-sm"
-						value={inputValue}
+						value={inputValue.toString()}
 						onChangeText={(text) => setInputValue(text)} // update temp state on typing
 						onSubmitEditing={() => {
 							const num = Number(inputValue);

@@ -1,20 +1,19 @@
 import { formatDateDisplay } from "@/lib/helpers";
-import { RangeMode } from "@/types/event-bus";
+import { SectionRange, WeekRange } from "@/types/manage-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import React, { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { DatePickerModal } from "react-native-paper-dates";
+import WeekPickerModal from "../week-picker-modal";
 
 type Props = {
-	selectedDate: Date;
-	setSelectedDate: React.Dispatch<React.SetStateAction<Date>>;
-	rangeMode: RangeMode;
+	selectedSectionRange: SectionRange;
+	setSelectedSectionRange: React.Dispatch<React.SetStateAction<SectionRange>>;
 };
 
 const ManageDatePickerHeader = ({
-	selectedDate,
-	setSelectedDate,
-	rangeMode,
+	selectedSectionRange,
+	setSelectedSectionRange,
 }: Props) => {
 	const [showPicker, setShowPicker] = useState(false);
 
@@ -35,12 +34,19 @@ const ManageDatePickerHeader = ({
 
 					<View>
 						<Text className="text-xs text-gray-500 font-medium">
-							{rangeMode === "day" ? "Select date" : "Select Week"}
+							{selectedSectionRange.type === "day"
+								? "Select date"
+								: "Select Week"}
 						</Text>
 						<Text className="text-indigo-700 font-semibold">
-							{rangeMode === "day"
-								? formatDateDisplay(selectedDate)
-								: `Week of ${formatDateDisplay(selectedDate)}`}
+							{selectedSectionRange.type === "day"
+								? formatDateDisplay(selectedSectionRange.date)
+								: `${selectedSectionRange.year} • ${new Date(
+										selectedSectionRange.year,
+										selectedSectionRange.month,
+									).toLocaleString("default", {
+										month: "long",
+									})} • Week ${(selectedSectionRange as WeekRange).week}`}
 						</Text>
 					</View>
 				</View>
@@ -48,16 +54,35 @@ const ManageDatePickerHeader = ({
 				<Text className="text-indigo-600 text-sm font-semibold">Change</Text>
 			</Pressable>
 
-			{showPicker && (
+			{selectedSectionRange.type === "day" ? (
 				<DatePickerModal
 					locale="en-GB"
 					mode="single"
-					visible
-					date={selectedDate}
+					visible={showPicker}
+					date={selectedSectionRange.date}
 					onDismiss={() => setShowPicker(false)}
 					onConfirm={({ date }) => {
 						setShowPicker(false);
-						if (date) setSelectedDate(date);
+						if (date)
+							setSelectedSectionRange({
+								type: "day",
+								date: date,
+							});
+					}}
+				/>
+			) : (
+				<WeekPickerModal
+					visible={showPicker}
+					initialData={selectedSectionRange}
+					onDismiss={() => setShowPicker(false)}
+					onConfirm={(date) => {
+						setSelectedSectionRange({
+							type: "week",
+							year: date.year,
+							month: date.month,
+							week: date.week,
+						});
+						setShowPicker(false);
 					}}
 				/>
 			)}

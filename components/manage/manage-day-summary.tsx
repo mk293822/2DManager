@@ -1,14 +1,21 @@
-import { SectionName, SectionSummaries } from "@/types/manage-types";
+import { Section, SectionName, SectionSummaries } from "@/types/manage-types";
 import React from "react";
 import DaySectionCard from "./day-section-card";
 import DaySummaryCard from "./day-summary-card";
 
 const ManageDaySummary = ({
 	sections,
-	selectedDate,
+	handleCreateSection,
+	onEditSave,
+	onConfirmDelete,
 }: {
 	sections: SectionSummaries;
-	selectedDate: Date;
+	handleCreateSection: (section: SectionName, date?: Date) => Promise<void>;
+	onEditSave: (
+		form: Omit<Section, "id" | "manager" | "section" | "date">,
+		id: string,
+	) => Promise<void>;
+	onConfirmDelete: (id: string, date: string) => Promise<void>;
 }) => {
 	const sectionList: SectionName[] = ["morning_section", "evening_section"];
 
@@ -17,10 +24,13 @@ const ManageDaySummary = ({
 		<>
 			<DaySummaryCard
 				summary={sections.summary}
-				selectedDate={selectedDate}
+				date={sections.date}
 			/>
 			{sectionList.map((sec) => (
 				<DaySectionCard
+					handleCreateSection={handleCreateSection}
+					onConfirmDelete={onConfirmDelete}
+					onEditSave={onEditSave}
 					key={sec}
 					section={sec}
 					data={sections[sec]}

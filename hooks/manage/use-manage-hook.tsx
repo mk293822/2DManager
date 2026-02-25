@@ -1,58 +1,73 @@
-import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { api } from "@/lib/api";
 import { formatDateRequest } from "@/lib/helpers";
-import { RangeMode } from "@/types/event-bus";
-import { Section, SectionName, SectionSummaries } from "@/types/manage-types";
+import {
+	Section,
+	SectionName,
+	SectionRange,
+	SectionSummaries,
+} from "@/types/manage-types";
 import { useCallback, useState } from "react";
 
 export type UseManageHookType = {
 	sections: SectionSummaries[] | null;
 	loading: boolean;
 	error: string | null;
-	rangeMode: RangeMode;
-	selectedDate: Date;
 
-	setSelectedDate: React.Dispatch<React.SetStateAction<Date>>;
 	setError: React.Dispatch<React.SetStateAction<string | null>>;
-	setRangeMode: React.Dispatch<React.SetStateAction<RangeMode>>;
 
 	handleCreateSection: (section: SectionName, date?: Date) => Promise<void>;
 	onEditSave: (
 		form: Omit<Section, "id" | "manager" | "section" | "date">,
 		id: string,
 	) => Promise<void>;
+	onConfirmDelete: (id: string, date: string) => Promise<void>;
 	fetchSection: (
 		signal: AbortSignal,
-		mode?: RangeMode,
-		date?: Date,
+		sectionRange: SectionRange,
 	) => Promise<void>;
-	onConfirmDelete: (id: string, date: string) => Promise<void>;
 };
 
+function upsertByDate(
+	prev: SectionSummaries[] | null,
+	newDay: SectionSummaries,
+) {
+	if (!prev) return [newDay];
+	const idx = prev.findIndex((d) => d.date === newDay.date);
+	if (idx !== -1) {
+		const newSections = [...prev];
+		newSections[idx] = newDay;
+		return newSections.sort(
+			(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+		);
+	}
+	return [...prev, newDay].sort(
+		(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+	);
+}
+
 const useManageHook = (): UseManageHookType => {
-	const [rangeMode, setRangeMode] = useState<RangeMode>("day");
 	const [sections, setSections] = useState<SectionSummaries[] | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const [selectedDate, setSelectedDate] = useState(new Date());
 
 	const fetchSection = useCallback(
-		async (
-			signal: AbortSignal,
-			mode: RangeMode = rangeMode,
-			date: Date = selectedDate,
-		) => {
+		async (signal: AbortSignal, sectionRange: SectionRange) => {
 			try {
 				setLoading(true);
 				setError(null);
 
-				const { data } = await api.get<SectionSummaries[]>(
-					`/manager/sections?date=${formatDateRequest(date)}&type=${mode}`,
-					{ signal },
-				);
+				const { data } = await api.get(`/manager/sections/`, {
+					signal,
+					params:
+						sectionRange.type === "day"
+							? { type: "day", date: formatDateRequest(sectionRange.date) }
+							: { ...sectionRange, month: sectionRange.month + 1 },
+				});
 
 				if (!signal.aborted) {
-					setSections(data);
+					const sectionsArray: SectionSummaries[] =
+						sectionRange.type === "day" ? [data] : data;
+					setSections(sectionsArray);
 				}
 			} catch (err: any) {
 				if (err.name === "CanceledError" || err.name === "AbortError") {
@@ -68,44 +83,19 @@ const useManageHook = (): UseManageHookType => {
 				}
 			}
 		},
-		[selectedDate, rangeMode],
-	);
-	// Date change
-	useAbortableEffect(
-		(signal) => {
-			fetchSection(signal);
-		},
-		[selectedDate, rangeMode],
+		[],
 	);
 
 	const handleCreateSection = async (
 		section: SectionName = "morning_section",
-		date: Date = selectedDate,
+		date: Date = new Date(),
 	) => {
 		try {
 			const { data } = await api.post<SectionSummaries>("/manager/sections/", {
 				section: section,
 				date: formatDateRequest(date),
 			});
-			setSections((prev) => {
-				if (!prev) return [data];
-
-				const idx = prev.findIndex((d) => d.summary.date === data.summary.date);
-
-				if (idx !== -1) {
-					// Replace existing day
-					const newSections = [...prev];
-					newSections[idx] = data;
-					return [...newSections].sort(
-						(a, b) =>
-							new Date(a.summary.date).getTime() -
-							new Date(b.summary.date).getTime(),
-					);
-				}
-
-				// Add new day if not found
-				return [...prev, data];
-			});
+			setSections((prev) => upsertByDate(prev, data));
 		} catch {
 			setError("Failed to create section");
 		}
@@ -123,25 +113,7 @@ const useManageHook = (): UseManageHookType => {
 					...form,
 				},
 			);
-			setSections((prev) => {
-				if (!prev) return [data];
-
-				const idx = prev.findIndex((d) => d.summary.date === data.summary.date);
-
-				if (idx !== -1) {
-					// Replace existing day
-					const newSections = [...prev];
-					newSections[idx] = data;
-					return [...newSections].sort(
-						(a, b) =>
-							new Date(a.summary.date).getTime() -
-							new Date(b.summary.date).getTime(),
-					);
-				}
-
-				// Add new day if not found
-				return [...prev, data];
-			});
+			setSections((prev) => upsertByDate(prev, data));
 		} catch {
 			setError("Failed to update section");
 		} finally {
@@ -157,10 +129,11 @@ const useManageHook = (): UseManageHookType => {
 				if (!prev) return null;
 
 				return prev.map((day) => {
-					if (day.summary.date !== date) return day;
+					if (day.date !== date) return day;
 
 					// Update morning/evening section
 					return {
+						date: day.date,
 						summary: day.summary,
 						morning_section:
 							day.morning_section?.id === id ? null : day.morning_section,
@@ -180,13 +153,9 @@ const useManageHook = (): UseManageHookType => {
 		sections,
 		loading,
 		error,
-		rangeMode,
-		selectedDate,
 
 		// SetStates
-		setSelectedDate,
 		setError,
-		setRangeMode,
 
 		// functions
 		handleCreateSection,

@@ -1,6 +1,6 @@
 // app/manage/layout.tsx
-import CommissionPageHeaderRight from "@/components/header-rights/commission-page";
-import CommissionUserPageProvider from "@/contexts/commission-user-page-provider";
+import CommissionPageHeaderRight from "@/components/header-rights/commission-user";
+import CommissionUserHeaderContextProvider from "@/contexts/commission-user-header-provider";
 import { Stack } from "expo-router";
 import { Text, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -8,7 +8,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 export default function CommissionUsersLayout() {
 	return (
 		<SafeAreaProvider>
-			<CommissionUserPageProvider>
+			<CommissionUserHeaderContextProvider>
 				<Stack>
 					<Stack.Screen
 						name="index"
@@ -35,7 +35,7 @@ export default function CommissionUsersLayout() {
 						}}
 					/>
 				</Stack>
-			</CommissionUserPageProvider>
+			</CommissionUserHeaderContextProvider>
 		</SafeAreaProvider>
 	);
 }

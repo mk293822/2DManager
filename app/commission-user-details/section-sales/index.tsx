@@ -1,9 +1,12 @@
-import WeekSectionSaleList from "@/components/commission-user/week-section-sale-list";
 import ManageDatePickerHeader from "@/components/manage/manage-date-picker-header";
-import { useCommissionUserDetailsContext } from "@/hooks/commission-user-details/use-details-context";
+import WeekSectionSaleList from "@/components/section-sales/week-section-sale-list";
+import { useSectionSalesPageHeaderContext } from "@/hooks/section-sales/use-header-context";
+import useSectionSalesHook from "@/hooks/section-sales/use-section-sale-hook";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
+import { getWeekOfMonth } from "@/lib/helpers";
+import { SectionRange } from "@/types/manage-types";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import {
 	ActivityIndicator,
@@ -17,14 +20,39 @@ const SectionSales = () => {
 
 	const userId = Array.isArray(id) ? id[0] : id;
 	registerTranslation("en-GB", enGB);
-	const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-	const {
-		fetchSectionSalesForWeek,
-		weekSectionSales,
-		loading,
-		error,
-		setError,
-	} = useCommissionUserDetailsContext();
+	const { rangeMode } = useSectionSalesPageHeaderContext();
+	const { fetchSectionSales, sectionSales, loading, error, setError } =
+		useSectionSalesHook();
+
+	const date = new Date();
+
+	const [selectedSectionRange, setSelectedSectionRange] =
+		useState<SectionRange>({
+			type: "day",
+			date: date,
+		});
+
+	useEffect(() => {
+		setSelectedSectionRange((prev) => {
+			if (!prev) return prev;
+			if (rangeMode === "week" && prev.type === "day") {
+				return {
+					type: "week",
+					year: date.getFullYear(),
+					month: date.getMonth(),
+					week: getWeekOfMonth(date),
+				};
+			}
+			if (rangeMode === "day" && prev.type === "week") {
+				return {
+					type: "day",
+					date: date,
+				};
+			}
+
+			return prev;
+		});
+	}, [rangeMode]);
 
 	useAbortableEffect(
 		(signal) => {
@@ -32,9 +60,9 @@ const SectionSales = () => {
 				router.replace("/commission-users");
 				return;
 			}
-			fetchSectionSalesForWeek(signal, userId, selectedDate);
+			fetchSectionSales(signal, userId, selectedSectionRange);
 		},
-		[userId, selectedDate],
+		[userId, selectedSectionRange],
 	);
 
 	if (!userId) {
@@ -51,7 +79,11 @@ const SectionSales = () => {
 				<Pressable
 					onPress={() => {
 						setError(null);
-						fetchSectionSalesForWeek(new AbortController().signal, userId); // retry
+						fetchSectionSales(
+							new AbortController().signal,
+							userId,
+							selectedSectionRange,
+						); // retry
 					}}
 					className="bg-indigo-600 px-6 py-3 rounded-lg"
 				>
@@ -62,7 +94,7 @@ const SectionSales = () => {
 	}
 
 	// Handle loading
-	if (loading || !weekSectionSales) {
+	if (loading || !sectionSales) {
 		return (
 			<View className="flex-1 items-center justify-center bg-gray-100 p-4">
 				<ActivityIndicator
@@ -80,12 +112,11 @@ const SectionSales = () => {
 				contentContainerStyle={{ paddingBottom: 120 }}
 			>
 				<ManageDatePickerHeader
-					selectedDate={selectedDate}
-					setSelectedDate={setSelectedDate}
-					rangeMode={"week"}
+					selectedSectionRange={selectedSectionRange}
+					setSelectedSectionRange={setSelectedSectionRange}
 				/>
 
-				<WeekSectionSaleList weekSectionSales={weekSectionSales} />
+				<WeekSectionSaleList sectionSales={sectionSales} />
 			</ScrollView>
 		</PaperProvider>
 	);

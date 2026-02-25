@@ -1,22 +1,20 @@
-import { formatDateDisplay, formatKs, getTotalArray } from "@/lib/helpers";
+import { formatKs, getTotalArray } from "@/lib/helpers";
 import { SectionSummaries } from "@/types/manage-types";
 import React from "react";
 import { Text, View } from "react-native";
 
 const DaySummaryCard = ({
 	summary,
-	selectedDate,
+	date,
 }: {
 	summary: SectionSummaries["summary"];
-	selectedDate: Date;
+	date: string;
 }) => (
 	<View className="bg-white rounded-2xl shadow p-6 mb-6">
 		<Text className="text-indigo-700 font-extrabold text-2xl mb-1">
 			Summary
 		</Text>
-		<Text className="text-gray-500 mb-4">
-			{formatDateDisplay(selectedDate)}
-		</Text>
+		<Text className="text-gray-500 mb-4">{date}</Text>
 
 		{getTotalArray(summary).map(([label, value]) => (
 			<View

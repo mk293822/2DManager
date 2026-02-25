@@ -1,4 +1,4 @@
-import { useCommissionUserPageContext } from "@/hooks/commission-users/use-commission-user-context";
+import { useCommissionUserPageHeaderContext } from "@/hooks/commission-users/use-header-context";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
@@ -13,7 +13,7 @@ import {
 const CommissionUsers = () => {
 	const router = useRouter();
 	const { commissionUsers, loading, error, reset } =
-		useCommissionUserPageContext();
+		useCommissionUserPageHeaderContext();
 
 	if (loading) {
 		return (

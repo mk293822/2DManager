@@ -1,28 +1,29 @@
-import { useManagePageDataContext } from "@/hooks/manage/use-data-context";
-import { useManagePageToggleContext } from "@/hooks/manage/user-toggle-context";
+import { useManagePageHeaderContext } from "@/hooks/manage/user-header-context";
 import { formatDateDisplay, formatKs, getTotalArray } from "@/lib/helpers";
-import { SectionSummary } from "@/types/manage-types";
+import { SectionRange, SectionSummary } from "@/types/manage-types";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 type Props = {
 	summary: SectionSummary;
 	date: Date;
+	setSelectedSectionRange: React.Dispatch<React.SetStateAction<SectionRange>>;
 };
 
-const WeekSummaryCard = ({ summary, date }: Props) => {
-	const { setSelectedDate } = useManagePageDataContext();
-	const { setRangeMode } = useManagePageToggleContext();
-
+const WeekSummaryCard = ({ summary, date, setSelectedSectionRange }: Props) => {
+	const { setRangeMode } = useManagePageHeaderContext();
 	const handleToggle = () => {
-		setSelectedDate(date);
 		setRangeMode("day");
+		setSelectedSectionRange({
+			type: "day",
+			date: date,
+		});
 	};
 	return (
 		<>
 			<View className="flex-row justify-between items-center mb-4 px-1">
 				<Text className="text-indigo-600 font-bold text-xl">
-					{formatDateDisplay(new Date(summary.date))}
+					{formatDateDisplay(new Date(date))}
 				</Text>
 				<TouchableOpacity
 					activeOpacity={0.85}

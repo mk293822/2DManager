@@ -55,5 +55,13 @@ export const getTotalArray = (data: any): [string, number][] => [
 	["Total Sold", data.total_amount],
 	["Total Resold", data.total_resold],
 	["Total Commission", data.total_commission],
-	["Total Draw Amount", data.draw_total_amount],
+	["Total Draw Amount", data.total_draw_amount],
 ];
+
+export function getWeekOfMonth(date: Date): number {
+	const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+	const dayOfMonth = date.getDate();
+	const startDay = firstDayOfMonth.getDay(); // 0–6
+
+	return Math.ceil((dayOfMonth + startDay) / 7);
+}

@@ -1,11 +1,10 @@
-// components/headers/manage-page-header-right.tsx
-import { useManagePageHeaderContext } from "@/hooks/manage/user-header-context";
+import { useSectionSalesPageHeaderContext } from "@/hooks/section-sales/use-header-context";
 import { RangeMode } from "@/types/manage-types";
 import React, { useEffect, useRef } from "react";
 import { Animated, Text, TouchableOpacity, View } from "react-native";
 
-const ManagePageHeaderRight = () => {
-	const { rangeMode, setRangeMode } = useManagePageHeaderContext();
+const SectionSalesPageHeaderRight = () => {
+	const { rangeMode, setRangeMode } = useSectionSalesPageHeaderContext();
 	const translateX = useRef(
 		new Animated.Value(rangeMode === "day" ? 0 : 1),
 	).current;
@@ -87,4 +86,4 @@ const ManagePageHeaderRight = () => {
 	);
 };
 
-export default ManagePageHeaderRight;
+export default SectionSalesPageHeaderRight;

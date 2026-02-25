@@ -13,7 +13,7 @@ const WeekSectionSaleSummaryCard = ({ summary, date }: Props) => {
 		<>
 			<View className="flex-row justify-between items-center mb-4 px-1">
 				<Text className="text-indigo-600 font-bold text-xl">
-					{formatDateDisplay(new Date(summary.date))}
+					{formatDateDisplay(new Date(date))}
 				</Text>
 			</View>
 

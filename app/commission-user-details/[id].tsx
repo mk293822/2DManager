@@ -12,8 +12,8 @@ import {
 	Provider as PaperProvider,
 } from "react-native-paper";
 
-import CommissionUserSectionsList from "@/components/commission-user/section-sale-list";
-import { useCommissionUserDetailsContext } from "@/hooks/commission-user-details/use-details-context";
+import CommissionUserSectionsList from "@/components/section-sales/section-sale-list";
+import useCommissionUserDetailsHook from "@/hooks/commission-user-details/use-commission-user-details-hook";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 
 const CommissionUserPage = () => {
@@ -29,7 +29,7 @@ const CommissionUserPage = () => {
 		error,
 		reset,
 		createComUserSection,
-	} = useCommissionUserDetailsContext();
+	} = useCommissionUserDetailsHook();
 
 	useAbortableEffect(
 		(signal) => {
@@ -81,7 +81,7 @@ const CommissionUserPage = () => {
 				className="flex-1 bg-gray-100"
 				contentContainerStyle={{
 					paddingTop: 16,
-					paddingBottom: 120,
+					paddingBottom: 40,
 					paddingHorizontal: 16,
 					gap: 16,
 				}}

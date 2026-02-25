@@ -15,15 +15,5 @@ type NotificationEvents = {
 	[EVENT_NAMES.NOTIFICATION]: NotificationPayload;
 };
 
-// Manage Page Header Right
-export type RangeMode = "day" | "week";
-
-type ManagePageHeaderRightEvents = {
-	[EVENT_NAMES.CHANGE_DATE_RANGE]: {
-		range: RangeMode;
-		date?: Date;
-	};
-};
-
 // Event Bus
-export type AppEvents = NotificationEvents & ManagePageHeaderRightEvents;
+export type AppEvents = NotificationEvents;

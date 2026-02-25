@@ -6,10 +6,10 @@ export type CommissionUserType = {
 	phone_number: string;
 	section_sales: SectionSaleGroup;
 	manager_name: string;
-	manager: number;
 };
 
 export type SectionSaleGroup = {
+	date: string;
 	morning_section: ComUserSectionSaleType;
 	evening_section: ComUserSectionSaleType;
 	summary: ComUserSectionSaleSummary;
@@ -20,7 +20,6 @@ export type ComUserSectionSaleSummary = {
 	total_commission: number;
 	profit_or_loss: number;
 	total_draw_amount: number;
-	date: string;
 };
 
 export type ComUserSectionSaleType = {

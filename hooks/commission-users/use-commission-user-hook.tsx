@@ -1,4 +1,5 @@
 import { api } from "@/lib/api";
+import { formatDateRequest } from "@/lib/helpers";
 import { CommissionUserType } from "@/types/commission-user-types";
 import { useCallback, useState } from "react";
 import { useAbortableEffect } from "../use-abortable-effect";
@@ -27,8 +28,13 @@ const useCommissionUserHook = (): UseCommissionUserHookType => {
 			setError(null);
 
 			const { data } = await api.get<CommissionUserType[]>(
-				"/commission_users/",
-				{ signal },
+				"/commission-users/",
+				{
+					signal,
+					params: {
+						date: formatDateRequest(new Date()),
+					},
+				},
 			);
 
 			if (!signal.aborted) {
@@ -62,11 +68,12 @@ const useCommissionUserHook = (): UseCommissionUserHookType => {
 		setLoading(true);
 		try {
 			const { data } = await api.post<CommissionUserType>(
-				"/commission_users/",
+				"/commission-users/",
 				{
 					...payload,
 				},
 			);
+
 			setCommissionUsers((pre) => {
 				if (!pre) return [data];
 				return [...pre, data];

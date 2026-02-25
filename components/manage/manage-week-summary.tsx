@@ -1,14 +1,24 @@
-import { useManagePageDataContext } from "@/hooks/manage/use-data-context";
 import { formatDateDisplay } from "@/lib/helpers";
-import { SectionName, SectionSummaries } from "@/types/manage-types";
+import {
+	SectionName,
+	SectionRange,
+	SectionSummaries,
+} from "@/types/manage-types";
 import React, { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import WeekSectionCard from "./week-section-card";
 import WeekSummaryCard from "./week-summary-card";
 
 /* ===== Week Summary ===== */
-const ManageWeekSummary = ({ sections }: { sections: SectionSummaries[] }) => {
-	const { handleCreateSection } = useManagePageDataContext();
+const ManageWeekSummary = ({
+	sections,
+	setSelectedSectionRange,
+	handleCreateSection,
+}: {
+	sections: SectionSummaries[];
+	setSelectedSectionRange: React.Dispatch<React.SetStateAction<SectionRange>>;
+	handleCreateSection: (section: SectionName, date?: Date) => Promise<void>;
+}) => {
 	const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({});
 
 	// use a map keyed by date + section type
@@ -41,7 +51,7 @@ const ManageWeekSummary = ({ sections }: { sections: SectionSummaries[] }) => {
 		<>
 			{sections.map((section, idx) => {
 				const { summary, morning_section, evening_section } = section;
-				const date = new Date(summary.date);
+				const date = new Date(section.date);
 
 				if (!morning_section && !evening_section) {
 					return (
@@ -50,8 +60,7 @@ const ManageWeekSummary = ({ sections }: { sections: SectionSummaries[] }) => {
 							className="bg-white rounded-2xl p-6 mb-4 items-center shadow"
 						>
 							<Text className="text-gray-500 font-medium text-center mb-3">
-								No sections available for{" "}
-								{formatDateDisplay(new Date(summary.date))}
+								No sections available for {formatDateDisplay(new Date(date))}
 							</Text>
 
 							<Text className="text-gray-400 text-sm text-center mb-4">
@@ -111,17 +120,18 @@ const ManageWeekSummary = ({ sections }: { sections: SectionSummaries[] }) => {
 						<WeekSummaryCard
 							date={date}
 							summary={summary}
+							setSelectedSectionRange={setSelectedSectionRange}
 						/>
 
 						<WeekSectionCard
 							name="Morning"
 							data={morning_section}
-							date={summary.date}
+							date={section.date}
 						/>
 						<WeekSectionCard
 							name="Evening"
 							data={evening_section}
-							date={summary.date}
+							date={section.date}
 						/>
 					</View>
 				);

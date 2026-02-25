@@ -1,6 +1,6 @@
 // app/manage/layout.tsx
-import CommissionUserDetailsHeaderRight from "@/components/header-rights/commission-user-details";
-import CommissionUserDetailsHeaderContextProvider from "@/contexts/commission-user-details-header-provider";
+import SectionSalesHeaderRight from "@/components/header-rights/section-sales";
+import SectionSalesHeaderContextProvider from "@/contexts/section-sales-header-provider";
 import { Stack } from "expo-router";
 import { Text, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -8,10 +8,10 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 export default function CommissionUsersDetailsLayout() {
 	return (
 		<SafeAreaProvider>
-			<CommissionUserDetailsHeaderContextProvider>
+			<SectionSalesHeaderContextProvider>
 				<Stack>
 					<Stack.Screen
-						name="[id]"
+						name="index"
 						options={{
 							headerTitle: () => (
 								<View
@@ -28,24 +28,20 @@ export default function CommissionUsersDetailsLayout() {
 											fontSize: 20,
 										}}
 									>
-										Commission User
+										Section Sales
 									</Text>
 								</View>
 							),
-							headerRight: () => <CommissionUserDetailsHeaderRight />,
 							headerStyle: {
 								backgroundColor: "rgba(49, 46, 129, 0.85)",
 							},
 							headerTintColor: "#e5e7eb",
 							headerTitleStyle: { fontWeight: "900" },
+							headerRight: () => <SectionSalesHeaderRight />,
 						}}
 					/>
-					<Stack.Screen
-						name="section-sales"
-						options={{ headerShown: false }}
-					/>
 				</Stack>
-			</CommissionUserDetailsHeaderContextProvider>
+			</SectionSalesHeaderContextProvider>
 		</SafeAreaProvider>
 	);
 }

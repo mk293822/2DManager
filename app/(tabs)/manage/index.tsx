@@ -1,8 +1,12 @@
 import ManageDatePickerHeader from "@/components/manage/manage-date-picker-header";
 import ManageDaySummary from "@/components/manage/manage-day-summary";
 import ManageWeekSummary from "@/components/manage/manage-week-summary";
-import { useManagePageDataContext } from "@/hooks/manage/use-data-context";
-import { useManagePageToggleContext } from "@/hooks/manage/user-toggle-context";
+import useManageHook from "@/hooks/manage/use-manage-hook";
+import { useManagePageHeaderContext } from "@/hooks/manage/user-header-context";
+import { useAbortableEffect } from "@/hooks/use-abortable-effect";
+import { getWeekOfMonth } from "@/lib/helpers";
+import { SectionRange } from "@/types/manage-types";
+import { useEffect, useState } from "react";
 import {
 	ActivityIndicator,
 	Pressable,
@@ -14,22 +18,57 @@ import { Provider as PaperProvider } from "react-native-paper";
 import { enGB, registerTranslation } from "react-native-paper-dates";
 
 const Manage = () => {
-	const { rangeMode } = useManagePageToggleContext();
 	const {
 		error,
 		loading,
 		sections,
-		selectedDate,
 
-		// setStates
-		setSelectedDate,
 		setError,
 
 		// Functions
 		fetchSection,
-	} = useManagePageDataContext();
+		handleCreateSection,
+		onEditSave,
+		onConfirmDelete,
+	} = useManageHook();
+	const { rangeMode } = useManagePageHeaderContext();
 
 	registerTranslation("en-GB", enGB);
+	const date = new Date();
+
+	const [selectedSectionRange, setSelectedSectionRange] =
+		useState<SectionRange>({
+			type: "day",
+			date: date,
+		});
+
+	const abortController = new AbortController();
+
+	useEffect(() => {
+		setSelectedSectionRange((prev) => {
+			if (!prev) return prev;
+			if (rangeMode === "week" && prev.type === "day") {
+				return {
+					type: "week",
+					year: date.getFullYear(),
+					month: date.getMonth(),
+					week: getWeekOfMonth(date),
+				};
+			}
+			if (rangeMode === "day" && prev.type === "week") {
+				return {
+					type: "day",
+					date: date,
+				};
+			}
+
+			return prev;
+		});
+	}, [rangeMode]);
+
+	useAbortableEffect(() => {
+		fetchSection(abortController.signal, selectedSectionRange);
+	}, [selectedSectionRange]);
 
 	/* ---------------- UI STATES ---------------- */
 
@@ -42,7 +81,7 @@ const Manage = () => {
 				<Pressable
 					onPress={() => {
 						setError(null);
-						fetchSection(new AbortController().signal); // retry
+						fetchSection(abortController.signal, selectedSectionRange); // retry
 					}}
 					className="bg-indigo-600 px-6 py-3 rounded-lg"
 				>
@@ -72,7 +111,9 @@ const Manage = () => {
 					No sections found for this date/week.
 				</Text>
 				<Pressable
-					onPress={() => fetchSection(new AbortController().signal)}
+					onPress={() =>
+						fetchSection(abortController.signal, selectedSectionRange)
+					}
 					className="bg-indigo-600 px-6 py-3 rounded-lg"
 				>
 					<Text className="text-white font-semibold">Reload</Text>
@@ -89,18 +130,23 @@ const Manage = () => {
 				contentContainerStyle={{ paddingBottom: 120 }}
 			>
 				<ManageDatePickerHeader
-					selectedDate={selectedDate}
-					setSelectedDate={setSelectedDate}
-					rangeMode={rangeMode}
+					selectedSectionRange={selectedSectionRange}
+					setSelectedSectionRange={setSelectedSectionRange}
 				/>
 
 				{rangeMode === "day" ? (
 					<ManageDaySummary
-						selectedDate={selectedDate}
+						onConfirmDelete={onConfirmDelete}
+						onEditSave={onEditSave}
+						handleCreateSection={handleCreateSection}
 						sections={sections[0]}
 					/>
 				) : (
-					<ManageWeekSummary sections={sections} />
+					<ManageWeekSummary
+						sections={sections}
+						setSelectedSectionRange={setSelectedSectionRange}
+						handleCreateSection={handleCreateSection}
+					/>
 				)}
 			</ScrollView>
 		</PaperProvider>

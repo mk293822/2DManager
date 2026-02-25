@@ -34,8 +34,8 @@ const EditManageSectionModal = ({
 	};
 
 	const handleSave = async () => {
-		await onEditSave(form, id);
 		onClose();
+		await onEditSave(form, id);
 	};
 
 	return (
@@ -103,9 +103,9 @@ const EditManageSectionModal = ({
 					{/* Draw Total Amount */}
 					<Text className="font-semibold text-gray-700">Draw Total Amount</Text>
 					<TextInput
-						value={form.draw_total_amount.toString()}
+						value={form.total_draw_amount.toString()}
 						onChangeText={(text) =>
-							handleChange("draw_total_amount", parseFloat(text) || 0)
+							handleChange("total_draw_amount", parseFloat(text) || 0)
 						}
 						keyboardType="numeric"
 						className="border border-gray-300 rounded-lg px-3 py-2"

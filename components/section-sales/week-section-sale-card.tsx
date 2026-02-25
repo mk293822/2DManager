@@ -15,7 +15,7 @@ const WeekSectionSaleCard = ({
 	if (!data) {
 		return (
 			<View className="bg-gray-100 rounded-xl p-3 mb-4">
-				<Text className="text-gray-500 font-medium">
+				<Text className="text-gray-500 font-medium text-center">
 					No {name} section for {formatDateDisplay(new Date(date))}
 				</Text>
 			</View>

@@ -1,12 +1,12 @@
-import { useCommissionUserHeaderContext } from "@/hooks/commission-users/use-header-context";
+import { useCommissionUserPageHeaderContext } from "@/hooks/commission-users/use-header-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import React, { useState } from "react";
 import { TouchableOpacity, View } from "react-native";
-import CreateCommissionUserModal from "../commission-user/create-commission-user-modal";
+import CreateCommissionUserModal from "../commission-user-details/create-commission-user-modal";
 
-const CommissionPageHeaderRight = () => {
+const CommissionUserPageHeaderRight = () => {
 	const [open, setOpen] = useState(false);
-	const { handleCreateCommissionUser } = useCommissionUserHeaderContext();
+	const { handleCreateCommissionUser } = useCommissionUserPageHeaderContext();
 
 	return (
 		<View
@@ -39,4 +39,4 @@ const CommissionPageHeaderRight = () => {
 	);
 };
 
-export default CommissionPageHeaderRight;
+export default CommissionUserPageHeaderRight;
