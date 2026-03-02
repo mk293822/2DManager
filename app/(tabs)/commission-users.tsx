@@ -1,4 +1,4 @@
-import { useCommissionUserPageHeaderContext } from "@/hooks/commission-users/use-header-context";
+import { useCommissionUserContext } from "@/hooks/commission-users/use-commission-user-context";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
@@ -12,8 +12,7 @@ import {
 
 const CommissionUsers = () => {
 	const router = useRouter();
-	const { commissionUsers, loading, error, reset } =
-		useCommissionUserPageHeaderContext();
+	const { commissionUsers, loading, error, reset } = useCommissionUserContext();
 
 	if (loading) {
 		return (
@@ -76,9 +75,7 @@ const CommissionUsers = () => {
 					className="bg-white rounded-2xl shadow p-4 mb-4 flex-row items-center justify-between"
 				>
 					<View>
-						<Text className="text-indigo-700 font-extrabold text-lg">
-							{user.name}
-						</Text>
+						<Text className="text-indigo-700 text-lg">{user.name}</Text>
 						<Text className="text-gray-500 mt-1">{user.phone_number}</Text>
 					</View>
 				</TouchableOpacity>

@@ -4,7 +4,7 @@ import { CommissionUserType } from "@/types/commission-user-types";
 import { useCallback, useState } from "react";
 import { useAbortableEffect } from "../use-abortable-effect";
 
-export type UseCommissionUserHookType = {
+export type CommissionUserHookType = {
 	loading: boolean;
 	commissionUsers: CommissionUserType[] | null;
 	error: string | null;
@@ -15,7 +15,7 @@ export type UseCommissionUserHookType = {
 	}) => Promise<void>;
 };
 
-const useCommissionUserHook = (): UseCommissionUserHookType => {
+const useCommissionUserHook = (): CommissionUserHookType => {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [commissionUsers, setCommissionUsers] = useState<

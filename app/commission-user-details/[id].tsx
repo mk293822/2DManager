@@ -15,10 +15,13 @@ import {
 import CommissionUserSectionsList from "@/components/section-sales/section-sale-list";
 import useCommissionUserDetailsHook from "@/hooks/commission-user-details/use-commission-user-details-hook";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
+import { usePhoneActions } from "@/hooks/use-phone-actions";
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 const CommissionUserPage = () => {
 	const { id } = useLocalSearchParams<{ id?: string | string[] }>();
 	const router = useRouter();
+	const { call, message } = usePhoneActions();
 
 	const userId = Array.isArray(id) ? id[0] : id;
 
@@ -95,19 +98,53 @@ const CommissionUserPage = () => {
 					<Text className="text-gray-500 mb-4">
 						ID: {commissionUserDetails.id}
 					</Text>
-
-					<View className="flex-row justify-between py-2 border-b border-gray-100">
-						<Text className="text-gray-600">Phone</Text>
-						<Text className="font-semibold">
-							{commissionUserDetails.phone_number}
-						</Text>
-					</View>
-
 					<View className="flex-row justify-between py-2">
 						<Text className="text-gray-600">Manager</Text>
 						<Text className="font-semibold">
 							{commissionUserDetails.manager_name}
 						</Text>
+					</View>
+
+					<View className="flex-row justify-between py-2">
+						<Text className="text-gray-600">Phone Number</Text>
+						<Text className="font-semibold">
+							{commissionUserDetails.phone_number}
+						</Text>
+					</View>
+
+					{/* ===== PHONE ACTIONS ===== */}
+					<View className="mt-2">
+						<View className="flex-row gap-3">
+							{/* CALL BUTTON */}
+							<TouchableOpacity
+								activeOpacity={0.85}
+								onPress={() => call(commissionUserDetails.phone_number)}
+								className="flex-1 bg-blue-600 rounded-2xl py-3 flex-row items-center justify-center gap-2 shadow"
+							>
+								<AntDesign
+									name="phone"
+									size={18}
+									color="white"
+								/>
+								<Text className="text-white font-bold text-base">Call</Text>
+							</TouchableOpacity>
+
+							{/* MESSAGE BUTTON */}
+							<TouchableOpacity
+								activeOpacity={0.85}
+								onPress={
+									() => message(commissionUserDetails.phone_number) // assuming you already created this
+								}
+								className="flex-1 bg-green-600 rounded-2xl py-3 flex-row items-center justify-center gap-2 shadow"
+							>
+								<AntDesign
+									name="message"
+									size={18}
+									color="white"
+								/>
+								<Text className="text-white font-bold text-base">Message</Text>
+							</TouchableOpacity>
+						</View>
 					</View>
 				</View>
 
@@ -117,6 +154,7 @@ const CommissionUserPage = () => {
 					createComUserSection={createComUserSection}
 					userId={userId}
 				/>
+
 				<View className="bg-red-100 border border-red-400 rounded-2xl p-6">
 					<Text className="text-red-600 font-extrabold text-lg mb-2">
 						Danger Zone

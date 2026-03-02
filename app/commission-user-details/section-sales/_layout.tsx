@@ -1,6 +1,6 @@
 // app/manage/layout.tsx
 import SectionSalesHeaderRight from "@/components/header-rights/section-sales";
-import SectionSalesHeaderContextProvider from "@/contexts/section-sales-header-provider";
+import ToggleContextProvider from "@/contexts/toggle-provider";
 import { Stack } from "expo-router";
 import { Text, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -8,7 +8,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 export default function CommissionUsersDetailsLayout() {
 	return (
 		<SafeAreaProvider>
-			<SectionSalesHeaderContextProvider>
+			<ToggleContextProvider>
 				<Stack>
 					<Stack.Screen
 						name="index"
@@ -41,7 +41,7 @@ export default function CommissionUsersDetailsLayout() {
 						}}
 					/>
 				</Stack>
-			</SectionSalesHeaderContextProvider>
+			</ToggleContextProvider>
 		</SafeAreaProvider>
 	);
 }

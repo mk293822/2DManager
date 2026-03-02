@@ -8,7 +8,7 @@ import {
 } from "@/types/manage-types";
 import { useCallback, useState } from "react";
 
-export type UseManageHookType = {
+export type ManageHookType = {
 	sections: SectionSummaries[] | null;
 	loading: boolean;
 	error: string | null;
@@ -45,7 +45,7 @@ function upsertByDate(
 	);
 }
 
-const useManageHook = (): UseManageHookType => {
+const useManageHook = (): ManageHookType => {
 	const [sections, setSections] = useState<SectionSummaries[] | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -142,8 +142,9 @@ const useManageHook = (): UseManageHookType => {
 					};
 				});
 			});
-		} catch {
-			setError("Failed to update section");
+		} catch (err: any) {
+			if (err.name === "CanceledError" || err.name === "AbortError") return;
+			setError("Failed to delete section");
 		} finally {
 			setLoading(false);
 		}

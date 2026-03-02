@@ -2,6 +2,7 @@ import { changeSectionName, formatKs, formatSmartNumber } from "@/lib/helpers";
 import { ComUserSectionSaleType } from "@/types/commission-user-types";
 import { SectionName } from "@/types/manage-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { useRouter } from "expo-router";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
@@ -23,6 +24,7 @@ const CommissionUserSectionCard = ({
 	section: SectionName;
 }) => {
 	const section_summary = sale?.section_summary;
+	const router = useRouter();
 
 	const isProfit = sale?.profit_or_loss >= 0;
 
@@ -116,7 +118,6 @@ const CommissionUserSectionCard = ({
 					{formatKs(sale.total_draw_amount)}
 				</Text>
 			</View>
-
 			<View className="flex-row justify-between py-2 border-b border-gray-100">
 				<Text className="text-gray-600">Draw Number</Text>
 				<Text className="font-extrabold text-indigo-700">
@@ -133,7 +134,6 @@ const CommissionUserSectionCard = ({
 					&times; {section_summary.draw_times}
 				</Text>
 			</View>
-
 			<View className="flex-row justify-between pt-3">
 				<Text className="font-semibold">Profit / Loss</Text>
 				<Text
@@ -144,6 +144,21 @@ const CommissionUserSectionCard = ({
 					{formatKs(sale.profit_or_loss)}
 				</Text>
 			</View>
+
+			<TouchableOpacity
+				activeOpacity={0.85}
+				className="bg-indigo-600 px-6 py-3 rounded-xl shadow mt-4"
+				onPress={() =>
+					router.push({
+						pathname: "/user-two-d-list/[id]",
+						params: { id: String(sale.id) },
+					})
+				}
+			>
+				<Text className="text-white font-bold text-center">
+					Add Two-D Number
+				</Text>
+			</TouchableOpacity>
 		</View>
 	);
 };

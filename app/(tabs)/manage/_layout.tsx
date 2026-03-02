@@ -1,6 +1,6 @@
 // app/manage/layout.tsx
 import ManagePageHeaderRight from "@/components/header-rights/manage-page";
-import ManageHeaderContextProvider from "@/contexts/manage-header-provider";
+import ToggleContextProvider from "@/contexts/toggle-provider";
 import { Stack } from "expo-router";
 import { Text, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -8,7 +8,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 export default function ManageLayout() {
 	return (
 		<SafeAreaProvider>
-			<ManageHeaderContextProvider>
+			<ToggleContextProvider>
 				<Stack>
 					<Stack.Screen
 						name="index"
@@ -35,7 +35,7 @@ export default function ManageLayout() {
 						}}
 					/>
 				</Stack>
-			</ManageHeaderContextProvider>
+			</ToggleContextProvider>
 		</SafeAreaProvider>
 	);
 }

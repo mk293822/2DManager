@@ -1,14 +1,14 @@
 // app/manage/layout.tsx
-import CommissionPageHeaderRight from "@/components/header-rights/commission-user";
-import CommissionUserHeaderContextProvider from "@/contexts/commission-user-header-provider";
+import TwoDListsHeaderRight from "@/components/header-rights/two-d-lists";
+import TwoDListsHeaderContextProvider from "@/contexts/two-d-lists-header-provider";
 import { Stack } from "expo-router";
 import { Text, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-export default function CommissionUsersLayout() {
+export default function TwoDListLayout() {
 	return (
 		<SafeAreaProvider>
-			<CommissionUserHeaderContextProvider>
+			<TwoDListsHeaderContextProvider>
 				<Stack>
 					<Stack.Screen
 						name="index"
@@ -22,11 +22,11 @@ export default function CommissionUsersLayout() {
 											fontSize: 20,
 										}}
 									>
-										Commission Users
+										2D Lists
 									</Text>
 								</View>
 							),
-							headerRight: () => <CommissionPageHeaderRight />,
+							headerRight: () => <TwoDListsHeaderRight />,
 							headerStyle: {
 								backgroundColor: "rgba(49, 46, 129, 0.85)",
 							},
@@ -35,7 +35,7 @@ export default function CommissionUsersLayout() {
 						}}
 					/>
 				</Stack>
-			</CommissionUserHeaderContextProvider>
+			</TwoDListsHeaderContextProvider>
 		</SafeAreaProvider>
 	);
 }

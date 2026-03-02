@@ -2,11 +2,7 @@ import { ToggleContext } from "@/contexts/contexts";
 import { RangeMode } from "@/types/manage-types";
 import React from "react";
 
-const SectionSalesHeaderContextProvider = ({
-	children,
-}: {
-	children: React.ReactNode;
-}) => {
+const ToggleContextProvider = ({ children }: { children: React.ReactNode }) => {
 	const [rangeMode, setRangeMode] = React.useState<RangeMode>("day");
 
 	return (
@@ -16,4 +12,4 @@ const SectionSalesHeaderContextProvider = ({
 	);
 };
 
-export default SectionSalesHeaderContextProvider;
+export default ToggleContextProvider;

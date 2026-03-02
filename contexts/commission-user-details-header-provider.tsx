@@ -1,5 +1,5 @@
 import React from "react";
-import { CommissoinUserDetailsHeaderContext } from "./contexts";
+import { CommissionUserDetailsHeaderContext } from "./contexts";
 
 const CommissionUserDetailsHeaderContextProvider = ({
 	children,
@@ -7,9 +7,9 @@ const CommissionUserDetailsHeaderContextProvider = ({
 	children: React.ReactNode;
 }) => {
 	return (
-		<CommissoinUserDetailsHeaderContext.Provider value={undefined}>
+		<CommissionUserDetailsHeaderContext.Provider value={undefined}>
 			{children}
-		</CommissoinUserDetailsHeaderContext.Provider>
+		</CommissionUserDetailsHeaderContext.Provider>
 	);
 };
 

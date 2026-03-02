@@ -1,6 +1,8 @@
 import HapticTab from "@/components/haptic-tab";
+import CommissionUserPageHeaderRight from "@/components/header-rights/commission-user";
 import HomePageHeaderRight from "@/components/header-rights/home-page";
-import TwoDListsHeaderRight from "@/components/header-rights/two-d-lists";
+import CommissionUserProvider from "@/contexts/commission-user-provider";
+import ManageProvider from "@/contexts/manage-provider";
 import { useAuthContext } from "@/hooks/use-auth-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Tabs, useRouter } from "expo-router";
@@ -14,22 +16,6 @@ interface Page {
 	icon: keyof typeof AntDesign.glyphMap;
 	headerRight?: () => React.ReactNode;
 }
-
-const pages: Page[] = [
-	{
-		name: "index",
-		title: "Home",
-		icon: "home",
-		headerRight: () => <HomePageHeaderRight />,
-	},
-	{
-		name: "two-d-lists",
-		title: "2D Lists",
-		icon: "unordered-list",
-		headerRight: () => <TwoDListsHeaderRight />,
-	},
-	{ name: "profile", title: "Profile", icon: "user" },
-];
 
 const TabIcon = ({ focused, icon }: Page & { focused: boolean }) => {
 	return (
@@ -67,112 +53,137 @@ const TabsLayout = () => {
 	}
 	return (
 		<SafeAreaProvider>
-			<Tabs
-				screenOptions={{
-					tabBarShowLabel: false,
-					tabBarButton: (props) => <HapticTab {...props} />,
-					tabBarItemStyle: {
-						justifyContent: "center",
-						alignItems: "center",
-						width: "auto",
-						height: "100%",
-					},
-					tabBarStyle: {
-						borderRadius: 50,
-						marginHorizontal: 20,
-						marginBottom: 30,
-						height: 60,
-						position: "absolute",
-						overflow: "hidden",
-						borderWidth: 1,
-						paddingHorizontal: 14,
-						backgroundColor: "rgba(49, 46, 129, 0.75)",
-					},
-				}}
-			>
-				{pages.slice(0, 2).map((page) => (
-					<Tabs.Screen
-						key={page.name}
-						name={page.name}
-						options={{
-							tabBarIcon: ({ focused }) => (
-								<TabIcon
-									icon={page.icon}
-									focused={focused}
-								/>
-							),
-							title: page.title,
-							headerStyle: {
-								backgroundColor: "rgba(49, 46, 129, 0.85)",
-							},
-
-							headerTintColor: "#e5e7eb",
-							headerTitleStyle: {
-								fontWeight: "900",
-							},
-
-							headerRightContainerStyle: {
-								display: "flex",
+			<ManageProvider>
+				<CommissionUserProvider>
+					<Tabs
+						screenOptions={{
+							tabBarShowLabel: false,
+							tabBarButton: (props) => <HapticTab {...props} />,
+							tabBarItemStyle: {
+								justifyContent: "center",
 								alignItems: "center",
+								width: "auto",
+								height: "100%",
 							},
-							headerRight: page.headerRight,
+							tabBarStyle: {
+								borderRadius: 50,
+								marginHorizontal: 20,
+								marginBottom: 30,
+								height: 60,
+								position: "absolute",
+								overflow: "hidden",
+								borderWidth: 1,
+								paddingHorizontal: 14,
+								backgroundColor: "rgba(49, 46, 129, 0.75)",
+							},
 						}}
-					/>
-				))}
-				<Tabs.Screen
-					name="manage"
-					options={{
-						headerShown: false,
-						tabBarIcon: ({ focused }) => (
-							<TabIcon
-								icon="appstore"
-								focused={focused}
-							/>
-						),
-					}}
-				/>
-				<Tabs.Screen
-					name="commission-users"
-					options={{
-						headerShown: false,
-						tabBarIcon: ({ focused }) => (
-							<TabIcon
-								icon="usergroup-add"
-								focused={focused}
-							/>
-						),
-					}}
-				/>
-				{pages.slice(2).map((page) => (
-					<Tabs.Screen
-						key={page.name}
-						name={page.name}
-						options={{
-							tabBarIcon: ({ focused }) => (
-								<TabIcon
-									icon={page.icon}
-									focused={focused}
-								/>
-							),
-							title: page.title,
-							headerStyle: {
-								backgroundColor: "rgba(49, 46, 129, 0.85)",
-							},
+					>
+						<Tabs.Screen
+							name={"index"}
+							options={{
+								tabBarIcon: ({ focused }) => (
+									<TabIcon
+										icon={"home"}
+										focused={focused}
+									/>
+								),
+								title: "Home",
+								headerStyle: {
+									backgroundColor: "rgba(49, 46, 129, 0.85)",
+								},
 
-							headerTintColor: "#e5e7eb",
-							headerTitleStyle: {
-								fontWeight: "900",
-							},
+								headerTintColor: "#e5e7eb",
+								headerTitleStyle: {
+									fontWeight: "900",
+								},
 
-							headerRightContainerStyle: {
-								display: "flex",
-								alignItems: "center",
-							},
-							headerRight: page.headerRight,
-						}}
-					/>
-				))}
-			</Tabs>
+								headerRightContainerStyle: {
+									display: "flex",
+									alignItems: "center",
+								},
+								headerRight: () => <HomePageHeaderRight />,
+							}}
+						/>
+
+						<Tabs.Screen
+							name="two-d-lists"
+							options={{
+								headerShown: false,
+								tabBarIcon: ({ focused }) => (
+									<TabIcon
+										icon="unordered-list"
+										focused={focused}
+									/>
+								),
+							}}
+						/>
+						<Tabs.Screen
+							name="manage"
+							options={{
+								headerShown: false,
+								tabBarIcon: ({ focused }) => (
+									<TabIcon
+										icon="appstore"
+										focused={focused}
+									/>
+								),
+							}}
+						/>
+						<Tabs.Screen
+							name={"commission-users"}
+							options={{
+								tabBarIcon: ({ focused }) => (
+									<TabIcon
+										icon={"usergroup-add"}
+										focused={focused}
+									/>
+								),
+								title: "Commission Users",
+								headerStyle: {
+									backgroundColor: "rgba(49, 46, 129, 0.85)",
+								},
+
+								headerTintColor: "#e5e7eb",
+								headerTitleStyle: {
+									fontWeight: "900",
+								},
+
+								headerRightContainerStyle: {
+									display: "flex",
+									alignItems: "center",
+								},
+								headerRight: () => <CommissionUserPageHeaderRight />,
+							}}
+						/>
+
+						<Tabs.Screen
+							name={"profile"}
+							options={{
+								tabBarIcon: ({ focused }) => (
+									<TabIcon
+										icon={"user"}
+										focused={focused}
+									/>
+								),
+								title: "Profile",
+								headerStyle: {
+									backgroundColor: "rgba(49, 46, 129, 0.85)",
+								},
+
+								headerTintColor: "#e5e7eb",
+								headerTitleStyle: {
+									fontWeight: "900",
+								},
+
+								headerRightContainerStyle: {
+									display: "flex",
+									alignItems: "center",
+								},
+							}}
+						/>
+					</Tabs>
+				</CommissionUserProvider>
+			</ManageProvider>
 		</SafeAreaProvider>
 	);
 };

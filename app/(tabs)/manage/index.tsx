@@ -1,7 +1,7 @@
 import ManageDatePickerHeader from "@/components/manage/manage-date-picker-header";
 import ManageDaySummary from "@/components/manage/manage-day-summary";
 import ManageWeekSummary from "@/components/manage/manage-week-summary";
-import useManageHook from "@/hooks/manage/use-manage-hook";
+import { useManageContext } from "@/hooks/manage/use-manage-context";
 import { useManagePageHeaderContext } from "@/hooks/manage/user-header-context";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { getWeekOfMonth } from "@/lib/helpers";
@@ -30,7 +30,7 @@ const Manage = () => {
 		handleCreateSection,
 		onEditSave,
 		onConfirmDelete,
-	} = useManageHook();
+	} = useManageContext();
 	const { rangeMode } = useManagePageHeaderContext();
 
 	registerTranslation("en-GB", enGB);

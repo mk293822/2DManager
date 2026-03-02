@@ -1,11 +1,11 @@
-import { CommissoinUserHeaderContext } from "@/contexts/contexts";
+import { CommissionUserHeaderContext } from "@/contexts/contexts";
 import { useContext } from "react";
 
 export function useCommissionUserPageHeaderContext() {
-	const context = useContext(CommissoinUserHeaderContext);
+	const context = useContext(CommissionUserHeaderContext);
 	if (!context)
 		throw new Error(
-			"useCommissionUserPageHeaderContext must be used inside CommissoinUserPageHeaderContextProvider",
+			"useCommissionUserPageHeaderContext must be used inside CommissionUserHeaderContextProvider",
 		);
 	return context;
 }
