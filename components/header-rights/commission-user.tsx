@@ -1,19 +1,24 @@
-import { useCommissionUserContext } from "@/hooks/commission-users/use-commission-user-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import React, { useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import CreateCommissionUserModal from "../commission-user-details/create-commission-user-modal";
 
-const CommissionUserPageHeaderRight = () => {
+const CommissionUserPageHeaderRight = ({
+	handleCreateCommissionUser,
+}: {
+	handleCreateCommissionUser: (payload: {
+		name: string;
+		phone_number: string;
+	}) => Promise<void>;
+}) => {
 	const [open, setOpen] = useState(false);
-	const { handleCreateCommissionUser } = useCommissionUserContext();
 
 	return (
 		<View
 			style={{
 				flexDirection: "row",
 				alignItems: "center",
-				paddingRight: 12,
+				paddingRight: 20,
 			}}
 		>
 			<TouchableOpacity

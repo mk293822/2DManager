@@ -1,10 +1,14 @@
-import { useSectionSalesPageHeaderContext } from "@/hooks/section-sales/use-header-context";
 import { RangeMode } from "@/types/manage-types";
 import React, { useEffect, useRef } from "react";
 import { Animated, Text, TouchableOpacity, View } from "react-native";
 
-const SectionSalesPageHeaderRight = () => {
-	const { rangeMode, setRangeMode } = useSectionSalesPageHeaderContext();
+const SectionSalesPageHeaderRight = ({
+	rangeMode,
+	setRangeMode,
+}: {
+	setRangeMode: React.Dispatch<React.SetStateAction<RangeMode>>;
+	rangeMode: RangeMode;
+}) => {
 	const translateX = useRef(
 		new Animated.Value(rangeMode === "day" ? 0 : 1),
 	).current;
@@ -38,6 +42,7 @@ const SectionSalesPageHeaderRight = () => {
 				borderRadius: 24,
 				padding: 2.5,
 				width: toggleWidth * 2,
+				marginRight: 8,
 			}}
 		>
 			{/* Sliding pill */}

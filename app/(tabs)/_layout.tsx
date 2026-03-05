@@ -1,6 +1,4 @@
 import HapticTab from "@/components/haptic-tab";
-import CommissionUserPageHeaderRight from "@/components/header-rights/commission-user";
-import HomePageHeaderRight from "@/components/header-rights/home-page";
 import CommissionUserProvider from "@/contexts/commission-user-provider";
 import ManageProvider from "@/contexts/manage-provider";
 import { useAuthContext } from "@/hooks/use-auth-context";
@@ -14,8 +12,35 @@ interface Page {
 	name?: string;
 	title?: string;
 	icon: keyof typeof AntDesign.glyphMap;
-	headerRight?: () => React.ReactNode;
 }
+
+const pages: Page[] = [
+	{
+		name: "index",
+		title: "Home",
+		icon: "home",
+	},
+	{
+		name: "two-d-lists",
+		title: "2D Lists",
+		icon: "unordered-list",
+	},
+	{
+		name: "manage",
+		title: "Manage",
+		icon: "appstore",
+	},
+	{
+		name: "commission-users",
+		title: "Commission Users",
+		icon: "usergroup-add",
+	},
+	{
+		name: "profile",
+		title: "Profile",
+		icon: "user",
+	},
+];
 
 const TabIcon = ({ focused, icon }: Page & { focused: boolean }) => {
 	return (
@@ -79,109 +104,34 @@ const TabsLayout = () => {
 							},
 						}}
 					>
-						<Tabs.Screen
-							name={"index"}
-							options={{
-								tabBarIcon: ({ focused }) => (
-									<TabIcon
-										icon={"home"}
-										focused={focused}
-									/>
-								),
-								title: "Home",
-								headerStyle: {
-									backgroundColor: "rgba(49, 46, 129, 0.85)",
-								},
+						{pages.map((page) => (
+							<Tabs.Screen
+								key={page.name}
+								name={page.name}
+								options={{
+									tabBarIcon: ({ focused }) => (
+										<TabIcon
+											icon={page.icon}
+											focused={focused}
+										/>
+									),
+									title: page.title,
+									headerStyle: {
+										backgroundColor: "rgba(49, 46, 129, 0.85)",
+									},
 
-								headerTintColor: "#e5e7eb",
-								headerTitleStyle: {
-									fontWeight: "900",
-								},
+									headerTintColor: "#e5e7eb",
+									headerTitleStyle: {
+										fontWeight: "900",
+									},
 
-								headerRightContainerStyle: {
-									display: "flex",
-									alignItems: "center",
-								},
-								headerRight: () => <HomePageHeaderRight />,
-							}}
-						/>
-
-						<Tabs.Screen
-							name="two-d-lists"
-							options={{
-								headerShown: false,
-								tabBarIcon: ({ focused }) => (
-									<TabIcon
-										icon="unordered-list"
-										focused={focused}
-									/>
-								),
-							}}
-						/>
-						<Tabs.Screen
-							name="manage"
-							options={{
-								headerShown: false,
-								tabBarIcon: ({ focused }) => (
-									<TabIcon
-										icon="appstore"
-										focused={focused}
-									/>
-								),
-							}}
-						/>
-						<Tabs.Screen
-							name={"commission-users"}
-							options={{
-								tabBarIcon: ({ focused }) => (
-									<TabIcon
-										icon={"usergroup-add"}
-										focused={focused}
-									/>
-								),
-								title: "Commission Users",
-								headerStyle: {
-									backgroundColor: "rgba(49, 46, 129, 0.85)",
-								},
-
-								headerTintColor: "#e5e7eb",
-								headerTitleStyle: {
-									fontWeight: "900",
-								},
-
-								headerRightContainerStyle: {
-									display: "flex",
-									alignItems: "center",
-								},
-								headerRight: () => <CommissionUserPageHeaderRight />,
-							}}
-						/>
-
-						<Tabs.Screen
-							name={"profile"}
-							options={{
-								tabBarIcon: ({ focused }) => (
-									<TabIcon
-										icon={"user"}
-										focused={focused}
-									/>
-								),
-								title: "Profile",
-								headerStyle: {
-									backgroundColor: "rgba(49, 46, 129, 0.85)",
-								},
-
-								headerTintColor: "#e5e7eb",
-								headerTitleStyle: {
-									fontWeight: "900",
-								},
-
-								headerRightContainerStyle: {
-									display: "flex",
-									alignItems: "center",
-								},
-							}}
-						/>
+									headerRightContainerStyle: {
+										display: "flex",
+										alignItems: "center",
+									},
+								}}
+							/>
+						))}
 					</Tabs>
 				</CommissionUserProvider>
 			</ManageProvider>

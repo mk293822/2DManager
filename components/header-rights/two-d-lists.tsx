@@ -1,12 +1,15 @@
 // TwoDListsHeaderRight.tsx
-import { useTwoDlistsPageHeaderContext } from "@/hooks/two-d-list/use-header-context";
 import { SectionName } from "@/types/manage-types";
 import React, { useEffect, useRef } from "react";
 import { Animated, Text, TouchableOpacity, View } from "react-native";
 
-const TwoDListsHeaderRight = () => {
-	const { section, setSection } = useTwoDlistsPageHeaderContext();
-
+const TwoDListsHeaderRight = ({
+	section,
+	setSection,
+}: {
+	setSection: React.Dispatch<React.SetStateAction<SectionName>>;
+	section: SectionName;
+}) => {
 	const translateX = useRef(
 		new Animated.Value(section === "morning_section" ? 0 : 1),
 	).current;
@@ -38,6 +41,7 @@ const TwoDListsHeaderRight = () => {
 				flexDirection: "row",
 				alignItems: "center",
 				gap: 12,
+				marginRight: 20,
 			}}
 		>
 			{/* Morning / Evening Sliding Pill */}

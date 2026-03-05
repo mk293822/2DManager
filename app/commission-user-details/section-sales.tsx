@@ -1,12 +1,12 @@
+import SectionSalesPageHeaderRight from "@/components/header-rights/section-sales";
 import { Loading } from "@/components/loading";
 import ManageDatePickerHeader from "@/components/manage/manage-date-picker-header";
 import WeekSectionSaleList from "@/components/section-sales/week-section-sale-list";
-import { useSectionSalesPageHeaderContext } from "@/hooks/section-sales/use-header-context";
 import useSectionSalesHook from "@/hooks/section-sales/use-section-sale-hook";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { getWeekOfMonth } from "@/lib/helpers";
-import { SectionRange } from "@/types/manage-types";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { RangeMode, SectionRange } from "@/types/manage-types";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { Provider as PaperProvider } from "react-native-paper";
@@ -15,10 +15,10 @@ import { enGB, registerTranslation } from "react-native-paper-dates";
 const SectionSales = () => {
 	const { id } = useLocalSearchParams<{ id?: string | string[] }>();
 	const router = useRouter();
+	const [rangeMode, setRangeMode] = useState<RangeMode>("day");
 
 	const userId = Array.isArray(id) ? id[0] : id;
 	registerTranslation("en-GB", enGB);
-	const { rangeMode } = useSectionSalesPageHeaderContext();
 	const { fetchSectionSales, sectionSales, loading, error, setError } =
 		useSectionSalesHook();
 
@@ -97,19 +97,31 @@ const SectionSales = () => {
 	}
 
 	return (
-		<PaperProvider>
-			<ScrollView
-				className="flex-1 bg-gray-100 p-4"
-				contentContainerStyle={{ paddingBottom: 120 }}
-			>
-				<ManageDatePickerHeader
-					selectedSectionRange={selectedSectionRange}
-					setSelectedSectionRange={setSelectedSectionRange}
-				/>
+		<>
+			<Stack.Screen
+				options={{
+					headerRight: () => (
+						<SectionSalesPageHeaderRight
+							rangeMode={rangeMode}
+							setRangeMode={setRangeMode}
+						/>
+					),
+				}}
+			/>
+			<PaperProvider>
+				<ScrollView
+					className="flex-1 bg-gray-100 p-4"
+					contentContainerStyle={{ paddingBottom: 120 }}
+				>
+					<ManageDatePickerHeader
+						selectedSectionRange={selectedSectionRange}
+						setSelectedSectionRange={setSelectedSectionRange}
+					/>
 
-				<WeekSectionSaleList sectionSales={sectionSales} />
-			</ScrollView>
-		</PaperProvider>
+					<WeekSectionSaleList sectionSales={sectionSales} />
+				</ScrollView>
+			</PaperProvider>
+		</>
 	);
 };
 

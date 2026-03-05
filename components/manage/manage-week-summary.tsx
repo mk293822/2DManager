@@ -1,5 +1,6 @@
 import { formatDateDisplay } from "@/lib/helpers";
 import {
+	RangeMode,
 	SectionName,
 	SectionRange,
 	SectionSummaries,
@@ -14,10 +15,12 @@ const ManageWeekSummary = ({
 	sections,
 	setSelectedSectionRange,
 	handleCreateSection,
+	setRangeMode,
 }: {
 	sections: SectionSummaries[];
 	setSelectedSectionRange: React.Dispatch<React.SetStateAction<SectionRange>>;
 	handleCreateSection: (section: SectionName, date?: Date) => Promise<void>;
+	setRangeMode: React.Dispatch<React.SetStateAction<RangeMode>>;
 }) => {
 	const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({});
 
@@ -118,6 +121,7 @@ const ManageWeekSummary = ({
 						className="bg-white rounded-3xl p-4 mb-6 shadow-md"
 					>
 						<WeekSummaryCard
+							setRangeMode={setRangeMode}
 							date={date}
 							summary={summary}
 							setSelectedSectionRange={setSelectedSectionRange}

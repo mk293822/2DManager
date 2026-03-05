@@ -1,4 +1,5 @@
 // TwoDLists.tsx
+import TwoDListsHeaderRight from "@/components/header-rights/two-d-lists";
 import HolidayInfo from "@/components/holiday-info";
 import { Loading } from "@/components/loading";
 import TwoDListToolBar from "@/components/two-d-lists/toolbar";
@@ -6,11 +7,12 @@ import TwoDListsRow from "@/components/two-d-lists/two-d-lists-row";
 import { useCommissionUserContext } from "@/hooks/commission-users/use-commission-user-context";
 import { useManageContext } from "@/hooks/manage/use-manage-context";
 import { useCalculatedData } from "@/hooks/two-d-list/use-calculated-data";
-import { useTwoDlistsPageHeaderContext } from "@/hooks/two-d-list/use-header-context";
 import { useTwoDListsContext } from "@/hooks/two-d-list/use-two-d-list-context";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { useDebounce } from "@/hooks/use-debounce";
+import { SectionName } from "@/types/manage-types";
 import { FilterModeType } from "@/types/two-d-list-types";
+import { Tabs } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
@@ -18,6 +20,7 @@ const TwoDLists = () => {
 	const date = new Date();
 	const { twoDListGroup, loading, error, setError, fetchTwoDList } =
 		useTwoDListsContext();
+	const [section, setSection] = useState<SectionName>("morning_section");
 	const { commissionUsers } = useCommissionUserContext();
 	const [filterMode, setFilterMode] = useState<FilterModeType>("all");
 	const [limit, setLimit] = useState<number>(1000);
@@ -27,7 +30,6 @@ const TwoDLists = () => {
 	const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 	const isHoliday = false;
 	const debouncedQuery = useDebounce(inputValue, 500);
-	const { section } = useTwoDlistsPageHeaderContext();
 	const debouncedSection = useDebounce(section, 500);
 	const {
 		sections,
@@ -114,44 +116,56 @@ const TwoDLists = () => {
 	}
 
 	return (
-		<View className="flex-col flex-1 bg-gray-100">
-			{isHoliday && <HolidayInfo />}
-
-			{/* Toolbar */}
-			<TwoDListToolBar
-				filterMode={filterMode}
-				setFilterMode={setFilterMode}
-				users={users}
-				selectedUserId={selectedUserId}
-				setSelectedUserId={setSelectedUserId}
-				userDropdownOpen={userDropdownOpen}
-				setUserDropdownOpen={setUserDropdownOpen}
-				filterDropdownOpen={filterDropdownOpen}
-				setFilterDropdownOpen={setFilterDropdownOpen}
-				inputValue={inputValue}
-				setInputValue={setInputValue}
-			/>
-
-			{/* Data list */}
-			<ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
-				{chunkedData.length > 0 ? (
-					chunkedData.map((pair, index) => (
-						<TwoDListsRow
-							limit={limit}
-							key={index}
-							left={pair.left}
-							right={pair.right}
+		<>
+			<Tabs.Screen
+				options={{
+					headerRight: () => (
+						<TwoDListsHeaderRight
+							section={section}
+							setSection={setSection}
 						/>
-					))
-				) : (
-					<View className="flex-col items-center justify-center h-40">
-						<Text className="text-3xl font-bold text-gray-400">
-							No Item Exists
-						</Text>
-					</View>
-				)}
-			</ScrollView>
-		</View>
+					),
+				}}
+			/>
+			<View className="flex-col flex-1 bg-gray-100">
+				{isHoliday && <HolidayInfo />}
+
+				{/* Toolbar */}
+				<TwoDListToolBar
+					filterMode={filterMode}
+					setFilterMode={setFilterMode}
+					users={users}
+					selectedUserId={selectedUserId}
+					setSelectedUserId={setSelectedUserId}
+					userDropdownOpen={userDropdownOpen}
+					setUserDropdownOpen={setUserDropdownOpen}
+					filterDropdownOpen={filterDropdownOpen}
+					setFilterDropdownOpen={setFilterDropdownOpen}
+					inputValue={inputValue}
+					setInputValue={setInputValue}
+				/>
+
+				{/* Data list */}
+				<ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
+					{chunkedData.length > 0 ? (
+						chunkedData.map((pair, index) => (
+							<TwoDListsRow
+								limit={limit}
+								key={index}
+								left={pair.left}
+								right={pair.right}
+							/>
+						))
+					) : (
+						<View className="flex-col items-center justify-center h-40">
+							<Text className="text-3xl font-bold text-gray-400">
+								No Item Exists
+							</Text>
+						</View>
+					)}
+				</ScrollView>
+			</View>
+		</>
 	);
 };
 

@@ -1,6 +1,5 @@
-import { useManagePageHeaderContext } from "@/hooks/manage/user-header-context";
 import { formatDateDisplay, formatKs, getTotalArray } from "@/lib/helpers";
-import { SectionRange, SectionSummary } from "@/types/manage-types";
+import { RangeMode, SectionRange, SectionSummary } from "@/types/manage-types";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
@@ -8,10 +7,15 @@ type Props = {
 	summary: SectionSummary;
 	date: Date;
 	setSelectedSectionRange: React.Dispatch<React.SetStateAction<SectionRange>>;
+	setRangeMode: React.Dispatch<React.SetStateAction<RangeMode>>;
 };
 
-const WeekSummaryCard = ({ summary, date, setSelectedSectionRange }: Props) => {
-	const { setRangeMode } = useManagePageHeaderContext();
+const WeekSummaryCard = ({
+	summary,
+	date,
+	setSelectedSectionRange,
+	setRangeMode,
+}: Props) => {
 	const handleToggle = () => {
 		setRangeMode("day");
 		setSelectedSectionRange({

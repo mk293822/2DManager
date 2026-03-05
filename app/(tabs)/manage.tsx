@@ -1,13 +1,14 @@
+import ManagePageHeaderRight from "@/components/header-rights/manage-page";
 import { Loading } from "@/components/loading";
 import ManageDatePickerHeader from "@/components/manage/manage-date-picker-header";
 import ManageDaySummary from "@/components/manage/manage-day-summary";
 import ManageWeekSummary from "@/components/manage/manage-week-summary";
 import { useManageContext } from "@/hooks/manage/use-manage-context";
-import { useManagePageHeaderContext } from "@/hooks/manage/user-header-context";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { useDebounce } from "@/hooks/use-debounce";
 import { getWeekOfMonth } from "@/lib/helpers";
-import { SectionRange } from "@/types/manage-types";
+import { RangeMode, SectionRange } from "@/types/manage-types";
+import { Tabs } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { Provider as PaperProvider } from "react-native-paper";
@@ -28,7 +29,7 @@ const Manage = () => {
 		onConfirmDelete,
 	} = useManageContext();
 
-	const { rangeMode } = useManagePageHeaderContext();
+	const [rangeMode, setRangeMode] = useState<RangeMode>("day");
 	const debounceRangeMode = useDebounce(rangeMode, 500);
 	registerTranslation("en-GB", enGB);
 	const date = new Date();
@@ -114,32 +115,45 @@ const Manage = () => {
 	/* ---------------- MAIN RENDER ---------------- */
 
 	return (
-		<PaperProvider>
-			<ScrollView
-				className="flex-1 bg-gray-100 p-4"
-				contentContainerStyle={{ paddingBottom: 120 }}
-			>
-				<ManageDatePickerHeader
-					selectedSectionRange={selectedSectionRange}
-					setSelectedSectionRange={setSelectedSectionRange}
-				/>
-
-				{debounceRangeMode === "day" ? (
-					<ManageDaySummary
-						onConfirmDelete={onConfirmDelete}
-						onEditSave={onEditSave}
-						handleCreateSection={handleCreateSection}
-						sections={sections[0]}
-					/>
-				) : (
-					<ManageWeekSummary
-						sections={sections}
+		<>
+			<Tabs.Screen
+				options={{
+					headerRight: () => (
+						<ManagePageHeaderRight
+							rangeMode={rangeMode}
+							setRangeMode={setRangeMode}
+						/>
+					),
+				}}
+			/>
+			<PaperProvider>
+				<ScrollView
+					className="flex-1 bg-gray-100 p-4"
+					contentContainerStyle={{ paddingBottom: 120 }}
+				>
+					<ManageDatePickerHeader
+						selectedSectionRange={selectedSectionRange}
 						setSelectedSectionRange={setSelectedSectionRange}
-						handleCreateSection={handleCreateSection}
 					/>
-				)}
-			</ScrollView>
-		</PaperProvider>
+
+					{debounceRangeMode === "day" ? (
+						<ManageDaySummary
+							onConfirmDelete={onConfirmDelete}
+							onEditSave={onEditSave}
+							handleCreateSection={handleCreateSection}
+							sections={sections[0]}
+						/>
+					) : (
+						<ManageWeekSummary
+							setRangeMode={setRangeMode}
+							sections={sections}
+							setSelectedSectionRange={setSelectedSectionRange}
+							handleCreateSection={handleCreateSection}
+						/>
+					)}
+				</ScrollView>
+			</PaperProvider>
+		</>
 	);
 };
 
