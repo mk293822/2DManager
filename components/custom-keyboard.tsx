@@ -1,0 +1,392 @@
+// CustomKeyboard.tsx
+import { isNumber } from "@/lib/helpers";
+import { Audio } from "expo-av";
+import * as Haptics from "expo-haptics";
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
+import { Pressable, Text, TextInput, View } from "react-native";
+
+interface CustomKeyboardProps {
+	twoDValue: string;
+	amount1Value: string;
+	amount2Value: string;
+	setTwoDValue: React.Dispatch<React.SetStateAction<string>>;
+	setAmount1Value: React.Dispatch<React.SetStateAction<string>>;
+	setAmount2Value: React.Dispatch<React.SetStateAction<string>>;
+	onEnter: () => void; // Optional Enter callback
+}
+
+const KEYBOARD_HEIGHT = 300;
+const FIELD_HEIGHT = 65;
+export const SPECIAL_KEYS = ["အပူး", "စုံပူး", "'မ'ပူး", "ပါဝါ", "နက္ခက်"];
+
+type ActiveField = "twoD" | "amount1" | "amount2";
+
+const CustomKeyboard: React.FC<CustomKeyboardProps> = ({
+	twoDValue,
+	amount1Value,
+	amount2Value,
+	setTwoDValue,
+	setAmount1Value,
+	setAmount2Value,
+	onEnter,
+}) => {
+	const [activeField, setActiveField] = useState<ActiveField>("twoD");
+
+	// Refs
+	const twoDRef = useRef<TextInput>(null);
+	const amount1Ref = useRef<TextInput>(null);
+	const amount2Ref = useRef<TextInput>(null);
+	const [isR, setIsR] = useState<boolean>(false);
+	const deleteDelay = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const deleteInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+	const clickSound = useRef<Audio.Sound | null>(null);
+
+	// Key rows
+	const topRow = useMemo(() => ["အပူး", "အုပ်စု", "ထိပ်", "ပိတ်"], []);
+	const secondRow = useMemo(() => ["စုံပူး", "1", "2", "3"], []);
+	const numericRows = useMemo(
+		() => [
+			["'မ'ပူး", "7", "8", "9"],
+			["ပါဝါ", "4", "5", "6"],
+			["နက္ခက်", "0", "00", "000"],
+		],
+		[],
+	);
+
+	// Load tap sound
+	useEffect(() => {
+		let mounted = true;
+
+		async function loadSound() {
+			try {
+				const { sound } = await Audio.Sound.createAsync(
+					require("../assets/sounds/tap.wav"),
+				);
+				clickSound.current = sound;
+				await clickSound.current.setVolumeAsync(0.1);
+			} catch (e) {
+				console.warn("Could not load sound:", e);
+			}
+		}
+
+		if (mounted) loadSound();
+
+		return () => {
+			mounted = false;
+			clickSound.current?.unloadAsync();
+			if (deleteDelay.current) clearTimeout(deleteDelay.current);
+			if (deleteInterval.current) clearInterval(deleteInterval.current);
+		};
+	}, []);
+
+	// Play tap sound with haptic feedback
+	const playTap = useCallback(
+		async (keyType: "normal" | "delete" | "enter" = "normal") => {
+			if (!clickSound.current) return;
+
+			try {
+				const status = await clickSound.current.getStatusAsync();
+				if (status.isLoaded) await clickSound.current.stopAsync();
+
+				await Promise.all([
+					clickSound.current?.playFromPositionAsync(0),
+					keyType === "delete"
+						? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
+						: keyType === "enter"
+							? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+							: Haptics.selectionAsync(),
+				]);
+			} catch (e) {
+				console.log("Tap error:", e);
+			}
+		},
+		[],
+	);
+
+	// Handle key press
+	const handlePress = useCallback(
+		(value: string) => {
+			playTap("normal");
+
+			// List of Burmese-only keys
+			const burmeseKeys = [
+				"အပူး",
+				"အုပ်စု",
+				"ထိပ်",
+				"ပိတ်",
+				"‌ခွေ",
+				"စုံပူး",
+				"'မ'ပူး",
+				"ပါဝါ",
+				"နက္ခက်",
+			];
+
+			if (burmeseKeys.includes(value)) {
+				// Always insert into amount2
+				setAmount1Value(value);
+				setIsR(false);
+
+				setTwoDValue("");
+			} else {
+				// Numeric keys follow activeField
+				if (activeField === "twoD") {
+					if (amount1Value && !isNumber(amount1Value))
+						setTwoDValue(value.charAt(0));
+					else if (twoDValue.length < 2)
+						setTwoDValue((prev) => prev + value.charAt(0));
+				} else if (isR) {
+					setAmount1Value((prev) => (isNumber(prev) ? prev + value : value));
+					setAmount2Value((prev) => prev + value);
+				} else if (activeField === "amount1") {
+					setAmount1Value((prev) => (isNumber(prev) ? prev + value : value));
+				} else {
+					setAmount2Value((prev) => prev + value);
+				}
+			}
+		},
+		[
+			activeField,
+			setTwoDValue,
+			setAmount1Value,
+			setAmount2Value,
+			playTap,
+			twoDValue,
+			amount1Value,
+			isR,
+		],
+	);
+
+	// Handle delete key
+	const handleDelete = useCallback(() => {
+		playTap("delete");
+		if (activeField === "twoD") setTwoDValue((prev) => prev.slice(0, -1));
+		else if (isR) {
+			setAmount1Value((prev) => prev.slice(0, -1));
+			setAmount2Value((prev) => prev.slice(0, -1));
+		} else if (activeField === "amount1")
+			setAmount1Value((prev) => (isNumber(prev) ? prev.slice(0, -1) : ""));
+		else setAmount2Value((prev) => prev.slice(0, -1));
+	}, [
+		activeField,
+		setTwoDValue,
+		setAmount1Value,
+		setAmount2Value,
+		playTap,
+		isR,
+	]);
+
+	const handleFieldPress = (
+		field: ActiveField,
+		ref: React.RefObject<TextInput | null>,
+	) => {
+		setActiveField(field);
+		ref.current?.focus();
+	};
+
+	return (
+		<View
+			style={{ height: KEYBOARD_HEIGHT }}
+			className="absolute bottom-0 left-0 right-0 bg-gray-50 border-t border-gray-200 p-4"
+		>
+			{/* Input fields */}
+			<View
+				className="absolute left-0 right-0 bg-gray-50 border-t border-gray-300 px-4 py-2 flex-row justify-between"
+				style={{
+					bottom: KEYBOARD_HEIGHT,
+					height: FIELD_HEIGHT,
+					backgroundColor: "white",
+					shadowColor: "#000",
+					shadowOffset: { width: 0, height: -4 },
+					shadowOpacity: 0.25,
+					shadowRadius: 4,
+					elevation: 1,
+				}}
+			>
+				{/* Two-D Field */}
+				<View className="flex-1 mr-2 p-1 rounded-lg">
+					<TextInput
+						ref={twoDRef}
+						placeholder="Two-D"
+						value={twoDValue}
+						maxLength={2}
+						onChangeText={setTwoDValue}
+						editable={!SPECIAL_KEYS.includes(amount1Value)}
+						onPressIn={() => handleFieldPress("twoD", twoDRef)}
+						showSoftInputOnFocus={false}
+						className={`bg-white shadow shadow-black rounded-lg px-4 py-3 border border-gray-200 focus:border-indigo-600 ${SPECIAL_KEYS.includes(amount1Value) ? "border-red-600" : ""}`}
+						accessibilityLabel="Two-D Field"
+						accessibilityState={{ selected: activeField === "twoD" }}
+					/>
+				</View>
+
+				{/* Amount 1 */}
+				<View className="flex-1 mr-2 p-1 rounded-lg">
+					<TextInput
+						ref={amount1Ref}
+						placeholder="Amount 1"
+						value={
+							isNumber(amount1Value)
+								? Number(amount1Value).toLocaleString()
+								: amount1Value
+						}
+						onChangeText={setAmount1Value}
+						editable
+						onPressIn={() => handleFieldPress("amount1", amount1Ref)}
+						showSoftInputOnFocus={false}
+						className="bg-white shadow shadow-black rounded-lg px-4 py-3 border border-gray-200 focus:border-indigo-600"
+						accessibilityLabel="Amount 1 Field"
+						accessibilityState={{ selected: activeField === "amount1" }}
+					/>
+				</View>
+
+				{/* Amount 2 */}
+				<View className="flex-1 mr-2 p-1 rounded-lg">
+					<TextInput
+						ref={amount2Ref}
+						placeholder="Amount 2"
+						value={
+							isNumber(amount2Value)
+								? Number(amount2Value).toLocaleString()
+								: amount2Value
+						}
+						onChangeText={setAmount2Value}
+						editable
+						onPressIn={() => handleFieldPress("amount2", amount2Ref)}
+						showSoftInputOnFocus={false}
+						className="bg-white shadow shadow-black rounded-lg px-4 py-3 border border-gray-200 focus:border-indigo-600"
+						accessibilityLabel="Amount 2 Field"
+						accessibilityState={{ selected: activeField === "amount2" }}
+					/>
+				</View>
+			</View>
+
+			{/* Top & second rows */}
+			<View className="flex-row mb-2">
+				{topRow.map((key) => (
+					<Pressable
+						key={key}
+						onPress={() => handlePress(key)}
+						className={
+							"flex-1  border border-gray-200 mx-1 shadow-gray-800 shadow-lg py-3 rounded-lg items-center bg-white"
+						}
+						accessibilityRole="button"
+						accessibilityLabel={key}
+						accessibilityHint={`Inserts ${key}`}
+					>
+						<Text className={"text-indigo-600 font-bold text-lg"}>{key}</Text>
+					</Pressable>
+				))}
+				{/* R */}
+				<Pressable
+					onPress={() => {
+						setIsR((pre) => !pre);
+						setAmount1Value((prev) => (isNumber(prev) ? prev : ""));
+					}}
+					className={`flex-1  border border-gray-200 mx-1 shadow-gray-800 shadow-lg py-3 rounded-lg items-center ${isR ? "bg-indigo-600" : "bg-white"}`}
+					accessibilityRole="button"
+					accessibilityLabel={"R"}
+					accessibilityHint={"R"}
+				>
+					<Text
+						className={`font-bold text-lg ${isR ? "text-white" : "text-indigo-600"}`}
+					>
+						R
+					</Text>
+				</Pressable>
+			</View>
+			<View className="flex-row mb-2">
+				{secondRow.map((key) => (
+					<Pressable
+						key={key}
+						onPress={() => handlePress(key)}
+						className={
+							"flex-1  border border-gray-200 mx-1 shadow-gray-800 shadow-lg py-3 rounded-lg items-center bg-white"
+						}
+						accessibilityRole="button"
+						accessibilityLabel={key}
+						accessibilityHint={`Inserts ${key}`}
+					>
+						<Text className={"text-indigo-600 font-bold text-lg"}>{key}</Text>
+					</Pressable>
+				))}
+				<Pressable
+					onPress={handleDelete}
+					className={
+						"flex-1  border border-gray-200 mx-1 shadow-gray-800 shadow-lg py-3 rounded-lg items-center bg-red-600"
+					}
+					accessibilityRole="button"
+					onPressIn={() => {
+						deleteDelay.current = setTimeout(() => {
+							deleteInterval.current = setInterval(() => handleDelete(), 50);
+						}, 500);
+					}}
+					onPressOut={() => {
+						if (deleteDelay.current) {
+							clearTimeout(deleteDelay.current);
+							deleteDelay.current = null;
+						}
+						if (deleteInterval.current) {
+							clearInterval(deleteInterval.current);
+							deleteInterval.current = null;
+						}
+					}}
+					accessibilityLabel={"Delete"}
+					accessibilityHint={"Deletes one character"}
+				>
+					<Text className={"text-white font-bold text-lg"}>⌫</Text>
+				</Pressable>
+			</View>
+
+			{/* Numeric rows */}
+			<View className="flex-row">
+				<View className="flex-col w-[80%]">
+					{numericRows.map((row, rowIndex) => (
+						<View
+							key={rowIndex}
+							className={`flex-row ${rowIndex === numericRows.length - 1 ? "" : "mb-2"}`}
+						>
+							{row.map((key) => (
+								<Pressable
+									key={key}
+									onPress={() => handlePress(key)}
+									accessibilityRole="button"
+									accessibilityLabel={key}
+									accessibilityHint={`Inserts ${key}`}
+									className="flex-1 mx-1 border border-gray-200 shadow-gray-800 shadow-lg bg-white py-3 rounded-lg items-center"
+								>
+									<Text className="text-indigo-600 font-bold text-lg">
+										{key}
+									</Text>
+								</Pressable>
+							))}
+						</View>
+					))}
+				</View>
+
+				{/* Enter button */}
+				<Pressable
+					className="flex-1 mx-1 border border-gray-200 shadow-gray-800 shadow-lg bg-indigo-600 py-3 rounded-lg items-center justify-center"
+					onPress={() => {
+						playTap("enter");
+						onEnter();
+					}}
+					accessibilityRole="button"
+					accessibilityLabel="Enter"
+					accessibilityHint="Submits input or triggers primary action"
+				>
+					<Text className="text-white font-bold text-md text-center">
+						Enter
+					</Text>
+				</Pressable>
+			</View>
+		</View>
+	);
+};
+
+export default CustomKeyboard;

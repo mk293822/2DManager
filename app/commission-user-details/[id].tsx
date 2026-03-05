@@ -12,7 +12,7 @@ import {
 	Provider as PaperProvider,
 } from "react-native-paper";
 
-import CommissionUserSectionsList from "@/components/section-sales/section-sale-list";
+import SectionSaleList from "@/components/section-sales/section-sale-list";
 import useCommissionUserDetailsHook from "@/hooks/commission-user-details/use-commission-user-details-hook";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { usePhoneActions } from "@/hooks/use-phone-actions";
@@ -149,10 +149,11 @@ const CommissionUserPage = () => {
 				</View>
 
 				{/* ===== SECTION SALES ===== */}
-				<CommissionUserSectionsList
+				<SectionSaleList
 					sales={commissionUserDetails.section_sales}
 					createComUserSection={createComUserSection}
 					userId={userId}
+					userName={commissionUserDetails.name}
 				/>
 
 				<View className="bg-red-100 border border-red-400 rounded-2xl p-6">

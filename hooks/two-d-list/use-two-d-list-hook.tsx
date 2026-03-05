@@ -1,38 +1,95 @@
 import { api } from "@/lib/api";
-import { TwoDListType } from "@/types/two-d-list-types";
+import { SectionName } from "@/types/manage-types";
+import { TwoDListGroup, TwoDListType } from "@/types/two-d-list-types";
 import { useState } from "react";
 
 export type TwoDListHookType = {
 	loading: boolean;
 	error: string | null;
+	twoDListGroup: TwoDListGroup | null;
 	twoDList: TwoDListType[] | null;
 	fetchTwoDList: (
 		signal: AbortSignal,
-		section_sale_id: string,
+		section_sale_id: string | undefined,
+	) => Promise<void>;
+	fetchTwoDListBySectionSale: (
+		signal: AbortSignal,
+		section_sale: string | undefined,
 	) => Promise<void>;
 	setError: React.Dispatch<React.SetStateAction<string | null>>;
+
 	handleCreateTwoDList: (
 		section_sale_id: string,
-		number: string,
-		total_amount: number,
+		numbers_data: {
+			total_amount: number;
+			number: string;
+		}[],
+		section_summary: string,
+		commission_user: string,
+		section: SectionName,
 	) => Promise<void>;
 };
 
 const useTwoDListHook = (): TwoDListHookType => {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [twoDListGroup, setTwoDListGroup] = useState<TwoDListGroup | null>(
+		null,
+	);
+
 	const [twoDList, setTwoDList] = useState<TwoDListType[] | null>(null);
 
 	const fetchTwoDList = async (
 		signal: AbortSignal,
-		section_summary_id: string,
+		section_summary_id: string | undefined,
 	) => {
+		if (!section_summary_id) {
+			setTwoDListGroup(null);
+			return;
+		}
+		try {
+			setLoading(true);
+			setError(null);
+
+			const { data } = await api.get<TwoDListGroup>(
+				`/sold-numbers/section-summary/${section_summary_id}/`,
+				{
+					signal,
+				},
+			);
+
+			if (!signal.aborted) {
+				setTwoDListGroup(data);
+			}
+		} catch (err: any) {
+			if (err.name === "CanceledError" || err.name === "AbortError") {
+				// Request was cancelled → do nothing
+				return;
+			}
+
+			setError("Failed to load two d list. Please try again.");
+			setTwoDListGroup(null);
+		} finally {
+			if (!signal.aborted) {
+				setLoading(false);
+			}
+		}
+	};
+
+	const fetchTwoDListBySectionSale = async (
+		signal: AbortSignal,
+		section_sale: string | undefined,
+	) => {
+		if (!section_sale) {
+			setTwoDList(null);
+			return;
+		}
 		try {
 			setLoading(true);
 			setError(null);
 
 			const { data } = await api.get<TwoDListType[]>(
-				`/sold-numbers/section-summary/${section_summary_id}/`,
+				`/sold-numbers/${section_sale}/`,
 				{
 					signal,
 				},
@@ -58,31 +115,40 @@ const useTwoDListHook = (): TwoDListHookType => {
 
 	const handleCreateTwoDList = async (
 		section_sale_id: string,
-		number: string,
-		total_amount: number,
+		numbers_data: {
+			total_amount: number;
+			number: string;
+		}[],
+		section_summary: string,
+		commission_user: string,
+		section: SectionName,
 	) => {
 		try {
 			const { data } = await api.post<TwoDListType>(
 				`/sold-numbers/${section_sale_id}/`,
-				{
-					number: number,
-					total_amount: total_amount,
-				},
+				{ numbers_data },
 			);
-			if (data.section_summary === twoDList?.[0]?.section_summary)
-				setTwoDList((prev) => {
-					if (!prev) return [data];
+			setTwoDListGroup((prev) => {
+				if (!prev) {
+					return {
+						section_summary,
+						section,
+						sold_numbers_by_user: {
+							[commission_user]: [data],
+						},
+					};
+				}
 
-					const index = prev.findIndex((item) => item.id === data.id);
-
-					if (index >= 0) {
-						const newList = [...prev];
-						newList[index] = data;
-						return newList;
-					}
-
-					return [...prev, data];
-				});
+				return {
+					...prev,
+					sold_numbers_by_user: {
+						...prev.sold_numbers_by_user,
+						[commission_user]: prev.sold_numbers_by_user[commission_user]
+							? [...prev.sold_numbers_by_user[commission_user], data]
+							: [data],
+					},
+				};
+			});
 		} catch {
 			setError("Failed to create two d list");
 		}
@@ -92,9 +158,11 @@ const useTwoDListHook = (): TwoDListHookType => {
 		loading,
 		error,
 		twoDList,
+		twoDListGroup,
 		setError,
 		fetchTwoDList,
 		handleCreateTwoDList,
+		fetchTwoDListBySectionSale,
 	};
 };
 

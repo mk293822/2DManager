@@ -51,6 +51,7 @@ const TabsLayout = () => {
 			</View>
 		);
 	}
+
 	return (
 		<SafeAreaProvider>
 			<ManageProvider>

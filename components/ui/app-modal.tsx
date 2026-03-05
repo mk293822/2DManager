@@ -13,7 +13,7 @@ const AppModal = ({
 		>
 			<View
 				className="flex-1 justify-center items-center p-4"
-				style={{ backgroundColor: "rgb(17 24 39 / 0.5)" }}
+				style={{ backgroundColor: "rgba(17,24,39,0.5)" }}
 			>
 				{children}
 			</View>

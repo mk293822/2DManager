@@ -13,9 +13,15 @@ type Props = {
 		date?: Date,
 	) => Promise<void>;
 	userId: string;
+	userName: string;
 };
 
-const SectionSaleList = ({ sales, createComUserSection, userId }: Props) => {
+const SectionSaleList = ({
+	sales,
+	createComUserSection,
+	userId,
+	userName,
+}: Props) => {
 	const date = new Date(sales.date);
 	const sectionList: SectionName[] = ["morning_section", "evening_section"];
 
@@ -38,6 +44,7 @@ const SectionSaleList = ({ sales, createComUserSection, userId }: Props) => {
 					userId={userId}
 					date={date}
 					section={sec}
+					userName={userName}
 				/>
 			))}
 		</View>

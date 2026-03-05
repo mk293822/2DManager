@@ -5,7 +5,7 @@ export function useTwoDlistsPageHeaderContext() {
 	const context = useContext(SectionContext);
 	if (!context)
 		throw new Error(
-			"useTwoDlistsPageHeaderContext must be used inside TwoDListsPageHeaderContextProvider",
+			"useTwoDlistsPageHeaderContext must be used inside TwoDListsHeaderContextProvider",
 		);
 	return context;
 }

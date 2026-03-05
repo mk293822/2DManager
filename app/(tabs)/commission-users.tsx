@@ -1,8 +1,9 @@
+import { Loading } from "@/components/loading";
 import { useCommissionUserContext } from "@/hooks/commission-users/use-commission-user-context";
+import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
-	ActivityIndicator,
 	Pressable,
 	ScrollView,
 	Text,
@@ -15,14 +16,7 @@ const CommissionUsers = () => {
 	const { commissionUsers, loading, error, reset } = useCommissionUserContext();
 
 	if (loading) {
-		return (
-			<View className="flex-1 items-center justify-center bg-gray-100 p-4">
-				<ActivityIndicator
-					size={50}
-					color="#2563eb"
-				/>
-			</View>
-		);
+		return <Loading />;
 	}
 
 	if (error) {
@@ -63,22 +57,37 @@ const CommissionUsers = () => {
 			contentContainerStyle={{ paddingBottom: 120 }}
 		>
 			{commissionUsers.map((user) => (
-				<TouchableOpacity
+				<View
 					key={user.id}
-					onPress={() =>
-						router.push({
-							pathname: "/commission-user-details/[id]",
-							params: { id: String(user.id) },
-						})
-					}
-					activeOpacity={0.8}
-					className="bg-white rounded-2xl shadow p-4 mb-4 flex-row items-center justify-between"
+					className="flex-1 bg-white rounded-2xl shadow p-4 mb-4 flex-row items-center justify-between"
 				>
-					<View>
-						<Text className="text-indigo-700 text-lg">{user.name}</Text>
-						<Text className="text-gray-500 mt-1">{user.phone_number}</Text>
+					<TouchableOpacity
+						onPress={() =>
+							router.push({
+								pathname: "/commission-user-details/[id]",
+								params: { id: String(user.id) },
+							})
+						}
+						activeOpacity={0.8}
+						className="flex-1 flex-row items-center justify-between"
+					>
+						<View>
+							<Text className="text-indigo-700 text-lg">{user.name}</Text>
+							<Text className="text-gray-500 mt-1">{user.phone_number}</Text>
+						</View>
+					</TouchableOpacity>
+					<View className="pr-2">
+						<TouchableOpacity
+							hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+						>
+							<AntDesign
+								name="plus"
+								size={18}
+								color={"#6b7280"}
+							/>
+						</TouchableOpacity>
 					</View>
-				</TouchableOpacity>
+				</View>
 			))}
 		</ScrollView>
 	);

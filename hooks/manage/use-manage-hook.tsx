@@ -7,6 +7,7 @@ import {
 	SectionSummaries,
 } from "@/types/manage-types";
 import { useCallback, useState } from "react";
+import { useAbortableEffect } from "../use-abortable-effect";
 
 export type ManageHookType = {
 	sections: SectionSummaries[] | null;
@@ -85,6 +86,13 @@ const useManageHook = (): ManageHookType => {
 		},
 		[],
 	);
+
+	useAbortableEffect((signal) => {
+		fetchSection(signal, {
+			type: "day",
+			date: new Date(),
+		});
+	}, []);
 
 	const handleCreateSection = async (
 		section: SectionName = "morning_section",

@@ -1,6 +1,6 @@
 import HolidayInfo from "@/components/holiday-info";
 import LiveCard from "@/components/live-card";
-import TwoDResultCard from "@/components/two-d-result-card";
+import TwoDResultCard from "@/components/two-d-lists/two-d-result-card";
 import { useBlink } from "@/hooks/use-blink";
 import useFetchLiveTwoD from "@/hooks/use-fetch-live-two-d";
 import { getTwoDResultTime, toSeconds } from "@/lib/get-twod-result-time";

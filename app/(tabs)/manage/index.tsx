@@ -1,19 +1,15 @@
+import { Loading } from "@/components/loading";
 import ManageDatePickerHeader from "@/components/manage/manage-date-picker-header";
 import ManageDaySummary from "@/components/manage/manage-day-summary";
 import ManageWeekSummary from "@/components/manage/manage-week-summary";
 import { useManageContext } from "@/hooks/manage/use-manage-context";
 import { useManagePageHeaderContext } from "@/hooks/manage/user-header-context";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
+import { useDebounce } from "@/hooks/use-debounce";
 import { getWeekOfMonth } from "@/lib/helpers";
 import { SectionRange } from "@/types/manage-types";
 import { useEffect, useState } from "react";
-import {
-	ActivityIndicator,
-	Pressable,
-	ScrollView,
-	Text,
-	View,
-} from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { Provider as PaperProvider } from "react-native-paper";
 import { enGB, registerTranslation } from "react-native-paper-dates";
 
@@ -31,8 +27,9 @@ const Manage = () => {
 		onEditSave,
 		onConfirmDelete,
 	} = useManageContext();
-	const { rangeMode } = useManagePageHeaderContext();
 
+	const { rangeMode } = useManagePageHeaderContext();
+	const debounceRangeMode = useDebounce(rangeMode, 500);
 	registerTranslation("en-GB", enGB);
 	const date = new Date();
 
@@ -47,7 +44,7 @@ const Manage = () => {
 	useEffect(() => {
 		setSelectedSectionRange((prev) => {
 			if (!prev) return prev;
-			if (rangeMode === "week" && prev.type === "day") {
+			if (debounceRangeMode === "week" && prev.type === "day") {
 				return {
 					type: "week",
 					year: date.getFullYear(),
@@ -55,7 +52,7 @@ const Manage = () => {
 					week: getWeekOfMonth(date),
 				};
 			}
-			if (rangeMode === "day" && prev.type === "week") {
+			if (debounceRangeMode === "day" && prev.type === "week") {
 				return {
 					type: "day",
 					date: date,
@@ -64,7 +61,7 @@ const Manage = () => {
 
 			return prev;
 		});
-	}, [rangeMode]);
+	}, [debounceRangeMode]);
 
 	useAbortableEffect(() => {
 		fetchSection(abortController.signal, selectedSectionRange);
@@ -93,14 +90,7 @@ const Manage = () => {
 
 	// Handle loading
 	if (loading || !sections) {
-		return (
-			<View className="flex-1 items-center justify-center bg-gray-100 p-4">
-				<ActivityIndicator
-					size={50}
-					color="#2563eb"
-				/>
-			</View>
-		);
+		return <Loading />;
 	}
 
 	// Handle no sections
@@ -134,7 +124,7 @@ const Manage = () => {
 					setSelectedSectionRange={setSelectedSectionRange}
 				/>
 
-				{rangeMode === "day" ? (
+				{debounceRangeMode === "day" ? (
 					<ManageDaySummary
 						onConfirmDelete={onConfirmDelete}
 						onEditSave={onEditSave}

@@ -65,3 +65,24 @@ export function getWeekOfMonth(date: Date): number {
 
 	return Math.ceil((dayOfMonth + startDay) / 7);
 }
+
+export const chunkIntoPairs = (data: any[]) => {
+	const result = [];
+	for (let i = 0; i < data.length; i += 2) {
+		result.push({
+			left: data[i],
+			right: data[i + 1] || null,
+		});
+	}
+	return result;
+};
+
+export function changePlace(value: string) {
+	if (value.length > 2) return value;
+
+	return value.trim().split("").reverse().join("");
+}
+
+export function isNumber(value: string) {
+	return !isNaN(Number(value));
+}

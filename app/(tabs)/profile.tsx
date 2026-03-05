@@ -1,11 +1,25 @@
+import { EVENT_NAMES } from "@/event-names";
 import { useAuthContext } from "@/hooks/use-auth-context";
+import { eventBus } from "@/lib/event-bus";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import * as Clipboard from "expo-clipboard";
+import * as Haptics from "expo-haptics";
 import { Link } from "expo-router";
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 const Profile = () => {
 	const { isAuthenticated, user, logout, fetchUser } = useAuthContext();
+
+	const onCopy = async () => {
+		await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+		await Clipboard.setStringAsync(user?.uuid || "");
+		eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+			title: "Copied!",
+			description: "User ID Copied Successfully!",
+			type: "success",
+		});
+	};
 
 	if (!isAuthenticated) {
 		return (
@@ -59,14 +73,18 @@ const Profile = () => {
 					Account Info
 				</Text>
 
-				<View className="flex-row items-center gap-3 py-2">
+				<TouchableOpacity
+					activeOpacity={0.5}
+					onPress={onCopy}
+					className="flex-row items-center gap-3 py-2"
+				>
 					<AntDesign
 						name="idcard"
 						size={18}
 						color="#4f46e5"
 					/>
 					<Text className="text-gray-700">{user?.uuid}</Text>
-				</View>
+				</TouchableOpacity>
 				<View className="flex-row items-center gap-3 py-2">
 					<AntDesign
 						name="phone"
