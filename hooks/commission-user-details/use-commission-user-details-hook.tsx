@@ -29,6 +29,11 @@ export type ComUserDetailsHookTypes = {
 			phone_number: string;
 		},
 	) => Promise<void>;
+	deleteComUserSection: (
+		id: string,
+		userId: string,
+		section: SectionName,
+	) => Promise<void>;
 };
 
 const useCommissionUserDetailsHook = () => {
@@ -132,6 +137,32 @@ const useCommissionUserDetailsHook = () => {
 		}
 	};
 
+	const deleteComUserSection = async (
+		id: string,
+		userId: string,
+		section: SectionName,
+	) => {
+		try {
+			setError(null);
+
+			await api.delete(`/commission-users/${userId}/section-sales/${id}/`);
+
+			setCommissionUserDetails((prev) => {
+				if (!prev) return prev;
+
+				return {
+					...prev,
+					section_sales: { ...prev.section_sales, [section]: null },
+				};
+			});
+		} catch (err: any) {
+			if (err.name === "CanceledError" || err.name === "AbortError") return;
+
+			setError("Failed to create section sale. Please try again.");
+			setCommissionUserDetails(null);
+		}
+	};
+
 	return {
 		loading,
 		error,
@@ -141,6 +172,7 @@ const useCommissionUserDetailsHook = () => {
 		createComUserSection,
 		setError,
 		editCommissionUserDetails,
+		deleteComUserSection,
 	};
 };
 

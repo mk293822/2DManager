@@ -36,6 +36,7 @@ const CommissionUserPage = () => {
 		reset,
 		createComUserSection,
 		editCommissionUserDetails,
+		deleteComUserSection,
 	} = useCommissionUserDetailsContext();
 
 	useAbortableEffect(
@@ -175,6 +176,7 @@ const CommissionUserPage = () => {
 
 					{/* ===== SECTION SALES ===== */}
 					<SectionSaleList
+						deleteComUserSection={deleteComUserSection}
 						sales={commissionUserDetails.section_sales}
 						createComUserSection={createComUserSection}
 						userId={userId}

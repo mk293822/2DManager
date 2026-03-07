@@ -14,6 +14,11 @@ type Props = {
 	) => Promise<void>;
 	userId: string;
 	user_name: string;
+	deleteComUserSection: (
+		id: string,
+		userId: string,
+		section: SectionName,
+	) => Promise<void>;
 };
 
 const SectionSaleList = ({
@@ -21,6 +26,7 @@ const SectionSaleList = ({
 	createComUserSection,
 	userId,
 	user_name,
+	deleteComUserSection,
 }: Props) => {
 	const date = new Date(sales.date);
 	const sectionList: SectionName[] = ["morning_section", "evening_section"];
@@ -38,6 +44,7 @@ const SectionSaleList = ({
 			</View>
 			{sectionList.map((sec) => (
 				<CommissionUserSectionCard
+					deleteComUserSection={deleteComUserSection}
 					key={sec}
 					sale={sales[sec]}
 					createComUserSection={createComUserSection}
