@@ -14,7 +14,7 @@ import {
 
 import CommissionUserDetailsHeaderRight from "@/components/header-rights/commission-user-details";
 import SectionSaleList from "@/components/section-sales/section-sale-list";
-import useCommissionUserDetailsHook from "@/hooks/commission-user-details/use-commission-user-details-hook";
+import { useCommissionUserDetailsContext } from "@/hooks/commission-user-details/use-context";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { usePhoneActions } from "@/hooks/use-phone-actions";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -33,7 +33,7 @@ const CommissionUserPage = () => {
 		error,
 		reset,
 		createComUserSection,
-	} = useCommissionUserDetailsHook();
+	} = useCommissionUserDetailsContext();
 
 	useAbortableEffect(
 		(signal) => {
@@ -162,7 +162,7 @@ const CommissionUserPage = () => {
 						sales={commissionUserDetails.section_sales}
 						createComUserSection={createComUserSection}
 						userId={userId}
-						userName={commissionUserDetails.name}
+						user_name={commissionUserDetails.name}
 					/>
 
 					<View className="bg-red-100 border border-red-400 rounded-2xl p-6">

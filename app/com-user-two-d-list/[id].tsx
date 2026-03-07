@@ -1,19 +1,13 @@
 // UserTwoDList.tsx
+import UserTwoDListHeaderRight from "@/components/header-rights/user-two-d-list";
 import { Loading } from "@/components/loading";
-import TwoDListsRow from "@/components/two-d-lists/two-d-lists-row";
 import { useTwoDListsContext } from "@/hooks/two-d-list/use-two-d-list-context";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
-import { chunkIntoPairs } from "@/lib/helpers";
-import AntDesign from "@expo/vector-icons/AntDesign";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { ENGLISH_TO_BURMESE_MAP } from "@/lib/custom-keyboard-helper";
+import { SoldNumberItem } from "@/types/two-d-list-types";
+import { Stack, useLocalSearchParams } from "expo-router";
 import React from "react";
-import {
-	Pressable,
-	ScrollView,
-	Text,
-	TouchableOpacity,
-	View,
-} from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 
 const UserTwoDList = () => {
 	const { twoDList, fetchTwoDListBySectionSale, loading } =
@@ -22,7 +16,6 @@ const UserTwoDList = () => {
 		id: string;
 		user_name: string;
 	}>();
-	const router = useRouter();
 
 	useAbortableEffect(
 		(signal) => {
@@ -32,9 +25,48 @@ const UserTwoDList = () => {
 	);
 
 	const reset = () => {
-		if (id) {
-			fetchTwoDListBySectionSale(new AbortController().signal, id);
+		if (id) fetchTwoDListBySectionSale(new AbortController().signal, id);
+	};
+
+	const renderNumberBox = (val: SoldNumberItem) => {
+		if (val.type === "normal" && val.number) {
+			return (
+				<View className="bg-indigo-600 px-4 py-2 rounded-xl">
+					<Text className="text-white font-bold text-lg tracking-wider">
+						{val.number}
+					</Text>
+				</View>
+			);
 		}
+		if (val.type === "special_group" && val.value) {
+			return (
+				<View className="bg-green-600 px-4 py-2 rounded-xl">
+					<Text className="text-white font-bold text-lg tracking-wider">
+						{ENGLISH_TO_BURMESE_MAP[val.value]}
+					</Text>
+				</View>
+			);
+		}
+		if (val.type === "digit_related" && val.number && val.value) {
+			return (
+				<View className="bg-yellow-600 px-4 py-2 rounded-xl">
+					<Text className="text-white font-bold text-lg tracking-wider">
+						{val.number} - {ENGLISH_TO_BURMESE_MAP[val.value]}
+					</Text>
+				</View>
+			);
+		}
+		return null;
+	};
+
+	const renderAmountBox = (amount: number | undefined) => {
+		return (
+			<View className="bg-gray-100 px-4 py-2 rounded-xl min-w-[70px] items-center">
+				<Text className="text-gray-800 font-semibold text-base">
+					{Number(amount).toLocaleString()}
+				</Text>
+			</View>
+		);
 	};
 
 	return (
@@ -42,31 +74,15 @@ const UserTwoDList = () => {
 			<Stack.Screen
 				options={{
 					headerTitle: user_name || "User",
-					headerRight: () => {
-						return (
-							<TouchableOpacity
-								hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-								style={{
-									padding: 6,
-									borderRadius: 999,
-								}}
-								onPress={() => {
-									router.push({
-										pathname: "/com-user-two-d-list/create-two-d-numbers",
-										params: { id, user_name },
-									});
-								}}
-							>
-								<AntDesign
-									name="plus"
-									size={22}
-									color="#fff"
-								/>
-							</TouchableOpacity>
-						);
-					},
+					headerRight: () => (
+						<UserTwoDListHeaderRight
+							id={id}
+							user_name={user_name}
+						/>
+					),
 				}}
 			/>
+
 			{loading ? (
 				<Loading />
 			) : !twoDList || twoDList.length === 0 ? (
@@ -83,36 +99,49 @@ const UserTwoDList = () => {
 				</View>
 			) : (
 				<ScrollView className="flex-1 bg-gray-100 px-4 pt-6">
-					{twoDList.map((item) => {
-						const formatted = item.numbers_data.map((n) => ({
-							number: n.number,
-							value: n.total_amount,
-						}));
-						const date = new Date(item.created_at);
+					{twoDList.map((twod, index) => (
+						<View
+							key={twod.id}
+							className="mb-6 bg-white rounded-2xl px-4 py-4 shadow"
+							style={{
+								shadowColor: "#000",
+								shadowOffset: { width: 0, height: 3 },
+								shadowOpacity: 0.1,
+								shadowRadius: 6,
+								elevation: 3,
+							}}
+						>
+							{/* Section Header */}
+							<Text className="text-gray-500 text-md mb-4 text-center">
+								Created: {new Date(twod.created_at).toLocaleTimeString()}
+							</Text>
 
-						const pairs = chunkIntoPairs(formatted);
+							{/* Numbers List */}
+							{twod.numbers_data.map((val, ind) => (
+								<View
+									key={ind}
+									className="mb-3 rounded-2xl bg-gray-200 p-3 shadow-sm"
+								>
+									<View className="flex-row items-center justify-between">
+										{renderNumberBox(val)}
+										<View className="flex-row items-center gap-3">
+											{renderAmountBox(val.amount1)}
 
-						return (
-							<View
-								key={item.id}
-								className="bg-gray-50 rounded-3xl py-4 mb-4 border border-gray-200"
-							>
-								{/* Time Header */}
-								<Text className="text-md px-4 font-semibold text-gray-600 mb-4 text-center">
-									{date.toLocaleTimeString()}
-								</Text>
+											{val.amount1 != null &&
+												val.amount2 != null &&
+												val.amount2 !== 0 && (
+													<View className="h-6 w-[1px] border-r border-gray-400" />
+												)}
 
-								{/* Rows */}
-								{pairs.map((pair, index) => (
-									<TwoDListsRow
-										key={index}
-										left={pair.left}
-										right={pair.right}
-									/>
-								))}
-							</View>
-						);
-					})}
+											{val.amount2 != null &&
+												val.amount2 !== 0 &&
+												renderAmountBox(val.amount2)}
+										</View>
+									</View>
+								</View>
+							))}
+						</View>
+					))}
 				</ScrollView>
 			)}
 		</>

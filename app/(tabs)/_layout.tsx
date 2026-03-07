@@ -1,6 +1,4 @@
 import HapticTab from "@/components/haptic-tab";
-import CommissionUserProvider from "@/contexts/commission-user-provider";
-import ManageProvider from "@/contexts/manage-provider";
 import { useAuthContext } from "@/hooks/use-auth-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Tabs, useRouter } from "expo-router";
@@ -79,62 +77,58 @@ const TabsLayout = () => {
 
 	return (
 		<SafeAreaProvider>
-			<ManageProvider>
-				<CommissionUserProvider>
-					<Tabs
-						screenOptions={{
-							tabBarShowLabel: false,
-							tabBarButton: (props) => <HapticTab {...props} />,
-							tabBarItemStyle: {
-								justifyContent: "center",
-								alignItems: "center",
-								width: "auto",
-								height: "100%",
+			<Tabs
+				screenOptions={{
+					tabBarShowLabel: false,
+					tabBarButton: (props) => <HapticTab {...props} />,
+					tabBarItemStyle: {
+						justifyContent: "center",
+						alignItems: "center",
+						width: "auto",
+						height: "100%",
+					},
+					tabBarStyle: {
+						borderRadius: 50,
+						marginHorizontal: 20,
+						marginBottom: 30,
+						height: 60,
+						position: "absolute",
+						overflow: "hidden",
+						borderWidth: 1,
+						paddingHorizontal: 14,
+						backgroundColor: "rgba(49, 46, 129, 0.75)",
+					},
+				}}
+			>
+				{pages.map((page) => (
+					<Tabs.Screen
+						key={page.name}
+						name={page.name}
+						options={{
+							tabBarIcon: ({ focused }) => (
+								<TabIcon
+									icon={page.icon}
+									focused={focused}
+								/>
+							),
+							title: page.title,
+							headerStyle: {
+								backgroundColor: "rgba(49, 46, 129, 0.85)",
 							},
-							tabBarStyle: {
-								borderRadius: 50,
-								marginHorizontal: 20,
-								marginBottom: 30,
-								height: 60,
-								position: "absolute",
-								overflow: "hidden",
-								borderWidth: 1,
-								paddingHorizontal: 14,
-								backgroundColor: "rgba(49, 46, 129, 0.75)",
+
+							headerTintColor: "#e5e7eb",
+							headerTitleStyle: {
+								fontWeight: "900",
+							},
+
+							headerRightContainerStyle: {
+								display: "flex",
+								alignItems: "center",
 							},
 						}}
-					>
-						{pages.map((page) => (
-							<Tabs.Screen
-								key={page.name}
-								name={page.name}
-								options={{
-									tabBarIcon: ({ focused }) => (
-										<TabIcon
-											icon={page.icon}
-											focused={focused}
-										/>
-									),
-									title: page.title,
-									headerStyle: {
-										backgroundColor: "rgba(49, 46, 129, 0.85)",
-									},
-
-									headerTintColor: "#e5e7eb",
-									headerTitleStyle: {
-										fontWeight: "900",
-									},
-
-									headerRightContainerStyle: {
-										display: "flex",
-										alignItems: "center",
-									},
-								}}
-							/>
-						))}
-					</Tabs>
-				</CommissionUserProvider>
-			</ManageProvider>
+					/>
+				))}
+			</Tabs>
 		</SafeAreaProvider>
 	);
 };

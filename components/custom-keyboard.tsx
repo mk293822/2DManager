@@ -1,4 +1,10 @@
 // CustomKeyboard.tsx
+import {
+	BURMESE_KEYS_MAP,
+	ENGLISH_TO_BURMESE_MAP,
+	SPECIAL_KEYS1,
+	SPECIAL_KEYS2,
+} from "@/lib/custom-keyboard-helper";
 import { isNumber } from "@/lib/helpers";
 import { Audio } from "expo-av";
 import * as Haptics from "expo-haptics";
@@ -23,7 +29,6 @@ interface CustomKeyboardProps {
 
 const KEYBOARD_HEIGHT = 300;
 const FIELD_HEIGHT = 65;
-export const SPECIAL_KEYS = ["အပူး", "စုံပူး", "'မ'ပူး", "ပါဝါ", "နက္ခက်"];
 
 type ActiveField = "twoD" | "amount1" | "amount2";
 
@@ -111,44 +116,61 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({
 
 	// Handle key press
 	const handlePress = useCallback(
-		(value: string) => {
+		(inputValue: string) => {
 			playTap("normal");
 
-			// List of Burmese-only keys
-			const burmeseKeys = [
-				"အပူး",
-				"အုပ်စု",
-				"ထိပ်",
-				"ပိတ်",
-				"‌ခွေ",
-				"စုံပူး",
-				"'မ'ပူး",
-				"ပါဝါ",
-				"နက္ခက်",
-			];
+			const value =
+				BURMESE_KEYS_MAP[inputValue as keyof typeof BURMESE_KEYS_MAP] ??
+				inputValue;
 
-			if (burmeseKeys.includes(value)) {
-				// Always insert into amount2
+			if (SPECIAL_KEYS1.includes(value)) {
+				setTwoDValue(value);
+				setIsR(false);
+				setActiveField("amount1");
+				amount1Ref.current?.focus();
+				setAmount2Value("");
+				setAmount1Value("");
+				return;
+			}
+
+			if (SPECIAL_KEYS2.includes(value)) {
 				setAmount1Value(value);
 				setIsR(false);
-
-				setTwoDValue("");
-			} else {
-				// Numeric keys follow activeField
-				if (activeField === "twoD") {
-					if (amount1Value && !isNumber(amount1Value))
-						setTwoDValue(value.charAt(0));
-					else if (twoDValue.length < 2)
-						setTwoDValue((prev) => prev + value.charAt(0));
-				} else if (isR) {
-					setAmount1Value((prev) => (isNumber(prev) ? prev + value : value));
-					setAmount2Value((prev) => prev + value);
-				} else if (activeField === "amount1") {
-					setAmount1Value((prev) => (isNumber(prev) ? prev + value : value));
+				setTwoDValue((pre) => (isNumber(pre) ? pre.charAt(0) : ""));
+				if (!twoDValue) {
+					setActiveField("twoD");
+					twoDRef.current?.focus();
 				} else {
-					setAmount2Value((prev) => prev + value);
+					setActiveField("amount2");
+					amount2Ref.current?.focus();
 				}
+				return;
 			}
+
+			// Numeric keys follow activeField
+			if (activeField === "twoD") {
+				// Only allow two digits & validate previous state
+				if (amount1Value && !isNumber(amount1Value)) {
+					setTwoDValue(value.charAt(0));
+				} else if (twoDValue.length < 2) {
+					setTwoDValue((prev) => prev + value.charAt(0));
+				}
+				return;
+			}
+
+			if (isR) {
+				setAmount1Value((prev) => (isNumber(prev) ? prev + value : value));
+				setAmount2Value((prev) => prev + value);
+				return;
+			}
+
+			if (activeField === "amount1") {
+				setAmount1Value((prev) => (isNumber(prev) ? prev + value : value));
+				return;
+			}
+
+			// Default/fallback: update amount2
+			setAmount2Value((prev) => prev + value);
 		},
 		[
 			activeField,
@@ -165,7 +187,8 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({
 	// Handle delete key
 	const handleDelete = useCallback(() => {
 		playTap("delete");
-		if (activeField === "twoD") setTwoDValue((prev) => prev.slice(0, -1));
+		if (activeField === "twoD")
+			setTwoDValue((prev) => (isNumber(prev) ? prev.slice(0, -1) : ""));
 		else if (isR) {
 			setAmount1Value((prev) => prev.slice(0, -1));
 			setAmount2Value((prev) => prev.slice(0, -1));
@@ -213,13 +236,12 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({
 					<TextInput
 						ref={twoDRef}
 						placeholder="Two-D"
-						value={twoDValue}
-						maxLength={2}
+						value={ENGLISH_TO_BURMESE_MAP[twoDValue] ?? twoDValue}
 						onChangeText={setTwoDValue}
-						editable={!SPECIAL_KEYS.includes(amount1Value)}
+						editable
 						onPressIn={() => handleFieldPress("twoD", twoDRef)}
 						showSoftInputOnFocus={false}
-						className={`bg-white shadow shadow-black rounded-lg px-4 py-3 border border-gray-200 focus:border-indigo-600 ${SPECIAL_KEYS.includes(amount1Value) ? "border-red-600" : ""}`}
+						className="bg-white shadow shadow-black rounded-lg px-4 py-3 border border-gray-200 focus:border-indigo-600"
 						accessibilityLabel="Two-D Field"
 						accessibilityState={{ selected: activeField === "twoD" }}
 					/>
@@ -231,9 +253,9 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({
 						ref={amount1Ref}
 						placeholder="Amount 1"
 						value={
-							isNumber(amount1Value)
+							amount1Value && isNumber(amount1Value)
 								? Number(amount1Value).toLocaleString()
-								: amount1Value
+								: (ENGLISH_TO_BURMESE_MAP[amount1Value] ?? amount1Value)
 						}
 						onChangeText={setAmount1Value}
 						editable
@@ -251,15 +273,15 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({
 						ref={amount2Ref}
 						placeholder="Amount 2"
 						value={
-							isNumber(amount2Value)
+							amount2Value && isNumber(amount2Value)
 								? Number(amount2Value).toLocaleString()
 								: amount2Value
 						}
 						onChangeText={setAmount2Value}
-						editable
+						editable={!SPECIAL_KEYS1.includes(twoDValue)}
 						onPressIn={() => handleFieldPress("amount2", amount2Ref)}
 						showSoftInputOnFocus={false}
-						className="bg-white shadow shadow-black rounded-lg px-4 py-3 border border-gray-200 focus:border-indigo-600"
+						className={`bg-white shadow shadow-black rounded-lg px-4 py-3 border border-gray-200 focus:border-indigo-600 ${SPECIAL_KEYS1.includes(twoDValue) ? "border-red-600" : ""}`}
 						accessibilityLabel="Amount 2 Field"
 						accessibilityState={{ selected: activeField === "amount2" }}
 					/>
@@ -273,8 +295,9 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({
 						key={key}
 						onPress={() => handlePress(key)}
 						className={
-							"flex-1  border border-gray-200 mx-1 shadow-gray-800 shadow-lg py-3 rounded-lg items-center bg-white"
+							"flex-1  border border-gray-200 mx-1 shadow-gray-800 shadow-lg py-3 rounded-lg items-center bg-white disabled:bg-gray-400"
 						}
+						disabled={SPECIAL_KEYS1.includes(twoDValue) && key !== "အပူး"}
 						accessibilityRole="button"
 						accessibilityLabel={key}
 						accessibilityHint={`Inserts ${key}`}
@@ -286,9 +309,13 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({
 				<Pressable
 					onPress={() => {
 						setIsR((pre) => !pre);
-						setAmount1Value((prev) => (isNumber(prev) ? prev : ""));
+						if (amount1Value !== amount2Value) {
+							setAmount1Value("");
+							setAmount2Value("");
+						}
 					}}
-					className={`flex-1  border border-gray-200 mx-1 shadow-gray-800 shadow-lg py-3 rounded-lg items-center ${isR ? "bg-indigo-600" : "bg-white"}`}
+					disabled={SPECIAL_KEYS1.includes(twoDValue)}
+					className={`flex-1  border border-gray-200 mx-1 shadow-gray-800 shadow-lg py-3 rounded-lg items-center disabled:bg-gray-400 ${isR ? "bg-indigo-600" : "bg-white"}`}
 					accessibilityRole="button"
 					accessibilityLabel={"R"}
 					accessibilityHint={"R"}

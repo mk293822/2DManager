@@ -10,8 +10,10 @@ import { useCalculatedData } from "@/hooks/two-d-list/use-calculated-data";
 import { useTwoDListsContext } from "@/hooks/two-d-list/use-two-d-list-context";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { useDebounce } from "@/hooks/use-debounce";
+import { changeSectionName } from "@/lib/helpers";
+import { chunkIntoPairs } from "@/lib/two-d-list-helper";
 import { SectionName } from "@/types/manage-types";
-import { FilterModeType } from "@/types/two-d-list-types";
+import { FilterModeType, SoldNumberItem } from "@/types/two-d-list-types";
 import { Tabs } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
@@ -67,53 +69,17 @@ const TwoDLists = () => {
 		...(commissionUsers || []).map((u) => ({ id: u.id, name: u.name })),
 	];
 
+	const numbers: SoldNumberItem[] = twoDListGroup
+		? Object.entries(twoDListGroup.sold_numbers_by_user)
+				.filter(([user]) => selectedUserId === "all" || user === selectedUserId)
+				.flatMap(([, twoDListArray]) => twoDListArray)
+				.flatMap((item) => item.numbers_data)
+		: [];
+
 	// Chunk filtered data into pairs
-	const chunkedData = useCalculatedData(
-		selectedUserId,
-		filterMode,
-		limit,
-		twoDListGroup,
-	);
+	const calculatedData = useCalculatedData(numbers, filterMode, limit);
 
-	/* ---------------- UI STATES ---------------- */
-
-	if (error) {
-		return (
-			<View className="flex-1 items-center justify-center bg-white p-4">
-				<Text className="text-red-600 font-semibold text-center mb-4">
-					{error}
-				</Text>
-				<Pressable
-					onPress={reset}
-					className="bg-indigo-600 px-6 py-3 rounded-lg"
-				>
-					<Text className="text-white font-semibold">Reload</Text>
-				</Pressable>
-			</View>
-		);
-	}
-
-	// Handle loading
-	if ((loading || sectionLoading) && !twoDListGroup) {
-		return <Loading />;
-	}
-
-	// Handle no sections
-	if (!twoDListGroup) {
-		return (
-			<View className="flex-1 items-center justify-center bg-gray-100 p-4">
-				<Text className="text-gray-500 font-semibold text-center mb-4">
-					No sections found for today.
-				</Text>
-				<Pressable
-					onPress={reset}
-					className="bg-indigo-600 px-6 py-3 rounded-lg"
-				>
-					<Text className="text-white font-semibold">Reload</Text>
-				</Pressable>
-			</View>
-		);
-	}
+	const chunkedData = chunkIntoPairs(calculatedData);
 
 	return (
 		<>
@@ -127,44 +93,73 @@ const TwoDLists = () => {
 					),
 				}}
 			/>
-			<View className="flex-col flex-1 bg-gray-100">
-				{isHoliday && <HolidayInfo />}
 
-				{/* Toolbar */}
-				<TwoDListToolBar
-					filterMode={filterMode}
-					setFilterMode={setFilterMode}
-					users={users}
-					selectedUserId={selectedUserId}
-					setSelectedUserId={setSelectedUserId}
-					userDropdownOpen={userDropdownOpen}
-					setUserDropdownOpen={setUserDropdownOpen}
-					filterDropdownOpen={filterDropdownOpen}
-					setFilterDropdownOpen={setFilterDropdownOpen}
-					inputValue={inputValue}
-					setInputValue={setInputValue}
-				/>
+			{error ? (
+				<View className="flex-1 items-center justify-center bg-white p-4">
+					<Text className="text-red-600 font-semibold text-center mb-4">
+						{error}
+					</Text>
+					<Pressable
+						onPress={reset}
+						className="bg-indigo-600 px-6 py-3 rounded-lg"
+					>
+						<Text className="text-white font-semibold">Reload</Text>
+					</Pressable>
+				</View>
+			) : (loading || sectionLoading) && !twoDListGroup ? (
+				<Loading />
+			) : !twoDListGroup ? (
+				<View className="flex-1 items-center justify-center bg-gray-100 p-4">
+					<Text className="text-gray-500 font-semibold text-center mb-4">
+						No sections found for {changeSectionName(section)} section.
+					</Text>
+					<Pressable
+						onPress={reset}
+						className="bg-indigo-600 px-6 py-3 rounded-lg"
+					>
+						<Text className="text-white font-semibold">Reload</Text>
+					</Pressable>
+				</View>
+			) : (
+				<View className="flex-col flex-1 bg-gray-100">
+					{isHoliday && <HolidayInfo />}
 
-				{/* Data list */}
-				<ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
-					{chunkedData.length > 0 ? (
-						chunkedData.map((pair, index) => (
-							<TwoDListsRow
-								limit={limit}
-								key={index}
-								left={pair.left}
-								right={pair.right}
-							/>
-						))
-					) : (
-						<View className="flex-col items-center justify-center h-40">
-							<Text className="text-3xl font-bold text-gray-400">
-								No Item Exists
-							</Text>
-						</View>
-					)}
-				</ScrollView>
-			</View>
+					{/* Toolbar */}
+					<TwoDListToolBar
+						filterMode={filterMode}
+						setFilterMode={setFilterMode}
+						users={users}
+						selectedUserId={selectedUserId}
+						setSelectedUserId={setSelectedUserId}
+						userDropdownOpen={userDropdownOpen}
+						setUserDropdownOpen={setUserDropdownOpen}
+						filterDropdownOpen={filterDropdownOpen}
+						setFilterDropdownOpen={setFilterDropdownOpen}
+						inputValue={inputValue}
+						setInputValue={setInputValue}
+					/>
+
+					{/* Data list */}
+					<ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
+						{chunkedData.length > 0 ? (
+							chunkedData.map((pair, index) => (
+								<TwoDListsRow
+									limit={limit}
+									key={index}
+									left={pair.left}
+									right={pair.right}
+								/>
+							))
+						) : (
+							<View className="flex-col items-center justify-center h-40">
+								<Text className="text-3xl font-bold text-gray-400">
+									No Item Exists
+								</Text>
+							</View>
+						)}
+					</ScrollView>
+				</View>
+			)}
 		</>
 	);
 };

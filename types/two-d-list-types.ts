@@ -1,11 +1,42 @@
 import { SectionName } from "./manage-types";
 
 export type FilterModeType = "all" | "greater" | "less";
+export type SoldNumberItemType = "normal" | "digit_related" | "special_group";
 
-export type SoldNumberItem = {
+export type SpecialGroupValue1 =
+	| "APU"
+	| "SONE_PU"
+	| "MA_PU"
+	| "PA_WA"
+	| "NAK_KET";
+
+export type SpecialGroupValue2 = "OOK_SU" | "TAIT" | "PATE";
+
+export type NormalItem = {
+	type: "normal";
 	number: string;
-	total_amount: number;
+	value?: null;
+	amount1: number;
+	amount2?: number;
 };
+
+export type DigitRelatedItem = {
+	type: "digit_related";
+	value: SpecialGroupValue2;
+	number: string;
+	amount1: number;
+	amount2?: null;
+};
+
+export type SpecialGroupItem = {
+	type: "special_group";
+	value: SpecialGroupValue1;
+	number?: never | string;
+	amount1: number;
+	amount2?: null;
+};
+
+export type SoldNumberItem = NormalItem | DigitRelatedItem | SpecialGroupItem;
 
 export type TwoDListType = {
 	id: string;
@@ -21,4 +52,10 @@ export type TwoDListGroup = {
 	sold_numbers_by_user: {
 		[commission_user: string]: TwoDListType[];
 	};
+};
+
+export type NumberEntry = {
+	number: string;
+	items: SoldNumberItem[];
+	value: number;
 };

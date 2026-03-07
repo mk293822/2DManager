@@ -90,8 +90,8 @@ const TwoDListsHeaderRight = ({
 										fontSize: 14,
 									}}
 								>
-									{time.charAt(0).toUpperCase() + time.slice(1).slice(0, -8)}{" "}
-									{/* Capitalize and remove "_section" */}
+									{time.charAt(0).toUpperCase() +
+										time.slice(1).slice(0, -8)}{" "}
 								</Text>
 							</TouchableOpacity>
 						);

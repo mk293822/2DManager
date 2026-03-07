@@ -68,50 +68,6 @@ const Manage = () => {
 		fetchSection(abortController.signal, selectedSectionRange);
 	}, [selectedSectionRange]);
 
-	/* ---------------- UI STATES ---------------- */
-
-	if (error) {
-		return (
-			<View className="flex-1 items-center justify-center bg-white p-4">
-				<Text className="text-red-600 font-semibold text-center mb-4">
-					{error}
-				</Text>
-				<Pressable
-					onPress={() => {
-						setError(null);
-						fetchSection(abortController.signal, selectedSectionRange); // retry
-					}}
-					className="bg-indigo-600 px-6 py-3 rounded-lg"
-				>
-					<Text className="text-white font-semibold">Reload</Text>
-				</Pressable>
-			</View>
-		);
-	}
-
-	// Handle loading
-	if (loading || !sections) {
-		return <Loading />;
-	}
-
-	// Handle no sections
-	if (sections.length === 0) {
-		return (
-			<View className="flex-1 items-center justify-center bg-gray-100 p-4">
-				<Text className="text-gray-500 font-semibold text-center mb-4">
-					No sections found for this date/week.
-				</Text>
-				<Pressable
-					onPress={() =>
-						fetchSection(abortController.signal, selectedSectionRange)
-					}
-					className="bg-indigo-600 px-6 py-3 rounded-lg"
-				>
-					<Text className="text-white font-semibold">Reload</Text>
-				</Pressable>
-			</View>
-		);
-	}
 	/* ---------------- MAIN RENDER ---------------- */
 
 	return (
@@ -126,33 +82,66 @@ const Manage = () => {
 					),
 				}}
 			/>
-			<PaperProvider>
-				<ScrollView
-					className="flex-1 bg-gray-100 p-4"
-					contentContainerStyle={{ paddingBottom: 120 }}
-				>
-					<ManageDatePickerHeader
-						selectedSectionRange={selectedSectionRange}
-						setSelectedSectionRange={setSelectedSectionRange}
-					/>
-
-					{debounceRangeMode === "day" ? (
-						<ManageDaySummary
-							onConfirmDelete={onConfirmDelete}
-							onEditSave={onEditSave}
-							handleCreateSection={handleCreateSection}
-							sections={sections[0]}
-						/>
-					) : (
-						<ManageWeekSummary
-							setRangeMode={setRangeMode}
-							sections={sections}
+			{error ? (
+				<View className="flex-1 items-center justify-center bg-white p-4">
+					<Text className="text-red-600 font-semibold text-center mb-4">
+						{error}
+					</Text>
+					<Pressable
+						onPress={() => {
+							setError(null);
+							fetchSection(abortController.signal, selectedSectionRange); // retry
+						}}
+						className="bg-indigo-600 px-6 py-3 rounded-lg"
+					>
+						<Text className="text-white font-semibold">Reload</Text>
+					</Pressable>
+				</View>
+			) : loading ? (
+				<Loading />
+			) : !sections || sections.length === 0 ? (
+				<View className="flex-1 items-center justify-center bg-gray-100 p-4">
+					<Text className="text-gray-500 font-semibold text-center mb-4">
+						No sections found for this date/week.
+					</Text>
+					<Pressable
+						onPress={() =>
+							fetchSection(abortController.signal, selectedSectionRange)
+						}
+						className="bg-indigo-600 px-6 py-3 rounded-lg"
+					>
+						<Text className="text-white font-semibold">Reload</Text>
+					</Pressable>
+				</View>
+			) : (
+				<PaperProvider>
+					<ScrollView
+						className="flex-1 bg-gray-100 p-4"
+						contentContainerStyle={{ paddingBottom: 120 }}
+					>
+						<ManageDatePickerHeader
+							selectedSectionRange={selectedSectionRange}
 							setSelectedSectionRange={setSelectedSectionRange}
-							handleCreateSection={handleCreateSection}
 						/>
-					)}
-				</ScrollView>
-			</PaperProvider>
+
+						{debounceRangeMode === "day" ? (
+							<ManageDaySummary
+								onConfirmDelete={onConfirmDelete}
+								onEditSave={onEditSave}
+								handleCreateSection={handleCreateSection}
+								sections={sections[0]}
+							/>
+						) : (
+							<ManageWeekSummary
+								setRangeMode={setRangeMode}
+								sections={sections}
+								setSelectedSectionRange={setSelectedSectionRange}
+								handleCreateSection={handleCreateSection}
+							/>
+						)}
+					</ScrollView>
+				</PaperProvider>
+			)}
 		</>
 	);
 };

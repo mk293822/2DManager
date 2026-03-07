@@ -1,3 +1,4 @@
+import useManageHook from "@/hooks/manage/use-manage-hook";
 import { changeSectionName, formatKs, formatSmartNumber } from "@/lib/helpers";
 import { ComUserSectionSaleType } from "@/types/commission-user-types";
 import { SectionName } from "@/types/manage-types";
@@ -17,7 +18,7 @@ type Props = {
 	userId: string;
 	date: Date;
 	section: SectionName;
-	userName: string;
+	user_name: string;
 };
 
 const CommissionUserSectionCard = ({
@@ -26,14 +27,23 @@ const CommissionUserSectionCard = ({
 	userId,
 	date,
 	section,
-	userName,
+	user_name,
 }: Props) => {
 	const section_summary = sale?.section_summary;
 	const router = useRouter();
+	const { fetchSection } = useManageHook();
 
 	const isProfit = sale?.profit_or_loss >= 0;
 
 	if (!sale || !section_summary) {
+		const handleCreate = async () => {
+			await createComUserSection(userId, section, date);
+			if (!section_summary)
+				fetchSection(new AbortController().signal, {
+					type: "day",
+					date: date,
+				});
+		};
 		return (
 			<View className="bg-white rounded-2xl shadow p-6 mb-6 items-center">
 				<Text className="text-gray-400 font-extrabold text-xl mb-2">
@@ -44,7 +54,7 @@ const CommissionUserSectionCard = ({
 				</Text>
 				<TouchableOpacity
 					activeOpacity={0.85}
-					onPress={() => createComUserSection(userId, section, date)}
+					onPress={handleCreate}
 					className="bg-indigo-600 px-6 py-3 rounded-xl shadow"
 				>
 					<Text className="text-white font-bold">Create</Text>
@@ -157,7 +167,10 @@ const CommissionUserSectionCard = ({
 					onPress={() =>
 						router.push({
 							pathname: "/com-user-two-d-list/[id]",
-							params: { id: String(sale.id), user_name: userName },
+							params: {
+								id: String(sale.id),
+								user_name: user_name,
+							},
 						})
 					}
 				>
@@ -174,7 +187,9 @@ const CommissionUserSectionCard = ({
 					onPress={() =>
 						router.push({
 							pathname: "/com-user-two-d-list/create-two-d-numbers",
-							params: { id: String(sale.id), user_name: userName },
+							params: {
+								section: section,
+							},
 						})
 					}
 				>
