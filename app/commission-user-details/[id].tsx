@@ -15,6 +15,7 @@ import {
 import CommissionUserDetailsHeaderRight from "@/components/header-rights/commission-user-details";
 import SectionSaleList from "@/components/section-sales/section-sale-list";
 import { useCommissionUserDetailsContext } from "@/hooks/commission-user-details/use-context";
+import { useCommissionUserContext } from "@/hooks/commission-users/use-commission-user-context";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { usePhoneActions } from "@/hooks/use-phone-actions";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -23,6 +24,7 @@ const CommissionUserPage = () => {
 	const { id } = useLocalSearchParams<{ id?: string | string[] }>();
 	const router = useRouter();
 	const { call, message } = usePhoneActions();
+	const { deleteCommissionUser } = useCommissionUserContext();
 
 	const userId = Array.isArray(id) ? id[0] : id;
 
@@ -33,6 +35,7 @@ const CommissionUserPage = () => {
 		error,
 		reset,
 		createComUserSection,
+		editCommissionUserDetails,
 	} = useCommissionUserDetailsContext();
 
 	useAbortableEffect(
@@ -45,6 +48,12 @@ const CommissionUserPage = () => {
 		},
 		[userId],
 	);
+
+	const handleDeleteUser = async () => {
+		if (!userId) return;
+		await deleteCommissionUser(userId);
+		router.replace("/(tabs)/commission-users");
+	};
 
 	if (!userId) {
 		router.replace("/commission-users");
@@ -83,7 +92,14 @@ const CommissionUserPage = () => {
 		<>
 			<Stack.Screen
 				options={{
-					headerRight: () => <CommissionUserDetailsHeaderRight />,
+					headerRight: () => (
+						<CommissionUserDetailsHeaderRight
+							id={userId}
+							editCommissionUserDetails={editCommissionUserDetails}
+							name={commissionUserDetails.name}
+							phone_number={commissionUserDetails.phone_number}
+						/>
+					),
 				}}
 			/>
 			<PaperProvider>
@@ -177,6 +193,7 @@ const CommissionUserPage = () => {
 
 						<TouchableOpacity
 							activeOpacity={0.85}
+							onPress={handleDeleteUser}
 							className="bg-red-600 rounded-xl py-3 items-center"
 						>
 							<Text className="text-white font-extrabold text-base">

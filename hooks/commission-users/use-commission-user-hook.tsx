@@ -13,6 +13,7 @@ export type CommissionUserHookType = {
 		name: string;
 		phone_number: string;
 	}) => Promise<void>;
+	deleteCommissionUser: (id: string) => Promise<void>;
 };
 
 const useCommissionUserHook = (): CommissionUserHookType => {
@@ -85,6 +86,26 @@ const useCommissionUserHook = (): CommissionUserHookType => {
 		}
 	};
 
+	const deleteCommissionUser = async (id: string) => {
+		try {
+			setLoading(true);
+			setError(null);
+
+			await api.delete(`/commission-users/${id}/`);
+
+			setCommissionUsers((pre) => pre?.filter((u) => u.id !== id) || []);
+		} catch (err: any) {
+			if (err.name === "CanceledError" || err.name === "AbortError") {
+				// Request was cancelled → do nothing
+				return;
+			}
+
+			setError("Failed to delete commission users. Please try again.");
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	const reset = () => {
 		setError(null);
 		const { signal } = new AbortController();
@@ -97,6 +118,7 @@ const useCommissionUserHook = (): CommissionUserHookType => {
 		error,
 		reset,
 		handleCreateCommissionUser,
+		deleteCommissionUser,
 	};
 };
 

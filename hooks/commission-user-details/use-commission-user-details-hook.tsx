@@ -22,6 +22,13 @@ export type ComUserDetailsHookTypes = {
 		date?: Date,
 	) => Promise<void>;
 	setError: React.Dispatch<React.SetStateAction<string | null>>;
+	editCommissionUserDetails: (
+		id: string,
+		form: {
+			name: string;
+			phone_number: string;
+		},
+	) => Promise<void>;
 };
 
 const useCommissionUserDetailsHook = () => {
@@ -58,6 +65,32 @@ const useCommissionUserDetailsHook = () => {
 			if (!signal.aborted) {
 				setLoading(false);
 			}
+		}
+	};
+
+	const editCommissionUserDetails = async (
+		id: string,
+		form: { name: string; phone_number: string },
+	) => {
+		try {
+			setLoading(true);
+			setError(null);
+
+			const { data } = await api.put<CommissionUserType>(
+				`/commission-users/${id}/`,
+				{ ...form },
+			);
+
+			setCommissionUserDetails(data);
+		} catch (err: any) {
+			if (err.name === "CanceledError" || err.name === "AbortError") {
+				// Request was cancelled → do nothing
+				return;
+			}
+
+			setError("Failed to edit commission user. Please try again.");
+		} finally {
+			setLoading(false);
 		}
 	};
 
@@ -107,6 +140,7 @@ const useCommissionUserDetailsHook = () => {
 		reset,
 		createComUserSection,
 		setError,
+		editCommissionUserDetails,
 	};
 };
 
