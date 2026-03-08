@@ -55,11 +55,18 @@ const ChangePasswordModal = ({
 	const handleSave = async () => {
 		// Clear previous errors
 		setLoading(true);
-		await changePassword(form);
+		const success = await changePassword(form);
 		setLoading(false);
-		fetchUser();
+		if (success) {
+			onCloseModal();
+			fetchUser();
+		}
+		setForm({
+			current_password: form.current_password,
+			new_password: "",
+			confirm_password: "",
+		});
 	};
-
 	return (
 		<AppModal open={open}>
 			{loading ? (

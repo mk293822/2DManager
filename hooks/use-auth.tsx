@@ -1,6 +1,5 @@
 import { api, clearTokens, setTokens } from "@/lib/api";
 import { User } from "@/types/main";
-import { AxiosError, isCancel } from "axios";
 import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 
@@ -85,33 +84,13 @@ export function useAuth(): UseAuthInterface {
 	);
 
 	const logout = useCallback(async () => {
-		try {
-			const refresh = await SecureStore.getItemAsync("refreshToken");
-			if (refresh) {
-				await api.post("/auth/logout/", { refresh }); // blacklist refresh token
-			}
-		} catch (err) {
-			if (isCancel(err)) return;
-			if (err instanceof AxiosError) {
-				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-					title: err.response?.data?.message || err.message || "Logout failed",
-					description:
-						"There was a problem logging out your account. Please try again.",
-					type: "error",
-				});
-			} else {
-				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-					title: "Logout failed ",
-					description:
-						"There was a problem logging out your account. Please try again.",
-					type: "error",
-				});
-			}
-		} finally {
-			setUser(null); // immediate UI logout
-			await clearTokens(); // remove tokens locally
-			router.replace("/login"); // redirect safely
+		const refresh = await SecureStore.getItemAsync("refreshToken");
+		if (refresh) {
+			await api.post("/auth/logout/", { refresh }); // blacklist refresh token
 		}
+		setUser(null); // immediate UI logout
+		await clearTokens(); // remove tokens locally
+		router.replace("/login"); // redirect safely
 	}, []);
 
 	const changePassword = async (form: {
@@ -127,6 +106,7 @@ export function useAuth(): UseAuthInterface {
 				description: "Password changed successfully!",
 				title: "Success",
 			});
+			return true;
 		} catch (err: any) {
 			const errData = err.response?.data || {};
 			const fieldErrors: typeof errors = {};
@@ -143,6 +123,7 @@ export function useAuth(): UseAuthInterface {
 				fieldErrors.confirm_password = errData.non_field_errors.join(" ");
 
 			setErrors(fieldErrors);
+			return false;
 		}
 	};
 
