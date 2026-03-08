@@ -1,8 +1,11 @@
+// CommissionUserPage.tsx
+import AntDesign from "@expo/vector-icons/AntDesign";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import {
+	FlatList,
 	Pressable,
-	ScrollView,
+	RefreshControl,
 	Text,
 	TouchableOpacity,
 	View,
@@ -18,7 +21,6 @@ import { useCommissionUserDetailsContext } from "@/hooks/commission-user-details
 import { useCommissionUserContext } from "@/hooks/commission-users/use-commission-user-context";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { usePhoneActions } from "@/hooks/use-phone-actions";
-import AntDesign from "@expo/vector-icons/AntDesign";
 
 const CommissionUserPage = () => {
 	const { id } = useLocalSearchParams<{ id?: string | string[] }>();
@@ -39,6 +41,8 @@ const CommissionUserPage = () => {
 		deleteComUserSection,
 	} = useCommissionUserDetailsContext();
 
+	const [refreshing, setRefreshing] = useState(false);
+
 	useAbortableEffect(
 		(signal) => {
 			if (!userId) {
@@ -50,6 +54,13 @@ const CommissionUserPage = () => {
 		[userId],
 	);
 
+	const onRefresh = async () => {
+		if (!userId) return;
+		setRefreshing(true);
+		await reset(userId);
+		setRefreshing(false);
+	};
+
 	const handleDeleteUser = async () => {
 		if (!userId) return;
 		await deleteCommissionUser(userId);
@@ -58,7 +69,7 @@ const CommissionUserPage = () => {
 
 	if (!userId) {
 		router.replace("/commission-users");
-		return;
+		return null;
 	}
 
 	if (loading)
@@ -78,7 +89,7 @@ const CommissionUserPage = () => {
 					{error}
 				</Text>
 				<Pressable
-					onPress={() => reset(userId)}
+					onPress={onRefresh}
 					className="bg-indigo-600 px-6 py-3 rounded-lg"
 				>
 					<Text className="text-white font-semibold">Reload</Text>
@@ -88,6 +99,100 @@ const CommissionUserPage = () => {
 	}
 
 	if (!commissionUserDetails) return null;
+
+	// Flatten all sections into a list
+	const flatListData = [
+		{ type: "userCard" },
+		{ type: "sectionSales" },
+		{ type: "dangerZone" },
+	];
+
+	const renderItem = ({ item }: { item: (typeof flatListData)[0] }) => {
+		switch (item.type) {
+			case "userCard":
+				return (
+					<View className="bg-white rounded-2xl shadow p-6 mb-4">
+						<Text className="text-indigo-700 font-extrabold text-2xl mb-1">
+							{commissionUserDetails.name}
+						</Text>
+						<Text className="text-gray-500 mb-4">
+							ID: {commissionUserDetails.id}
+						</Text>
+						<View className="flex-row justify-between py-2">
+							<Text className="text-gray-600">Manager</Text>
+							<Text className="font-semibold">
+								{commissionUserDetails.manager_name}
+							</Text>
+						</View>
+						<View className="flex-row justify-between py-2">
+							<Text className="text-gray-600">Phone Number</Text>
+							<Text className="font-semibold">
+								{commissionUserDetails.phone_number}
+							</Text>
+						</View>
+						<View className="mt-2 flex-row gap-3">
+							<TouchableOpacity
+								activeOpacity={0.85}
+								onPress={() => call(commissionUserDetails.phone_number)}
+								className="flex-1 bg-blue-600 rounded-2xl py-3 flex-row items-center justify-center gap-2 shadow"
+							>
+								<AntDesign
+									name="phone"
+									size={18}
+									color="white"
+								/>
+								<Text className="text-white font-bold text-base">Call</Text>
+							</TouchableOpacity>
+							<TouchableOpacity
+								activeOpacity={0.85}
+								onPress={() => message(commissionUserDetails.phone_number)}
+								className="flex-1 bg-green-600 rounded-2xl py-3 flex-row items-center justify-center gap-2 shadow"
+							>
+								<AntDesign
+									name="message"
+									size={18}
+									color="white"
+								/>
+								<Text className="text-white font-bold text-base">Message</Text>
+							</TouchableOpacity>
+						</View>
+					</View>
+				);
+			case "sectionSales":
+				return (
+					<SectionSaleList
+						deleteComUserSection={deleteComUserSection}
+						sales={commissionUserDetails.section_sales}
+						createComUserSection={createComUserSection}
+						userId={userId}
+						user_name={commissionUserDetails.name}
+					/>
+				);
+			case "dangerZone":
+				return (
+					<View className="bg-red-100 border border-red-400 rounded-2xl p-6">
+						<Text className="text-red-600 font-extrabold text-lg mb-2">
+							Danger Zone
+						</Text>
+						<Text className="text-gray-500 mb-4">
+							Deleting this user will permanently remove all related data and
+							commissions.
+						</Text>
+						<TouchableOpacity
+							activeOpacity={0.85}
+							onPress={handleDeleteUser}
+							className="bg-red-600 rounded-xl py-3 items-center"
+						>
+							<Text className="text-white font-extrabold text-base">
+								Delete User
+							</Text>
+						</TouchableOpacity>
+					</View>
+				);
+			default:
+				return null;
+		}
+	};
 
 	return (
 		<>
@@ -104,106 +209,24 @@ const CommissionUserPage = () => {
 				}}
 			/>
 			<PaperProvider>
-				<ScrollView
-					className="flex-1 bg-gray-100"
+				<FlatList
+					data={flatListData}
+					renderItem={renderItem}
+					keyExtractor={(item, index) => item.type + index}
+					refreshControl={
+						<RefreshControl
+							colors={["#0000ff"]}
+							refreshing={refreshing}
+							onRefresh={onRefresh}
+						/>
+					}
 					contentContainerStyle={{
 						paddingTop: 16,
 						paddingBottom: 40,
 						paddingHorizontal: 16,
 						gap: 16,
 					}}
-				>
-					{/* ===== USER INFO CARD ===== */}
-					<View className="bg-white rounded-2xl shadow p-6">
-						<Text className="text-indigo-700 font-extrabold text-2xl mb-1">
-							{commissionUserDetails.name}
-						</Text>
-
-						<Text className="text-gray-500 mb-4">
-							ID: {commissionUserDetails.id}
-						</Text>
-						<View className="flex-row justify-between py-2">
-							<Text className="text-gray-600">Manager</Text>
-							<Text className="font-semibold">
-								{commissionUserDetails.manager_name}
-							</Text>
-						</View>
-
-						<View className="flex-row justify-between py-2">
-							<Text className="text-gray-600">Phone Number</Text>
-							<Text className="font-semibold">
-								{commissionUserDetails.phone_number}
-							</Text>
-						</View>
-
-						{/* ===== PHONE ACTIONS ===== */}
-						<View className="mt-2">
-							<View className="flex-row gap-3">
-								{/* CALL BUTTON */}
-								<TouchableOpacity
-									activeOpacity={0.85}
-									onPress={() => call(commissionUserDetails.phone_number)}
-									className="flex-1 bg-blue-600 rounded-2xl py-3 flex-row items-center justify-center gap-2 shadow"
-								>
-									<AntDesign
-										name="phone"
-										size={18}
-										color="white"
-									/>
-									<Text className="text-white font-bold text-base">Call</Text>
-								</TouchableOpacity>
-
-								{/* MESSAGE BUTTON */}
-								<TouchableOpacity
-									activeOpacity={0.85}
-									onPress={
-										() => message(commissionUserDetails.phone_number) // assuming you already created this
-									}
-									className="flex-1 bg-green-600 rounded-2xl py-3 flex-row items-center justify-center gap-2 shadow"
-								>
-									<AntDesign
-										name="message"
-										size={18}
-										color="white"
-									/>
-									<Text className="text-white font-bold text-base">
-										Message
-									</Text>
-								</TouchableOpacity>
-							</View>
-						</View>
-					</View>
-
-					{/* ===== SECTION SALES ===== */}
-					<SectionSaleList
-						deleteComUserSection={deleteComUserSection}
-						sales={commissionUserDetails.section_sales}
-						createComUserSection={createComUserSection}
-						userId={userId}
-						user_name={commissionUserDetails.name}
-					/>
-
-					<View className="bg-red-100 border border-red-400 rounded-2xl p-6">
-						<Text className="text-red-600 font-extrabold text-lg mb-2">
-							Danger Zone
-						</Text>
-
-						<Text className="text-gray-500 mb-4">
-							Deleting this user will permanently remove all related data and
-							commissions.
-						</Text>
-
-						<TouchableOpacity
-							activeOpacity={0.85}
-							onPress={handleDeleteUser}
-							className="bg-red-600 rounded-xl py-3 items-center"
-						>
-							<Text className="text-white font-extrabold text-base">
-								Delete User
-							</Text>
-						</TouchableOpacity>
-					</View>
-				</ScrollView>
+				/>
 			</PaperProvider>
 		</>
 	);

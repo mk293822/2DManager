@@ -1,3 +1,4 @@
+// SectionSales.tsx
 import SectionSalesPageHeaderRight from "@/components/header-rights/section-sales";
 import { Loading } from "@/components/loading";
 import ManageDatePickerHeader from "@/components/manage/manage-date-picker-header";
@@ -8,7 +9,7 @@ import { getWeekOfMonth } from "@/lib/helpers";
 import { RangeMode, SectionRange } from "@/types/manage-types";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
 import { Provider as PaperProvider } from "react-native-paper";
 import { enGB, registerTranslation } from "react-native-paper-dates";
 
@@ -16,19 +17,19 @@ const SectionSales = () => {
 	const { id } = useLocalSearchParams<{ id?: string | string[] }>();
 	const router = useRouter();
 	const [rangeMode, setRangeMode] = useState<RangeMode>("day");
-
 	const userId = Array.isArray(id) ? id[0] : id;
 	registerTranslation("en-GB", enGB);
+
 	const { fetchSectionSales, sectionSales, loading, error, setError } =
 		useSectionSalesHook();
 
 	const date = new Date();
-
 	const [selectedSectionRange, setSelectedSectionRange] =
 		useState<SectionRange>({
 			type: "day",
 			date: date,
 		});
+	const [refreshing, setRefreshing] = useState(false);
 
 	useEffect(() => {
 		setSelectedSectionRange((prev) => {
@@ -42,12 +43,8 @@ const SectionSales = () => {
 				};
 			}
 			if (rangeMode === "day" && prev.type === "week") {
-				return {
-					type: "day",
-					date: date,
-				};
+				return { type: "day", date: date };
 			}
-
 			return prev;
 		});
 	}, [rangeMode]);
@@ -63,9 +60,21 @@ const SectionSales = () => {
 		[userId, selectedSectionRange],
 	);
 
+	const onRefresh = async () => {
+		if (!userId) return;
+		setRefreshing(true);
+		setError(null);
+		await fetchSectionSales(
+			new AbortController().signal,
+			userId,
+			selectedSectionRange,
+		);
+		setRefreshing(false);
+	};
+
 	if (!userId) {
 		router.replace("/commission-users");
-		return;
+		return null;
 	}
 
 	if (error) {
@@ -75,14 +84,7 @@ const SectionSales = () => {
 					{error}
 				</Text>
 				<Pressable
-					onPress={() => {
-						setError(null);
-						fetchSectionSales(
-							new AbortController().signal,
-							userId,
-							selectedSectionRange,
-						); // retry
-					}}
+					onPress={onRefresh}
 					className="bg-indigo-600 px-6 py-3 rounded-lg"
 				>
 					<Text className="text-white font-semibold">Reload</Text>
@@ -91,10 +93,28 @@ const SectionSales = () => {
 		);
 	}
 
-	// Handle loading
 	if (loading || !sectionSales) {
 		return <Loading />;
 	}
+
+	// Flatten the content into an array for FlatList
+	const flatListData = [{ type: "datePicker" }, { type: "sectionSales" }];
+
+	const renderItem = ({ item }: { item: (typeof flatListData)[0] }) => {
+		switch (item.type) {
+			case "datePicker":
+				return (
+					<ManageDatePickerHeader
+						selectedSectionRange={selectedSectionRange}
+						setSelectedSectionRange={setSelectedSectionRange}
+					/>
+				);
+			case "sectionSales":
+				return <WeekSectionSaleList sectionSales={sectionSales} />;
+			default:
+				return null;
+		}
+	};
 
 	return (
 		<>
@@ -109,17 +129,19 @@ const SectionSales = () => {
 				}}
 			/>
 			<PaperProvider>
-				<ScrollView
-					className="flex-1 bg-gray-100 p-4"
-					contentContainerStyle={{ paddingBottom: 120 }}
-				>
-					<ManageDatePickerHeader
-						selectedSectionRange={selectedSectionRange}
-						setSelectedSectionRange={setSelectedSectionRange}
-					/>
-
-					<WeekSectionSaleList sectionSales={sectionSales} />
-				</ScrollView>
+				<FlatList
+					data={flatListData}
+					renderItem={renderItem}
+					keyExtractor={(item, index) => item.type + index}
+					refreshControl={
+						<RefreshControl
+							colors={["#0000ff"]}
+							refreshing={refreshing}
+							onRefresh={onRefresh}
+						/>
+					}
+					contentContainerStyle={{ padding: 16, paddingBottom: 20, gap: 16 }}
+				/>
 			</PaperProvider>
 		</>
 	);

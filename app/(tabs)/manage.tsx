@@ -1,3 +1,4 @@
+// Manage.tsx
 import ManagePageHeaderRight from "@/components/header-rights/manage-page";
 import { Loading } from "@/components/loading";
 import ManageDatePickerHeader from "@/components/manage/manage-date-picker-header";
@@ -10,7 +11,7 @@ import { getWeekOfMonth } from "@/lib/helpers";
 import { RangeMode, SectionRange } from "@/types/manage-types";
 import { Tabs } from "expo-router";
 import { useEffect, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
 import { Provider as PaperProvider } from "react-native-paper";
 import { enGB, registerTranslation } from "react-native-paper-dates";
 
@@ -19,10 +20,7 @@ const Manage = () => {
 		error,
 		loading,
 		sections,
-
 		setError,
-
-		// Functions
 		fetchSection,
 		handleCreateSection,
 		onEditSave,
@@ -32,14 +30,15 @@ const Manage = () => {
 	const [rangeMode, setRangeMode] = useState<RangeMode>("day");
 	const debounceRangeMode = useDebounce(rangeMode, 500);
 	registerTranslation("en-GB", enGB);
-	const date = new Date();
 
+	const date = new Date();
 	const [selectedSectionRange, setSelectedSectionRange] =
 		useState<SectionRange>({
 			type: "day",
 			date: date,
 		});
 
+	const [refreshing, setRefreshing] = useState(false);
 	const abortController = new AbortController();
 
 	useEffect(() => {
@@ -54,12 +53,8 @@ const Manage = () => {
 				};
 			}
 			if (debounceRangeMode === "day" && prev.type === "week") {
-				return {
-					type: "day",
-					date: date,
-				};
+				return { type: "day", date: date };
 			}
-
 			return prev;
 		});
 	}, [debounceRangeMode]);
@@ -67,6 +62,36 @@ const Manage = () => {
 	useAbortableEffect(() => {
 		fetchSection(abortController.signal, selectedSectionRange);
 	}, [selectedSectionRange]);
+
+	const refreshData = async () => {
+		setRefreshing(true);
+		setError(null);
+		await fetchSection(abortController.signal, selectedSectionRange);
+		setRefreshing(false);
+	};
+
+	const renderSectionItem = ({ item }: { item: any }) => {
+		// item is sections[0] for day mode or sections for week mode
+		if (debounceRangeMode === "day") {
+			return (
+				<ManageDaySummary
+					onConfirmDelete={onConfirmDelete}
+					onEditSave={onEditSave}
+					handleCreateSection={handleCreateSection}
+					sections={item}
+				/>
+			);
+		} else {
+			return (
+				<ManageWeekSummary
+					setRangeMode={setRangeMode}
+					sections={item}
+					setSelectedSectionRange={setSelectedSectionRange}
+					handleCreateSection={handleCreateSection}
+				/>
+			);
+		}
+	};
 
 	/* ---------------- MAIN RENDER ---------------- */
 
@@ -88,10 +113,7 @@ const Manage = () => {
 						{error}
 					</Text>
 					<Pressable
-						onPress={() => {
-							setError(null);
-							fetchSection(abortController.signal, selectedSectionRange); // retry
-						}}
+						onPress={refreshData}
 						className="bg-indigo-600 px-6 py-3 rounded-lg"
 					>
 						<Text className="text-white font-semibold">Reload</Text>
@@ -105,9 +127,7 @@ const Manage = () => {
 						No sections found for this date/week.
 					</Text>
 					<Pressable
-						onPress={() =>
-							fetchSection(abortController.signal, selectedSectionRange)
-						}
+						onPress={refreshData}
 						className="bg-indigo-600 px-6 py-3 rounded-lg"
 					>
 						<Text className="text-white font-semibold">Reload</Text>
@@ -115,31 +135,28 @@ const Manage = () => {
 				</View>
 			) : (
 				<PaperProvider>
-					<ScrollView
-						className="flex-1 bg-gray-100 p-4"
-						contentContainerStyle={{ paddingBottom: 120 }}
-					>
-						<ManageDatePickerHeader
-							selectedSectionRange={selectedSectionRange}
-							setSelectedSectionRange={setSelectedSectionRange}
-						/>
-
-						{debounceRangeMode === "day" ? (
-							<ManageDaySummary
-								onConfirmDelete={onConfirmDelete}
-								onEditSave={onEditSave}
-								handleCreateSection={handleCreateSection}
-								sections={sections[0]}
+					<FlatList
+						data={debounceRangeMode === "day" ? sections : [sections]}
+						keyExtractor={(_, index) => index.toString()}
+						renderItem={renderSectionItem}
+						refreshControl={
+							<RefreshControl
+								colors={["#0000ff"]}
+								refreshing={refreshing}
+								onRefresh={refreshData}
 							/>
-						) : (
-							<ManageWeekSummary
-								setRangeMode={setRangeMode}
-								sections={sections}
+						}
+						ListHeaderComponent={
+							<ManageDatePickerHeader
+								selectedSectionRange={selectedSectionRange}
 								setSelectedSectionRange={setSelectedSectionRange}
-								handleCreateSection={handleCreateSection}
 							/>
-						)}
-					</ScrollView>
+						}
+						contentContainerStyle={{
+							paddingBottom: 100,
+							padding: 15,
+						}}
+					/>
 				</PaperProvider>
 			)}
 		</>

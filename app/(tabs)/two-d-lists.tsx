@@ -16,7 +16,7 @@ import { SectionName } from "@/types/manage-types";
 import { FilterModeType, SoldNumberItem } from "@/types/two-d-list-types";
 import { Tabs } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
 
 const TwoDLists = () => {
 	const date = new Date();
@@ -30,6 +30,7 @@ const TwoDLists = () => {
 	const [selectedUserId, setSelectedUserId] = useState("all");
 	const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
 	const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+	const [refreshing, setRefreshing] = useState(false); // ⬅️ for pull-to-refresh
 	const isHoliday = false;
 	const debouncedQuery = useDebounce(inputValue, 500);
 	const debouncedSection = useDebounce(section, 500);
@@ -40,7 +41,6 @@ const TwoDLists = () => {
 	} = useManageContext();
 	const abortController = new AbortController();
 
-	// 2️⃣ When sections state updates, fetch twoDList
 	useAbortableEffect(
 		(signal) => {
 			if (debouncedSection) {
@@ -58,10 +58,12 @@ const TwoDLists = () => {
 
 	const reset = async () => {
 		setError(null);
-		fetchSection(abortController.signal, {
+		setRefreshing(true); // show loading at top
+		await fetchSection(abortController.signal, {
 			type: "day",
 			date: date,
 		});
+		setRefreshing(false);
 	};
 
 	const users = [
@@ -76,10 +78,16 @@ const TwoDLists = () => {
 				.flatMap((item) => item.numbers_data)
 		: [];
 
-	// Chunk filtered data into pairs
 	const calculatedData = useCalculatedData(numbers, filterMode, limit);
-
 	const chunkedData = chunkIntoPairs(calculatedData);
+
+	const renderItem = ({ item }: { item: (typeof chunkedData)[0] }) => (
+		<TwoDListsRow
+			limit={limit}
+			left={item.left}
+			right={item.right}
+		/>
+	);
 
 	return (
 		<>
@@ -106,7 +114,7 @@ const TwoDLists = () => {
 						<Text className="text-white font-semibold">Reload</Text>
 					</Pressable>
 				</View>
-			) : (loading || sectionLoading) && !twoDListGroup ? (
+			) : loading || sectionLoading ? (
 				<Loading />
 			) : !twoDListGroup ? (
 				<View className="flex-1 items-center justify-center bg-gray-100 p-4">
@@ -139,25 +147,28 @@ const TwoDLists = () => {
 						setInputValue={setInputValue}
 					/>
 
-					{/* Data list */}
-					<ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
-						{chunkedData.length > 0 ? (
-							chunkedData.map((pair, index) => (
-								<TwoDListsRow
-									limit={limit}
-									key={index}
-									left={pair.left}
-									right={pair.right}
+					{/* Data list using FlatList with pull-to-refresh */}
+					{chunkedData.length > 0 ? (
+						<FlatList
+							data={chunkedData}
+							keyExtractor={(_, index) => index.toString()}
+							renderItem={renderItem}
+							refreshControl={
+								<RefreshControl
+									colors={["#0000ff"]}
+									refreshing={refreshing}
+									onRefresh={reset}
 								/>
-							))
-						) : (
-							<View className="flex-col items-center justify-center h-40">
-								<Text className="text-3xl font-bold text-gray-400">
-									No Item Exists
-								</Text>
-							</View>
-						)}
-					</ScrollView>
+							}
+							contentContainerStyle={{ paddingBottom: 120 }}
+						/>
+					) : (
+						<View className="flex-col items-center justify-center h-40">
+							<Text className="text-3xl font-bold text-gray-400">
+								No Item Exists
+							</Text>
+						</View>
+					)}
 				</View>
 			)}
 		</>

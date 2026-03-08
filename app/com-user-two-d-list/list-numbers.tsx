@@ -1,11 +1,12 @@
+// UserTwoDListNumbers.tsx
 import { Loading } from "@/components/loading";
 import TwoDListsRow from "@/components/two-d-lists/two-d-lists-row";
 import { useCalculatedData } from "@/hooks/two-d-list/use-calculated-data";
 import { useTwoDListsContext } from "@/hooks/two-d-list/use-two-d-list-context";
 import { chunkIntoPairs } from "@/lib/two-d-list-helper";
 import { Stack, useLocalSearchParams } from "expo-router";
-import React from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import React, { useState } from "react";
+import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
 
 const UserTwoDListNumbers = () => {
 	const { twoDList, fetchTwoDListBySectionSale, loading } =
@@ -14,16 +15,26 @@ const UserTwoDListNumbers = () => {
 		id: string;
 		user_name: string;
 	}>();
+	const [refreshing, setRefreshing] = useState(false);
 
-	const reset = () => {
-		if (id) fetchTwoDListBySectionSale(new AbortController().signal, id);
+	const reset = async () => {
+		if (!id) return;
+		setRefreshing(true);
+		await fetchTwoDListBySectionSale(new AbortController().signal, id);
+		setRefreshing(false);
 	};
 
 	const numbers = useCalculatedData(
 		twoDList?.flatMap((value) => value.numbers_data) || [],
 	);
-
 	const chunkedData = chunkIntoPairs(numbers);
+
+	const renderItem = ({ item }: { item: (typeof chunkedData)[0] }) => (
+		<TwoDListsRow
+			left={item.left}
+			right={item.right}
+		/>
+	);
 
 	return (
 		<>
@@ -32,6 +43,7 @@ const UserTwoDListNumbers = () => {
 					headerTitle: user_name || "User",
 				}}
 			/>
+
 			{loading ? (
 				<Loading />
 			) : !twoDList || twoDList.length === 0 ? (
@@ -47,23 +59,26 @@ const UserTwoDListNumbers = () => {
 					</Pressable>
 				</View>
 			) : (
-				<ScrollView contentContainerStyle={{ paddingVertical: 20 }}>
-					{chunkedData.length > 0 ? (
-						chunkedData.map((pair, index) => (
-							<TwoDListsRow
-								key={index}
-								left={pair.left}
-								right={pair.right}
-							/>
-						))
-					) : (
+				<FlatList
+					data={chunkedData}
+					renderItem={renderItem}
+					keyExtractor={(_, index) => index.toString()}
+					refreshControl={
+						<RefreshControl
+							colors={["#0000ff"]}
+							refreshing={refreshing}
+							onRefresh={reset}
+						/>
+					}
+					contentContainerStyle={{ paddingVertical: 20 }}
+					ListEmptyComponent={
 						<View className="flex-col items-center justify-center h-40">
 							<Text className="text-3xl font-bold text-gray-400">
 								No Item Exists
 							</Text>
 						</View>
-					)}
-				</ScrollView>
+					}
+				/>
 			)}
 		</>
 	);

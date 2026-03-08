@@ -40,7 +40,6 @@ const CommissionUserSectionCard = ({
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
 	const { fetchSection } = useManageHook();
-	const [open, setOpen] = useState(false);
 
 	const isProfit = sale?.profit_or_loss >= 0;
 
