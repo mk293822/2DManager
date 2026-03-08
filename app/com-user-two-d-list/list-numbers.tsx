@@ -26,6 +26,9 @@ const UserTwoDListNumbers = () => {
 
 	const numbers = useCalculatedData(
 		twoDList?.flatMap((value) => value.numbers_data) || [],
+		"all",
+		0,
+		false,
 	);
 	const chunkedData = chunkIntoPairs(numbers);
 

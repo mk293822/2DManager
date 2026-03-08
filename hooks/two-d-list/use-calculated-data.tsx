@@ -48,6 +48,7 @@ export const useCalculatedData = (
 	numbers: SoldNumberItem[] | null,
 	filterMode: FilterModeType = "all",
 	limit: number = 0,
+	isFull: boolean = true,
 ): NumberEntry[] =>
 	useMemo(() => {
 		if (!numbers) return [];
@@ -134,5 +135,7 @@ export const useCalculatedData = (
 			}
 		}
 
+		if (!isFull) return fullList.filter((n) => n.value !== 0);
+
 		return fullList;
-	}, [numbers, filterMode, limit]);
+	}, [numbers, filterMode, limit, isFull]);
