@@ -70,7 +70,7 @@ const TwoDLists = () => {
 	];
 
 	const numbers: SoldNumberItem[] = twoDListGroup
-		? Object.entries(twoDListGroup.sold_numbers_by_user)
+		? Object.entries(twoDListGroup.sold_numbers_by_user ?? {})
 				.filter(([user]) => selectedUserId === "all" || user === selectedUserId)
 				.flatMap(([, twoDListArray]) => twoDListArray)
 				.flatMap((item) => item.numbers_data)

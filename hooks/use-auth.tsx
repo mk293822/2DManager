@@ -16,11 +16,30 @@ export interface UseAuthInterface {
 	register: (name: string, phone_number: string, password: string) => void;
 	logout: () => void;
 	fetchUser: () => void;
+	changePassword: (form: {
+		current_password: string;
+		new_password: string;
+		confirm_password: string;
+	}) => Promise<any>;
+	editUserDetails: (form: {
+		name: string;
+		phone_number: string;
+	}) => Promise<void>;
+	errors: {
+		current_password?: string | undefined;
+		new_password?: string | undefined;
+		confirm_password?: string | undefined;
+	};
 }
 
 export function useAuth(): UseAuthInterface {
 	const [user, setUser] = useState<User | null>(null);
 	const [authLoading, setAuthLoading] = useState(true);
+	const [errors, setErrors] = useState<{
+		current_password?: string;
+		new_password?: string;
+		confirm_password?: string;
+	}>({});
 
 	const fetchUser = useCallback(async () => {
 		setAuthLoading(true);
@@ -95,6 +114,49 @@ export function useAuth(): UseAuthInterface {
 		}
 	}, []);
 
+	const changePassword = async (form: {
+		current_password: string;
+		new_password: string;
+		confirm_password: string;
+	}) => {
+		setErrors({});
+		try {
+			await api.post("/users/change-password/", { ...form });
+			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+				type: "success",
+				description: "Password changed successfully!",
+				title: "Success",
+			});
+		} catch (err: any) {
+			const errData = err.response?.data || {};
+			const fieldErrors: typeof errors = {};
+
+			if (errData.current_password)
+				fieldErrors.current_password = errData.current_password.join(" ");
+			if (errData.new_password)
+				fieldErrors.new_password = errData.new_password.join(" ");
+			if (errData.confirm_password)
+				fieldErrors.confirm_password = errData.confirm_password.join(" ");
+
+			// Non-field errors
+			if (errData.non_field_errors)
+				fieldErrors.confirm_password = errData.non_field_errors.join(" ");
+
+			setErrors(fieldErrors);
+		}
+	};
+
+	const editUserDetails = async (form: {
+		name: string;
+		phone_number: string;
+	}) => {
+		const { data } = await api.patch<User>("/users/profile/", {
+			...form,
+		});
+
+		setUser(data);
+	};
+
 	// On mount: refresh user (if already logged in)
 	useEffect(() => {
 		fetchUser();
@@ -110,5 +172,8 @@ export function useAuth(): UseAuthInterface {
 		register,
 		logout,
 		fetchUser,
+		changePassword,
+		editUserDetails,
+		errors,
 	};
 }
