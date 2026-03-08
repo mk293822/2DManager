@@ -55,40 +55,6 @@ const DaySectionCard = ({
 					<View
 						style={{
 							position: "relative",
-							marginRight: 5,
-						}}
-					>
-						<TouchableOpacity
-							onPress={() => setOpenModal(true)}
-							activeOpacity={0.85}
-							hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-							className="p-2.5"
-						>
-							<AntDesign
-								name="edit"
-								color={"#4338ca"}
-								size={18}
-							/>
-
-							<View
-								style={{
-									position: "absolute",
-									top: -0,
-									bottom: -0,
-									left: -0,
-									right: -0,
-									borderWidth: 1,
-									borderColor: "#4338ca",
-									borderStyle: "dashed",
-									borderRadius: 4,
-								}}
-								pointerEvents="none"
-							/>
-						</TouchableOpacity>
-					</View>
-					<View
-						style={{
-							position: "relative",
 						}}
 					>
 						<TouchableOpacity
@@ -154,6 +120,15 @@ const DaySectionCard = ({
 					{formatKs(data.profit_or_loss)}
 				</Text>
 			</View>
+			<TouchableOpacity
+				onPress={() => setOpenModal(true)}
+				activeOpacity={0.85}
+				className="bg-indigo-600 py-3 rounded-xl mt-3"
+			>
+				<Text className="text-white font-bold text-center">
+					Edit Section & add draw number
+				</Text>
+			</TouchableOpacity>
 
 			<EditManageSectionModal
 				open={openModal}
