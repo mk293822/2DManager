@@ -1,7 +1,7 @@
 import { EVENT_NAMES } from "@/event-names";
+import { LoginFields } from "@/hooks/use-auth";
 import { useAuthContext } from "@/hooks/use-auth-context";
 import { eventBus } from "@/lib/event-bus";
-import { AxiosError, isCancel } from "axios";
 import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -15,43 +15,50 @@ import {
 
 const Login = () => {
 	const { login } = useAuthContext();
+
 	const [phoneNumber, setPhoneNumber] = useState("");
 	const [password, setPassword] = useState("");
 	const [loading, setLoading] = useState(false);
+
+	const [errors, setErrors] = useState<Partial<Record<LoginFields, string>>>(
+		{},
+	);
+
 	const router = useRouter();
 
 	const handleLogin = async () => {
 		setLoading(true);
-		try {
-			await login(phoneNumber, password);
+
+		const res = await login(phoneNumber, password);
+
+		setLoading(false);
+
+		if (res.success) {
+			setErrors({});
+
 			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
 				title: "Login Success",
-				description: "You successfully login to your account!",
+				description: "You successfully logged in!",
 				type: "success",
 			});
 
 			setPhoneNumber("");
-			router.replace("/profile");
-		} catch (err) {
-			if (isCancel(err)) return;
-			if (err instanceof AxiosError) {
-				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-					title: err.response?.data?.message || err.message || "Login failed",
-					description:
-						"There was a problem logging into your account. Please try again.",
-					type: "error",
-				});
-			} else {
-				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-					title: "Login failed ",
-					description:
-						"There was a problem logging into your account. Please try again.",
-					type: "error",
-				});
-			}
-		} finally {
 			setPassword("");
-			setLoading(false);
+
+			router.replace("/profile");
+			return;
+		}
+
+		// field errors
+		setErrors(res.errors.fields);
+
+		// global error
+		if (res.errors.form) {
+			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+				title: "Login failed",
+				description: res.errors.form,
+				type: "error",
+			});
 		}
 	};
 
@@ -77,29 +84,45 @@ const Login = () => {
 					<Text className="text-sm font-medium text-gray-600">
 						Phone number
 					</Text>
+
 					<TextInput
-						onChangeText={setPhoneNumber}
+						onChangeText={(v) => {
+							setPhoneNumber(v);
+							setErrors((p) => ({ ...p, phone_number: undefined }));
+						}}
 						value={phoneNumber}
-						textContentType="telephoneNumber"
 						keyboardType="phone-pad"
+						textContentType="telephoneNumber"
 						className="bg-gray-100 rounded-lg px-4 py-3 text-base"
 						placeholder="Enter phone number"
 						placeholderTextColor="#9ca3af"
 					/>
+
+					{errors.phone_number && (
+						<Text className="text-red-500 text-sm">{errors.phone_number}</Text>
+					)}
 				</View>
 
 				{/* Password */}
 				<View className="gap-2">
 					<Text className="text-sm font-medium text-gray-600">Password</Text>
+
 					<TextInput
 						secureTextEntry
-						onChangeText={setPassword}
+						onChangeText={(v) => {
+							setPassword(v);
+							setErrors((p) => ({ ...p, password: undefined }));
+						}}
 						value={password}
 						textContentType="password"
 						className="bg-gray-100 rounded-lg px-4 py-3 text-base"
 						placeholder="Enter password"
 						placeholderTextColor="#9ca3af"
 					/>
+
+					{errors.password && (
+						<Text className="text-red-500 text-sm">{errors.password}</Text>
+					)}
 				</View>
 
 				{/* Login Button */}
@@ -110,7 +133,7 @@ const Login = () => {
 					className="bg-indigo-400 py-3 rounded-lg mt-2"
 				>
 					{loading ? (
-						<View className="flex-1 items-center bg-indigo-400 justify-center">
+						<View className="items-center justify-center">
 							<ActivityIndicator
 								size={20}
 								color="#fff"
@@ -126,6 +149,7 @@ const Login = () => {
 				{/* Footer */}
 				<View className="flex-row justify-center gap-1 mt-2">
 					<Text className="text-gray-600">Don’t have an account?</Text>
+
 					<Link
 						href="/register"
 						className="text-indigo-500 font-semibold"

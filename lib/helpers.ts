@@ -75,3 +75,42 @@ export function changePlace(value: string) {
 export function isNumber(value: string) {
 	return !isNaN(Number(value));
 }
+
+export type ParsedErrors<T extends string = string> = {
+	fields: Partial<Record<T, string>>;
+	form?: string;
+};
+
+export function parseErrors<T extends string>(
+	data: any,
+	fields: T[] = [],
+): ParsedErrors<T> {
+	const fieldErrors: Partial<Record<T, string>> = {};
+	let formError: string | undefined;
+
+	// Parse field errors
+	fields.forEach((field) => {
+		if (data?.[field]) {
+			fieldErrors[field] = Array.isArray(data[field])
+				? data[field].join(" ")
+				: String(data[field]);
+		}
+	});
+
+	// Parse non_field_errors
+	if (data?.non_field_errors) {
+		formError = Array.isArray(data.non_field_errors)
+			? data.non_field_errors.join(" ")
+			: String(data.non_field_errors);
+	}
+
+	// Parse DRF/SimpleJWT detail errors
+	if (!formError && data?.detail) {
+		formError = String(data.detail);
+	}
+
+	return {
+		fields: fieldErrors,
+		form: formError,
+	};
+}

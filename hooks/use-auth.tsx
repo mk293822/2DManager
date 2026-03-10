@@ -1,153 +1,314 @@
+import { EVENT_NAMES } from "@/event-names";
 import { api, clearTokens, setTokens } from "@/lib/api";
+import { eventBus } from "@/lib/event-bus";
+import { ParsedErrors, parseErrors } from "@/lib/helpers";
 import { User } from "@/types/main";
 import { router } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
-
-import { EVENT_NAMES } from "@/event-names";
-import { eventBus } from "@/lib/event-bus";
 import * as SecureStore from "expo-secure-store";
+import { useCallback, useState } from "react";
+import { useAbortableEffect } from "./use-abortable-effect";
+
+export type ChangePasswordFields =
+	| "current_password"
+	| "new_password"
+	| "confirm_password";
+
+export type LoginFields = "phone_number" | "password";
+
+export type RegisterFields = "phone_number" | "name" | "password";
+
+export type EditUserFields = "name" | "phone_number";
 
 export interface UseAuthInterface {
 	user: User | null;
 	authLoading: boolean;
+	initialized: boolean;
 	isAuthenticated: boolean;
-	login: (phone_number: string, password: string) => void;
-	register: (name: string, phone_number: string, password: string) => void;
-	logout: () => void;
-	fetchUser: () => void;
+
+	login: (
+		phone_number: string,
+		password: string,
+	) => Promise<{ success: boolean; errors: ParsedErrors<LoginFields> }>;
+
+	register: (
+		name: string,
+		phone_number: string,
+		password: string,
+	) => Promise<{ success: boolean; errors: ParsedErrors<RegisterFields> }>;
+
+	logout: () => Promise<void>;
+
+	fetchUser: (
+		signal?: AbortSignal,
+		showLoading?: boolean,
+	) => Promise<User | null>;
+
 	changePassword: (form: {
 		current_password: string;
 		new_password: string;
 		confirm_password: string;
-	}) => Promise<any>;
-	editUserDetails: (form: {
-		name: string;
-		phone_number: string;
-	}) => Promise<void>;
-	errors: {
-		current_password?: string | undefined;
-		new_password?: string | undefined;
-		confirm_password?: string | undefined;
-	};
+	}) => Promise<{
+		success: boolean;
+		errors: ParsedErrors<ChangePasswordFields>;
+	}>;
+
+	editUserDetails: (form: { name: string; phone_number: string }) => Promise<{
+		success: boolean;
+		errors: ParsedErrors<EditUserFields>;
+	}>;
 }
 
 export function useAuth(): UseAuthInterface {
 	const [user, setUser] = useState<User | null>(null);
 	const [authLoading, setAuthLoading] = useState(true);
-	const [errors, setErrors] = useState<{
-		current_password?: string;
-		new_password?: string;
-		confirm_password?: string;
-	}>({});
+	const [initialized, setInitialized] = useState(false);
 
-	const fetchUser = useCallback(async () => {
-		setAuthLoading(true);
-		try {
-			const { data } = await api.get<User>("/users/profile/");
-			setUser(data);
-			return data;
-		} catch {
-			setUser(null);
-			return null;
-		} finally {
-			setAuthLoading(false);
-		}
-	}, []);
+	/* ---------------- fetch user ---------------- */
+
+	const fetchUser = useCallback(
+		async (signal?: AbortSignal, showLoading = true) => {
+			if (showLoading) setAuthLoading(true);
+
+			try {
+				const { data } = await api.get<User>("/users/profile/", { signal });
+				setUser(data);
+				return data;
+			} catch (err: any) {
+				if (signal?.aborted) return null;
+
+				if (err?.response?.status === 401) {
+					setUser(null);
+					return null;
+				}
+
+				const message =
+					err?.response?.data?.detail || err?.message || "Unable to fetch user";
+
+				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+					type: "error",
+					title: "Error",
+					description: message,
+				});
+
+				setUser(null);
+				return null;
+			} finally {
+				if (showLoading) setAuthLoading(false);
+			}
+		},
+		[],
+	);
+
+	/* ---------------- login ---------------- */
 
 	const login = useCallback(
 		async (phone_number: string, password: string) => {
-			const { data } = await api.post("/auth/login/", {
-				phone_number,
-				password,
-			});
-			await setTokens(data.access, data.refresh);
-			// fetch user AFTER login
-			return fetchUser();
+			try {
+				const { data } = await api.post("/auth/login/", {
+					phone_number,
+					password,
+				});
+
+				await setTokens(data.access, data.refresh);
+				await fetchUser();
+
+				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+					type: "success",
+					title: "Success",
+					description: "Logged in successfully",
+				});
+
+				return { success: true, errors: { fields: {} } };
+			} catch (err: any) {
+				const data = err?.response?.data || {};
+
+				const errors = parseErrors<LoginFields>(data, [
+					"phone_number",
+					"password",
+				]);
+
+				if (errors.form && Object.keys(errors.fields).length === 0) {
+					eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+						type: "error",
+						title: "Login Failed",
+						description: errors.form,
+					});
+				}
+
+				return { success: false, errors };
+			}
 		},
 		[fetchUser],
 	);
+
+	/* ---------------- register ---------------- */
 
 	const register = useCallback(
 		async (name: string, phone_number: string, password: string) => {
-			const { data } = await api.post("/users/register/", {
-				name,
-				phone_number,
-				password,
-			});
-			await setTokens(data.access, data.refresh);
-			const user = data.user;
-			if (user) {
-				setUser(user);
-			} else return fetchUser();
+			try {
+				const { data } = await api.post("/users/register/", {
+					name,
+					phone_number,
+					password,
+				});
+
+				await setTokens(data.access, data.refresh);
+
+				if (data.user) setUser(data.user);
+				else await fetchUser();
+
+				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+					type: "success",
+					title: "Success",
+					description: "Account created successfully",
+				});
+
+				return { success: true, errors: { fields: {} } };
+			} catch (err: any) {
+				const data = err?.response?.data || {};
+
+				const errors = parseErrors<RegisterFields>(data, [
+					"name",
+					"phone_number",
+					"password",
+				] as any);
+
+				if (errors.form && Object.keys(errors.fields).length === 0) {
+					eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+						type: "error",
+						title: "Register Failed",
+						description: errors.form,
+					});
+				}
+
+				return { success: false, errors };
+			}
 		},
 		[fetchUser],
 	);
 
+	/* ---------------- logout ---------------- */
+
 	const logout = useCallback(async () => {
-		const refresh = await SecureStore.getItemAsync("refreshToken");
-		if (refresh) {
-			await api.post("/auth/logout/", { refresh }); // blacklist refresh token
+		try {
+			const refresh = await SecureStore.getItemAsync("refreshToken");
+
+			if (refresh) {
+				await api.post("/auth/logout/", { refresh });
+			}
+		} catch (err: any) {
+			// Optional notification
+			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+				type: "error",
+				title: "Logout Warning",
+				description:
+					err?.response?.data?.detail ||
+					"Server logout failed, but you have been logged out locally.",
+			});
+		} finally {
+			// ALWAYS logout locally
+			setUser(null);
+			await clearTokens();
+			router.replace("/login");
 		}
-		setUser(null); // immediate UI logout
-		await clearTokens(); // remove tokens locally
-		router.replace("/login"); // redirect safely
 	}, []);
+
+	/* ---------------- change password ---------------- */
 
 	const changePassword = async (form: {
 		current_password: string;
 		new_password: string;
 		confirm_password: string;
 	}) => {
-		setErrors({});
 		try {
-			await api.post("/users/change-password/", { ...form });
+			const res = await api.post("/users/change-password/", form);
+
 			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
 				type: "success",
-				description: "Password changed successfully!",
 				title: "Success",
+				description: res.data.message || "Password changed successfully",
 			});
-			return true;
+
+			return { success: true, errors: { fields: {} } };
 		} catch (err: any) {
-			const errData = err.response?.data || {};
-			const fieldErrors: typeof errors = {};
+			const data = err?.response?.data || {};
 
-			if (errData.current_password)
-				fieldErrors.current_password = errData.current_password.join(" ");
-			if (errData.new_password)
-				fieldErrors.new_password = errData.new_password.join(" ");
-			if (errData.confirm_password)
-				fieldErrors.confirm_password = errData.confirm_password.join(" ");
+			const errors = parseErrors<ChangePasswordFields>(data, [
+				"current_password",
+				"new_password",
+				"confirm_password",
+			]);
 
-			// Non-field errors
-			if (errData.non_field_errors)
-				fieldErrors.confirm_password = errData.non_field_errors.join(" ");
+			if (errors.form && Object.keys(errors.fields).length === 0) {
+				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+					type: "error",
+					title: "Error",
+					description: errors.form,
+				});
+			}
 
-			setErrors(fieldErrors);
-			return false;
+			return { success: false, errors };
 		}
 	};
+
+	/* ---------------- edit profile ---------------- */
 
 	const editUserDetails = async (form: {
 		name: string;
 		phone_number: string;
 	}) => {
-		const { data } = await api.patch<User>("/users/profile/", {
-			...form,
-		});
+		try {
+			const { data } = await api.patch<User>("/users/profile/", form);
 
-		setUser(data);
+			setUser(data);
+
+			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+				type: "success",
+				title: "Success",
+				description: "Profile updated successfully",
+			});
+
+			return { success: true, errors: { fields: {} } };
+		} catch (err: any) {
+			const data = err?.response?.data || {};
+
+			const errors = parseErrors<EditUserFields>(data, [
+				"name",
+				"phone_number",
+			]);
+
+			if (errors.form && Object.keys(errors.fields).length === 0) {
+				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+					type: "error",
+					title: "Update Failed",
+					description: errors.form,
+				});
+			}
+
+			return { success: false, errors };
+		}
 	};
 
-	// On mount: refresh user (if already logged in)
-	useEffect(() => {
-		fetchUser();
-	}, [fetchUser]);
+	/* ---------------- init auth ---------------- */
+
+	useAbortableEffect(
+		(signal) => {
+			const init = async () => {
+				await fetchUser(signal);
+				setInitialized(true);
+			};
+
+			init();
+		},
+		[fetchUser],
+	);
 
 	const isAuthenticated = !!user;
 
 	return {
 		user,
 		authLoading,
+		initialized,
 		isAuthenticated,
 		login,
 		register,
@@ -155,6 +316,5 @@ export function useAuth(): UseAuthInterface {
 		fetchUser,
 		changePassword,
 		editUserDetails,
-		errors,
 	};
 }

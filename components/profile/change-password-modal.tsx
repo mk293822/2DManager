@@ -1,3 +1,7 @@
+import { EVENT_NAMES } from "@/event-names";
+import { ChangePasswordFields } from "@/hooks/use-auth";
+import { eventBus } from "@/lib/event-bus";
+import { ParsedErrors } from "@/lib/helpers";
 import React, { useState } from "react";
 import {
 	ScrollView,
@@ -16,12 +20,10 @@ type Props = {
 		current_password: string;
 		new_password: string;
 		confirm_password: string;
-	}) => Promise<any>;
-	errors: {
-		current_password?: string | undefined;
-		new_password?: string | undefined;
-		confirm_password?: string | undefined;
-	};
+	}) => Promise<{
+		success: boolean;
+		errors: ParsedErrors<ChangePasswordFields>;
+	}>;
 	fetchUser: () => void;
 };
 
@@ -29,19 +31,17 @@ const ChangePasswordModal = ({
 	open,
 	onClose,
 	changePassword,
-	errors,
 	fetchUser,
 }: Props) => {
-	const [form, setForm] = useState<{
-		current_password: string;
-		new_password: string;
-		confirm_password: string;
-	}>({
+	const [form, setForm] = useState<Record<ChangePasswordFields, string>>({
 		current_password: "",
 		new_password: "",
 		confirm_password: "",
 	});
 	const [loading, setLoading] = useState(false);
+	const [errors, setErrors] = useState<
+		Partial<Record<ChangePasswordFields, string>>
+	>({});
 
 	const handleChange = (key: keyof typeof form, value: string | number) => {
 		setForm((prev) => ({ ...prev, [key]: value }));
@@ -53,20 +53,47 @@ const ChangePasswordModal = ({
 	};
 
 	const handleSave = async () => {
-		// Clear previous errors
 		setLoading(true);
-		const success = await changePassword(form);
-		setLoading(false);
-		if (success) {
-			onCloseModal();
-			fetchUser();
+
+		try {
+			const res = await changePassword(form);
+
+			if (res.success) {
+				setErrors({});
+				onCloseModal();
+				await fetchUser();
+
+				setForm({
+					current_password: "",
+					new_password: "",
+					confirm_password: "",
+				});
+
+				return;
+			}
+
+			// field errors
+			setErrors(res.errors.fields || {});
+
+			// form error (non field error)
+			if (res.errors.form) {
+				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+					type: "error",
+					title: "Error",
+					description: res.errors.form,
+				});
+			}
+
+			setForm({
+				current_password: form.current_password,
+				new_password: "",
+				confirm_password: "",
+			});
+		} finally {
+			setLoading(false);
 		}
-		setForm({
-			current_password: form.current_password,
-			new_password: "",
-			confirm_password: "",
-		});
 	};
+
 	return (
 		<AppModal open={open}>
 			{loading ? (

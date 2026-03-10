@@ -16,7 +16,7 @@ import {
 } from "react-native";
 
 const Profile = () => {
-	const { user, logout, changePassword, editUserDetails, fetchUser, errors } =
+	const { user, logout, changePassword, editUserDetails, fetchUser } =
 		useAuthContext();
 	const [openPasModal, setOpenPasModal] = useState(false);
 	const [openEditModal, setOpenEditModal] = useState(false);
@@ -38,7 +38,7 @@ const Profile = () => {
 					Soemthing went wrong!
 				</Text>
 				<Pressable
-					onPress={fetchUser}
+					onPress={() => fetchUser()}
 					className="bg-indigo-600 px-6 py-3 rounded-lg"
 				>
 					<Text className="text-white font-semibold">Reload</Text>
@@ -163,7 +163,6 @@ const Profile = () => {
 				open={openPasModal}
 				onClose={() => setOpenPasModal(false)}
 				changePassword={changePassword}
-				errors={errors}
 			/>
 
 			<EditUserProfileModal

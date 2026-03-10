@@ -5,11 +5,11 @@ import { eventBus } from "@/lib/event-bus";
 import { TwoDResponse } from "@/types/two-d-types";
 import { useIsFocused } from "@react-navigation/native";
 import { isAxiosError } from "axios";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 type Options = {
-	interval?: number | false; // ms | disable
-	immediate?: boolean; // fetch on focus
+	interval?: number | false;
+	immediate?: boolean;
 };
 
 type UseFetchLiveTwoD<T> = {
@@ -22,25 +22,37 @@ function useFetchLiveTwoD<T = TwoDResponse>(
 	url: string = "/live",
 	options: Options = {},
 ): UseFetchLiveTwoD<T> {
-	const {
-		interval = 3000, // default polling
-		immediate = true,
-	} = options;
+	const { interval = 3000, immediate = true } = options;
 
 	const [liveData, setLiveData] = useState<T | null>(null);
 	const [loading, setLoading] = useState(false);
 	const isFocused = useIsFocused();
 
+	const retryCount = useRef(0);
+	const MAX_RETRY = 3;
+
 	const fetchLive2D = useCallback(
 		async (signal: AbortSignal) => {
 			if (!isFocused) return;
 
-			setLoading(true);
+			if (retryCount.current === 0) setLoading(true);
+
 			try {
 				const { data } = await two_d_api.get<T>(url, { signal });
+
 				setLiveData(data);
+
+				// reset retry counter on success
+				retryCount.current = 0;
 			} catch (err) {
-				if (!signal.aborted) {
+				if (signal.aborted) return;
+
+				retryCount.current += 1;
+
+				// only show error after 3 failures
+				if (retryCount.current >= MAX_RETRY) {
+					retryCount.current = 0;
+
 					if (isAxiosError(err)) {
 						eventBus.emit(EVENT_NAMES.NOTIFICATION, {
 							title: "Error",

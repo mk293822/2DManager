@@ -1,7 +1,6 @@
 import { EVENT_NAMES } from "@/event-names";
 import { useAuthContext } from "@/hooks/use-auth-context";
 import { eventBus } from "@/lib/event-bus";
-import { AxiosError, isCancel } from "axios";
 import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -15,58 +14,63 @@ import {
 
 const Register = () => {
 	const { register } = useAuthContext();
+	const router = useRouter();
+
 	const [name, setName] = useState("");
 	const [phoneNumber, setPhoneNumber] = useState("");
 	const [password, setPassword] = useState("");
 	const [passwordConfirm, setPasswordConfirm] = useState("");
 	const [loading, setLoading] = useState(false);
-	const router = useRouter();
+
+	const [errors, setErrors] = useState<
+		Partial<Record<"name" | "phone_number" | "password", string>>
+	>({});
 
 	const handleRegister = async () => {
 		setLoading(true);
+
+		// local password confirmation check
 		if (password !== passwordConfirm) {
-			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-				title: "Passwords doesn't match!",
-				description: "Your password and confirm password doesn't match!",
-				type: "error",
-			});
+			setErrors({ password: "Passwords do not match" });
 			setPasswordConfirm("");
 			setLoading(false);
 			return;
 		}
-		try {
-			await register(name, phoneNumber, password);
+
+		// call hook
+		const res = await register(name, phoneNumber, password);
+
+		setLoading(false);
+
+		if (res?.success) {
+			setErrors({});
 			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-				title: "Registered Successfuly",
-				description: "You successfully registered your account!",
+				title: "Registered Successfully",
+				description: "You successfully created your account!",
 				type: "success",
 			});
 
-			setPhoneNumber("");
 			setName("");
-			router.replace("/profile");
-		} catch (err) {
-			if (isCancel(err)) return;
-			if (err instanceof AxiosError) {
-				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-					title:
-						err.response?.data?.message || err.message || "Register failed",
-					description:
-						"There was a problem registering your account. Please try again.",
-					type: "error",
-				});
-			} else {
-				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-					title: "Register failed ",
-					description:
-						"There was a problem registering your account. Please try again.",
-					type: "error",
-				});
-			}
-		} finally {
+			setPhoneNumber("");
 			setPassword("");
 			setPasswordConfirm("");
-			setLoading(false);
+
+			router.replace("/profile");
+			return;
+		}
+
+		// set field errors
+		if (res?.errors?.fields) {
+			setErrors(res.errors.fields);
+		}
+
+		// global/form errors
+		if (res?.errors?.form) {
+			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+				title: "Register failed",
+				description: res.errors.form,
+				type: "error",
+			});
 		}
 	};
 
@@ -91,12 +95,18 @@ const Register = () => {
 				<View className="gap-2">
 					<Text className="text-sm font-medium text-gray-600">Full name</Text>
 					<TextInput
-						onChangeText={setName}
+						onChangeText={(v) => {
+							setName(v);
+							setErrors((p) => ({ ...p, name: undefined }));
+						}}
 						value={name}
 						className="bg-gray-100 rounded-lg px-4 py-3 text-base"
 						placeholder="Enter your name"
 						placeholderTextColor="#9ca3af"
 					/>
+					{errors.name && (
+						<Text className="text-red-500 text-sm">{errors.name}</Text>
+					)}
 				</View>
 
 				{/* Phone */}
@@ -105,7 +115,10 @@ const Register = () => {
 						Phone number
 					</Text>
 					<TextInput
-						onChangeText={setPhoneNumber}
+						onChangeText={(v) => {
+							setPhoneNumber(v);
+							setErrors((p) => ({ ...p, phone_number: undefined }));
+						}}
 						value={phoneNumber}
 						textContentType="telephoneNumber"
 						keyboardType="phone-pad"
@@ -113,13 +126,19 @@ const Register = () => {
 						placeholder="Enter phone number"
 						placeholderTextColor="#9ca3af"
 					/>
+					{errors.phone_number && (
+						<Text className="text-red-500 text-sm">{errors.phone_number}</Text>
+					)}
 				</View>
 
 				{/* Password */}
 				<View className="gap-2">
 					<Text className="text-sm font-medium text-gray-600">Password</Text>
 					<TextInput
-						onChangeText={setPassword}
+						onChangeText={(v) => {
+							setPassword(v);
+							setErrors((p) => ({ ...p, password: undefined }));
+						}}
 						value={password}
 						secureTextEntry
 						textContentType="newPassword"
@@ -127,6 +146,9 @@ const Register = () => {
 						placeholder="Create password"
 						placeholderTextColor="#9ca3af"
 					/>
+					{errors.password && (
+						<Text className="text-red-500 text-sm">{errors.password}</Text>
+					)}
 				</View>
 
 				{/* Confirm Password */}
