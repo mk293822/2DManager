@@ -8,6 +8,7 @@ import React, { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { SectinDetailRow } from "../info-components";
 import { Loading } from "../loading";
+import DeleteSectionSaleModal from "./delete-section-sale-modal";
 
 type Props = {
 	sale: ComUserSectionSaleType;
@@ -40,6 +41,7 @@ const CommissionUserSectionCard = ({
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
 	const { fetchSection } = useManageHook();
+	const [open, setOpen] = useState(false);
 
 	const isProfit = sale?.profit_or_loss >= 0;
 
@@ -89,6 +91,10 @@ const CommissionUserSectionCard = ({
 			value: sale.include_draw_number ? "Yes" : "No",
 		},
 		{
+			label: "Total Draw Value",
+			value: formatKs(sale.total_draw_value),
+		},
+		{
 			label: "Total Draw Amount",
 			value: formatKs(sale.total_draw_amount),
 		},
@@ -110,6 +116,7 @@ const CommissionUserSectionCard = ({
 		setLoading(true);
 		await deleteComUserSection(sale.id, userId, section);
 		setLoading(false);
+		setOpen(false);
 	};
 
 	return (
@@ -133,7 +140,7 @@ const CommissionUserSectionCard = ({
 									activeOpacity={0.85}
 									hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
 									className="p-2.5"
-									onPress={handleDelete}
+									onPress={() => setOpen(true)}
 								>
 									<AntDesign
 										name="delete"
@@ -189,6 +196,7 @@ const CommissionUserSectionCard = ({
 									params: {
 										id: String(sale.id),
 										user_name: user_name,
+										section: section,
 									},
 								})
 							}
@@ -226,6 +234,13 @@ const CommissionUserSectionCard = ({
 					</View>
 				</View>
 			)}
+
+			<DeleteSectionSaleModal
+				open={open}
+				onClose={() => setOpen(false)}
+				handleDelete={handleDelete}
+				sectionName={sale.section_summary.section}
+			/>
 		</>
 	);
 };

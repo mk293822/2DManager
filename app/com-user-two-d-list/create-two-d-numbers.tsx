@@ -3,6 +3,7 @@ import CreateTwoDNumbersHeaderRight from "@/components/header-rights/create-two-
 import { Loading } from "@/components/loading";
 import { EVENT_NAMES } from "@/event-names";
 import { useCommissionUserDetailsContext } from "@/hooks/commission-user-details/use-context";
+import { useManageContext } from "@/hooks/manage/use-manage-context";
 import { useTwoDListsContext } from "@/hooks/two-d-list/use-two-d-list-context";
 import {
 	ENGLISH_TO_BURMESE_MAP,
@@ -39,11 +40,14 @@ const CreateTwoDNumbersPage = () => {
 	const { section } = useLocalSearchParams<{
 		section: SectionName;
 	}>();
+	const abordController = new AbortController();
 
 	const section_sale = user?.section_sales?.[section];
 
 	const [list, setList] = useState<SoldNumberItem[] | null>(null);
 	const { handleCreateTwoDList } = useTwoDListsContext();
+	const { fetchSection } = useManageContext();
+	const { fetchCommissionUserDetails } = useCommissionUserDetailsContext();
 
 	const [twoDValue, setTwoDValue] = useState<string>("");
 	const [amount1Value, setAmount1Value] = useState<string>("");
@@ -128,6 +132,11 @@ const CreateTwoDNumbersPage = () => {
 			user.id,
 			section,
 		);
+		await fetchSection(abordController.signal, {
+			type: "day",
+			date: new Date(),
+		});
+		await fetchCommissionUserDetails(abordController.signal, user.id);
 		setList(null);
 	};
 

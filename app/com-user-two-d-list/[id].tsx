@@ -4,6 +4,7 @@ import { Loading } from "@/components/loading";
 import { useTwoDListsContext } from "@/hooks/two-d-list/use-two-d-list-context";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { ENGLISH_TO_BURMESE_MAP } from "@/lib/custom-keyboard-helper";
+import { SectionName } from "@/types/manage-types";
 import { SoldNumberItem, TwoDListType } from "@/types/two-d-list-types";
 import { Stack, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
@@ -12,9 +13,10 @@ import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
 const UserTwoDList = () => {
 	const { twoDList, fetchTwoDListBySectionSale, loading } =
 		useTwoDListsContext();
-	const { id, user_name } = useLocalSearchParams<{
+	const { id, user_name, section } = useLocalSearchParams<{
 		id: string;
 		user_name: string;
+		section: SectionName;
 	}>();
 	const [refreshing, setRefreshing] = useState(false);
 
@@ -124,6 +126,7 @@ const UserTwoDList = () => {
 						<UserTwoDListHeaderRight
 							id={id}
 							user_name={user_name}
+							section={section}
 						/>
 					),
 				}}

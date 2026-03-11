@@ -37,6 +37,13 @@ const WeekSectionCard = ({
 			))}
 
 			<View className="flex-row justify-between py-0.5">
+				<Text className="text-gray-500">Total Draw Amount</Text>
+				<Text className="font-semibold">
+					{formatKs(data.total_draw_amount as number)}
+				</Text>
+			</View>
+
+			<View className="flex-row justify-between py-0.5">
 				<Text className="text-gray-500">Draw Number</Text>
 				<Text className="font-semibold text-indigo-700">
 					{data.draw_number ?? "--"}

@@ -97,6 +97,12 @@ const DaySectionCard = ({
 				</View>
 			))}
 			<View className="flex-row justify-between py-2 border-b border-gray-100">
+				<Text className="text-gray-600">Total Draw Amount</Text>
+				<Text className="font-semibold">
+					{formatKs(data.total_draw_amount)}
+				</Text>
+			</View>
+			<View className="flex-row justify-between py-2 border-b border-gray-100">
 				<Text className="text-gray-600">Draw Number</Text>
 				<Text className="font-extrabold text-indigo-700">
 					{data.draw_number

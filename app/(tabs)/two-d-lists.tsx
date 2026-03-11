@@ -83,6 +83,7 @@ const TwoDLists = () => {
 
 	const renderItem = ({ item }: { item: (typeof chunkedData)[0] }) => (
 		<TwoDListsRow
+			draw_number={sections?.[0][section]?.draw_number || null}
 			limit={limit}
 			left={item.left}
 			right={item.right}

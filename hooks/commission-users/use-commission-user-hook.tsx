@@ -14,6 +14,7 @@ export type CommissionUserHookType = {
 		phone_number: string;
 	}) => Promise<void>;
 	deleteCommissionUser: (id: string) => Promise<void>;
+	fetchCommissionUsers: (signal: AbortSignal) => Promise<void>;
 };
 
 const useCommissionUserHook = (): CommissionUserHookType => {
@@ -23,7 +24,7 @@ const useCommissionUserHook = (): CommissionUserHookType => {
 		CommissionUserType[] | null
 	>(null);
 
-	const fetchCommissionUser = useCallback(async (signal: AbortSignal) => {
+	const fetchCommissionUsers = useCallback(async (signal: AbortSignal) => {
 		try {
 			setLoading(true);
 			setError(null);
@@ -58,7 +59,7 @@ const useCommissionUserHook = (): CommissionUserHookType => {
 
 	// Date change
 	useAbortableEffect((signal) => {
-		fetchCommissionUser(signal);
+		fetchCommissionUsers(signal);
 	}, []);
 
 	// Create
@@ -109,7 +110,7 @@ const useCommissionUserHook = (): CommissionUserHookType => {
 	const reset = () => {
 		setError(null);
 		const { signal } = new AbortController();
-		fetchCommissionUser(signal);
+		fetchCommissionUsers(signal);
 	};
 
 	return {
@@ -119,6 +120,7 @@ const useCommissionUserHook = (): CommissionUserHookType => {
 		reset,
 		handleCreateCommissionUser,
 		deleteCommissionUser,
+		fetchCommissionUsers,
 	};
 };
 

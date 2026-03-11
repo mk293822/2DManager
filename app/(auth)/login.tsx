@@ -36,12 +36,6 @@ const Login = () => {
 		if (res.success) {
 			setErrors({});
 
-			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-				title: "Login Success",
-				description: "You successfully logged in!",
-				type: "success",
-			});
-
 			setPhoneNumber("");
 			setPassword("");
 

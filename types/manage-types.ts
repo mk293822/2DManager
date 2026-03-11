@@ -13,6 +13,7 @@ export type Section = {
 	date: string;
 	profit_or_loss: number;
 	total_draw_amount: number;
+	total_draw_value: number;
 };
 
 export type SectionSummary = {
@@ -20,7 +21,7 @@ export type SectionSummary = {
 	total_commission: number;
 	total_resold: number;
 	profit_or_loss: number;
-	total_draw_amount: number;
+	total_draw_value: number;
 };
 
 export type SectionSummaries = {

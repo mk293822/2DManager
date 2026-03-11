@@ -15,6 +15,7 @@ import {
 	Provider as PaperProvider,
 } from "react-native-paper";
 
+import DeleteComUserModal from "@/components/commission-user-details/delete-com-user-modal";
 import CommissionUserDetailsHeaderRight from "@/components/header-rights/commission-user-details";
 import SectionSaleList from "@/components/section-sales/section-sale-list";
 import { useCommissionUserDetailsContext } from "@/hooks/commission-user-details/use-context";
@@ -27,6 +28,7 @@ const CommissionUserPage = () => {
 	const router = useRouter();
 	const { call, message } = usePhoneActions();
 	const { deleteCommissionUser } = useCommissionUserContext();
+	const [open, setOpen] = useState(false);
 
 	const userId = Array.isArray(id) ? id[0] : id;
 
@@ -64,6 +66,7 @@ const CommissionUserPage = () => {
 	const handleDeleteUser = async () => {
 		if (!userId) return;
 		await deleteCommissionUser(userId);
+		setOpen(false);
 		router.replace("/(tabs)/commission-users");
 	};
 
@@ -180,7 +183,7 @@ const CommissionUserPage = () => {
 						</Text>
 						<TouchableOpacity
 							activeOpacity={0.85}
-							onPress={handleDeleteUser}
+							onPress={() => setOpen(true)}
 							className="bg-red-600 rounded-xl py-3 items-center"
 						>
 							<Text className="text-white font-extrabold text-base">
@@ -228,6 +231,13 @@ const CommissionUserPage = () => {
 					}}
 				/>
 			</PaperProvider>
+
+			<DeleteComUserModal
+				handleDelete={handleDeleteUser}
+				open={open}
+				onClose={() => setOpen(false)}
+				user_name={commissionUserDetails.name}
+			/>
 		</>
 	);
 };

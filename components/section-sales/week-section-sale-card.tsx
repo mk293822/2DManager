@@ -36,6 +36,7 @@ const WeekSectionSaleCard = ({
 			{[
 				["Total Amount", data.total_amount],
 				["Total Commission", data.total_commission],
+				["Total Draw Value", data.total_draw_value],
 				["Total Draw Amount", data.total_draw_amount],
 			].map(([label, value]) => (
 				<View

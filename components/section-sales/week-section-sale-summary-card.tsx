@@ -23,7 +23,7 @@ const WeekSectionSaleSummaryCard = ({ summary, date }: Props) => {
 				{[
 					["Total Amount", summary.total_amount],
 					["Total Commission", summary.total_commission],
-					["Total Draw Amount", summary.total_draw_amount],
+					["Total Draw Amount", summary.total_draw_value],
 				].map(([label, value]) => (
 					<View
 						key={label}

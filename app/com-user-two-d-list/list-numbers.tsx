@@ -1,9 +1,11 @@
 // UserTwoDListNumbers.tsx
 import { Loading } from "@/components/loading";
 import TwoDListsRow from "@/components/two-d-lists/two-d-lists-row";
+import { useManageContext } from "@/hooks/manage/use-manage-context";
 import { useCalculatedData } from "@/hooks/two-d-list/use-calculated-data";
 import { useTwoDListsContext } from "@/hooks/two-d-list/use-two-d-list-context";
 import { chunkIntoPairs } from "@/lib/two-d-list-helper";
+import { SectionName } from "@/types/manage-types";
 import { Stack, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
@@ -11,9 +13,11 @@ import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
 const UserTwoDListNumbers = () => {
 	const { twoDList, fetchTwoDListBySectionSale, loading } =
 		useTwoDListsContext();
-	const { id, user_name } = useLocalSearchParams<{
+	const { sections } = useManageContext();
+	const { id, user_name, section } = useLocalSearchParams<{
 		id: string;
 		user_name: string;
+		section: SectionName;
 	}>();
 	const [refreshing, setRefreshing] = useState(false);
 
@@ -34,6 +38,7 @@ const UserTwoDListNumbers = () => {
 
 	const renderItem = ({ item }: { item: (typeof chunkedData)[0] }) => (
 		<TwoDListsRow
+			draw_number={sections?.[0][section]?.draw_number || null}
 			left={item.left}
 			right={item.right}
 		/>

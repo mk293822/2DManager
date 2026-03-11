@@ -44,12 +44,6 @@ const Register = () => {
 
 		if (res?.success) {
 			setErrors({});
-			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-				title: "Registered Successfully",
-				description: "You successfully created your account!",
-				type: "success",
-			});
-
 			setName("");
 			setPhoneNumber("");
 			setPassword("");

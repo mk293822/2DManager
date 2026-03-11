@@ -103,9 +103,9 @@ const EditManageSectionModal = ({
 					{/* Draw Total Amount */}
 					<Text className="font-semibold text-gray-700">Draw Total Amount</Text>
 					<TextInput
-						value={form.total_draw_amount.toString()}
+						value={form.total_draw_value.toString()}
 						onChangeText={(text) =>
-							handleChange("total_draw_amount", parseFloat(text) || 0)
+							handleChange("total_draw_value", parseFloat(text) || 0)
 						}
 						keyboardType="numeric"
 						className="border border-gray-300 rounded-lg px-3 py-2"
