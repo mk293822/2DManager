@@ -1,7 +1,6 @@
 import HapticTab from "@/components/haptic-tab";
 import { useCommissionUserContext } from "@/hooks/commission-users/use-commission-user-context";
 import { useManageContext } from "@/hooks/manage/use-manage-context";
-import { useTwoDListsContext } from "@/hooks/two-d-list/use-two-d-list-context";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { useAuthContext } from "@/hooks/use-auth-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -63,17 +62,17 @@ const TabsLayout = () => {
 	const router = useRouter();
 	const { fetchSection } = useManageContext();
 	const { fetchCommissionUsers } = useCommissionUserContext();
-	const { twoDListGroup } = useTwoDListsContext();
 
 	useAbortableEffect((signal) => {
-		fetchSection(signal, {
-			type: "day",
-			date: new Date(),
-		});
+		if (isAuthenticated)
+			fetchSection(signal, {
+				type: "day",
+				date: new Date(),
+			});
 	}, []);
 
 	useAbortableEffect((signal) => {
-		fetchCommissionUsers(signal);
+		if (isAuthenticated) fetchCommissionUsers(signal);
 	}, []);
 
 	useEffect(() => {

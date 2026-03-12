@@ -14,6 +14,7 @@ type Props = {
 	handleCreateCommissionUser: (payload: {
 		name: string;
 		phone_number: string;
+		default_commission_percent: number;
 	}) => Promise<void>;
 };
 
@@ -22,9 +23,15 @@ const CreateCommissionUserModal = ({
 	onClose,
 	handleCreateCommissionUser,
 }: Props) => {
-	const [form, setForm] = useState<{ name: string; phone_number: string }>({
+	const [form, setForm] = useState<{
+		name: string;
+		phone_number: string;
+		default_commission_percent: number;
+	}>({
 		name: "",
 		phone_number: "",
+		default_commission_percent:
+			process.env.EXPO_PUBLIC_DEFAULT_COMMISSION_PERCENT,
 	});
 
 	const handleChange = (key: keyof typeof form, value: string | number) => {
@@ -33,7 +40,12 @@ const CreateCommissionUserModal = ({
 
 	const onCloseModal = () => {
 		onClose();
-		setForm({ name: "", phone_number: "" });
+		setForm({
+			name: "",
+			phone_number: "",
+			default_commission_percent:
+				process.env.EXPO_PUBLIC_DEFAULT_COMMISSION_PERCENT,
+		});
 	};
 
 	const handleSave = async () => {
@@ -55,7 +67,7 @@ const CreateCommissionUserModal = ({
 					<Text className="font-semibold text-gray-700">Name</Text>
 					<TextInput
 						value={form.name}
-						onChangeText={(text) => handleChange("name", text)}
+						onChangeText={(text) => handleChange("name", Number(text))}
 						className="border border-gray-300 rounded-lg px-3 py-2"
 					/>
 
@@ -64,6 +76,19 @@ const CreateCommissionUserModal = ({
 						value={form.phone_number}
 						keyboardType="numeric"
 						onChangeText={(text) => handleChange("phone_number", text)}
+						className="border border-gray-300 rounded-lg px-3 py-2"
+					/>
+					<Text className="font-semibold text-gray-700">
+						Default Commission %
+					</Text>
+					<TextInput
+						value={form.default_commission_percent.toLocaleString()}
+						keyboardType="numeric"
+						maxLength={3}
+						onChangeText={(text) => {
+							const clean = text.replace(/,/g, "");
+							handleChange("default_commission_percent", Number(clean));
+						}}
 						className="border border-gray-300 rounded-lg px-3 py-2"
 					/>
 				</ScrollView>

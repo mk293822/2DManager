@@ -133,6 +133,12 @@ const CommissionUserPage = () => {
 								{commissionUserDetails.phone_number}
 							</Text>
 						</View>
+						<View className="flex-row justify-between py-2">
+							<Text className="text-gray-600">Default Commission %</Text>
+							<Text className="font-semibold">
+								{commissionUserDetails.default_commission_percent}%
+							</Text>
+						</View>
 						<View className="mt-2 flex-row gap-3">
 							<TouchableOpacity
 								activeOpacity={0.85}
@@ -203,6 +209,9 @@ const CommissionUserPage = () => {
 				options={{
 					headerRight: () => (
 						<CommissionUserDetailsHeaderRight
+							default_commission_percent={
+								commissionUserDetails.default_commission_percent
+							}
 							id={userId}
 							editCommissionUserDetails={editCommissionUserDetails}
 							name={commissionUserDetails.name}

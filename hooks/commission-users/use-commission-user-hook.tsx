@@ -12,6 +12,7 @@ export type CommissionUserHookType = {
 	handleCreateCommissionUser: (payload: {
 		name: string;
 		phone_number: string;
+		default_commission_percent: number;
 	}) => Promise<void>;
 	deleteCommissionUser: (id: string) => Promise<void>;
 	fetchCommissionUsers: (signal: AbortSignal) => Promise<void>;
@@ -66,6 +67,7 @@ const useCommissionUserHook = (): CommissionUserHookType => {
 	const handleCreateCommissionUser = async (payload: {
 		name: string;
 		phone_number: string;
+		default_commission_percent: number;
 	}) => {
 		setLoading(true);
 		try {

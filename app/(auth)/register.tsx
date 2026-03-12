@@ -53,18 +53,14 @@ const Register = () => {
 			return;
 		}
 
-		// set field errors
-		if (res?.errors?.fields) {
-			setErrors(res.errors.fields);
-		}
-
-		// global/form errors
-		if (res?.errors?.form) {
+		if (res.errors.form && Object.keys(res.errors.fields).length === 0) {
 			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-				title: "Register failed",
-				description: res.errors.form,
 				type: "error",
+				title: "Register Failed",
+				description: res.errors.form,
 			});
+		} else {
+			setErrors(res.errors.fields);
 		}
 	};
 
@@ -135,7 +131,7 @@ const Register = () => {
 						}}
 						value={password}
 						secureTextEntry
-						textContentType="newPassword"
+						textContentType="password"
 						className="bg-gray-100 rounded-lg px-4 py-3 text-base"
 						placeholder="Create password"
 						placeholderTextColor="#9ca3af"
@@ -154,7 +150,7 @@ const Register = () => {
 						onChangeText={setPasswordConfirm}
 						value={passwordConfirm}
 						secureTextEntry
-						textContentType="password"
+						textContentType="newPassword"
 						className="bg-gray-100 rounded-lg px-4 py-3 text-base"
 						placeholder="Confirm password"
 						placeholderTextColor="#9ca3af"

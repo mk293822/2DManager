@@ -1,10 +1,12 @@
 // CustomKeyboard.tsx
+import { EVENT_NAMES } from "@/event-names";
 import {
 	BURMESE_KEYS_MAP,
 	ENGLISH_TO_BURMESE_MAP,
 	SPECIAL_KEYS1,
 	SPECIAL_KEYS2,
 } from "@/lib/custom-keyboard-helper";
+import { eventBus } from "@/lib/event-bus";
 import { isNumber } from "@/lib/helpers";
 import { Audio } from "expo-av";
 import * as Haptics from "expo-haptics";
@@ -108,7 +110,11 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({
 							: Haptics.selectionAsync(),
 				]);
 			} catch (e) {
-				console.log("Tap error:", e);
+				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+					type: "error",
+					title: "Tap Error",
+					description: JSON.stringify(e),
+				});
 			}
 		},
 		[],

@@ -9,6 +9,7 @@ const CommissionUserPageHeaderRight = ({
 	handleCreateCommissionUser: (payload: {
 		name: string;
 		phone_number: string;
+		default_commission_percent: number;
 	}) => Promise<void>;
 }) => {
 	const [open, setOpen] = useState(false);

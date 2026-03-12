@@ -1,4 +1,6 @@
-import { Section, SectionName, SectionSummaries } from "@/types/manage-types";
+import { SectionSummaryEditFields } from "@/hooks/manage/use-manage-hook";
+import { ParsedErrors } from "@/lib/helpers";
+import { SectionName, SectionSummaries } from "@/types/manage-types";
 import React from "react";
 import DaySectionCard from "./day-section-card";
 import DaySummaryCard from "./day-summary-card";
@@ -12,9 +14,22 @@ const ManageDaySummary = ({
 	sections: SectionSummaries;
 	handleCreateSection: (section: SectionName, date?: Date) => Promise<void>;
 	onEditSave: (
-		form: Omit<Section, "id" | "manager" | "section" | "date">,
+		form:
+			| {
+					total_amount: number;
+					total_commission: number;
+					total_resold: number;
+					total_draw_value: number;
+			  }
+			| {
+					draw_number: string;
+					draw_times: number;
+			  },
 		id: string,
-	) => Promise<void>;
+	) => Promise<{
+		success: boolean;
+		errors: ParsedErrors<SectionSummaryEditFields>;
+	}>;
 	onConfirmDelete: (id: string, date: string) => Promise<void>;
 }) => {
 	const sectionList: SectionName[] = ["morning_section", "evening_section"];

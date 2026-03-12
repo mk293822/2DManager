@@ -1,4 +1,4 @@
-import useManageHook from "@/hooks/manage/use-manage-hook";
+import { useManageContext } from "@/hooks/manage/use-manage-context";
 import { changeSectionName, formatKs, formatSmartNumber } from "@/lib/helpers";
 import { ComUserSectionSaleType } from "@/types/commission-user-types";
 import { SectionName } from "@/types/manage-types";
@@ -40,7 +40,7 @@ const CommissionUserSectionCard = ({
 	const section_summary = sale?.section_summary;
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
-	const { fetchSection } = useManageHook();
+	const { fetchSection, sections } = useManageContext();
 	const [open, setOpen] = useState(false);
 
 	const isProfit = sale?.profit_or_loss >= 0;
@@ -48,7 +48,7 @@ const CommissionUserSectionCard = ({
 	if (!sale || !section_summary) {
 		const handleCreate = async () => {
 			await createComUserSection(userId, section, date);
-			if (!section_summary)
+			if (!sections?.[0][section])
 				fetchSection(new AbortController().signal, {
 					type: "day",
 					date: date,

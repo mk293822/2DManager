@@ -1,9 +1,16 @@
-import { changeSectionName, formatKs, getTotalArray } from "@/lib/helpers";
+import { SectionSummaryEditFields } from "@/hooks/manage/use-manage-hook";
+import {
+	changeSectionName,
+	formatKs,
+	getTotalArray,
+	ParsedErrors,
+} from "@/lib/helpers";
 import { Section, SectionName } from "@/types/manage-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import React, { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import DeleteManageSectionModal from "./delete-manage-section-modal";
+import EditDrawNumberModal from "./edit-draw-number-modal";
 import EditManageSectionModal from "./edit-manage-section-modal";
 
 const DaySectionCard = ({
@@ -17,12 +24,26 @@ const DaySectionCard = ({
 	data: Section | null;
 	handleCreateSection: (section: SectionName, date?: Date) => Promise<void>;
 	onEditSave: (
-		form: Omit<Section, "id" | "manager" | "section" | "date">,
+		form:
+			| {
+					total_amount: number;
+					total_commission: number;
+					total_resold: number;
+					total_draw_value: number;
+			  }
+			| {
+					draw_number: string;
+					draw_times: number;
+			  },
 		id: string,
-	) => Promise<void>;
+	) => Promise<{
+		success: boolean;
+		errors: ParsedErrors<SectionSummaryEditFields>;
+	}>;
 	onConfirmDelete: (id: string, date: string) => Promise<void>;
 }) => {
 	const [openModal, setOpenModal] = useState(false);
+	const [openDrawNumberModal, setOpenDrawNumberModal] = useState(false);
 	const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
 	if (!data) {
@@ -48,10 +69,43 @@ const DaySectionCard = ({
 	return (
 		<View className="bg-white rounded-2xl shadow p-6 mb-6">
 			<View className="flex-row justify-between items-center mb-2">
-				<Text className="text-indigo-700 font-extrabold text-xl">
+				<Text className="text-indigo-600 font-extrabold text-xl">
 					{changeSectionName(data.section)}
 				</Text>
 				<View className="flex-row items-center justify-end gap-3">
+					<View
+						style={{
+							position: "relative",
+						}}
+					>
+						<TouchableOpacity
+							onPress={() => setOpenModal(true)}
+							activeOpacity={0.85}
+							hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+							className="p-2.5"
+						>
+							<AntDesign
+								name="edit"
+								color={"#4f46e5"}
+								size={18}
+							/>
+
+							<View
+								style={{
+									position: "absolute",
+									top: -0,
+									bottom: -0,
+									left: -0,
+									right: -0,
+									borderWidth: 1,
+									borderColor: "#4f46e5",
+									borderStyle: "dashed",
+									borderRadius: 4,
+								}}
+								pointerEvents="none"
+							/>
+						</TouchableOpacity>
+					</View>
 					<View
 						style={{
 							position: "relative",
@@ -118,6 +172,12 @@ const DaySectionCard = ({
 					&times; {data.draw_times}
 				</Text>
 			</View>
+			<View className="flex-row justify-between py-2 border-b border-gray-100">
+				<Text className="text-gray-600">Sold Numbers Exists</Text>
+				<Text className="font-extrabold text-red-700">
+					{data.sold_numbers_exists ? "Yes" : "No"}
+				</Text>
+			</View>
 			<View className="flex-row justify-between pt-3">
 				<Text className="font-semibold">Profit / Loss</Text>
 				<Text
@@ -127,12 +187,12 @@ const DaySectionCard = ({
 				</Text>
 			</View>
 			<TouchableOpacity
-				onPress={() => setOpenModal(true)}
+				onPress={() => setOpenDrawNumberModal(true)}
 				activeOpacity={0.85}
 				className="bg-indigo-600 py-3 rounded-xl mt-3"
 			>
 				<Text className="text-white font-bold text-center">
-					Edit Section & add draw number
+					Edit Draw Number and Times
 				</Text>
 			</TouchableOpacity>
 
@@ -141,6 +201,12 @@ const DaySectionCard = ({
 				onEditSave={onEditSave}
 				onClose={() => setOpenModal(false)}
 				sectionObj={data}
+			/>
+			<EditDrawNumberModal
+				open={openDrawNumberModal}
+				onClose={() => setOpenDrawNumberModal(false)}
+				sectionObj={data}
+				onEditSave={onEditSave}
 			/>
 			<DeleteManageSectionModal
 				section_id={data.id}

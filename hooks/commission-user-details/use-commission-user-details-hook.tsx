@@ -27,6 +27,7 @@ export type ComUserDetailsHookTypes = {
 		form: {
 			name: string;
 			phone_number: string;
+			default_commission_percent: number;
 		},
 	) => Promise<void>;
 	deleteComUserSection: (
@@ -75,7 +76,11 @@ const useCommissionUserDetailsHook = () => {
 
 	const editCommissionUserDetails = async (
 		id: string,
-		form: { name: string; phone_number: string },
+		form: {
+			name: string;
+			phone_number: string;
+			default_commission_percent: number;
+		},
 	) => {
 		try {
 			setLoading(true);

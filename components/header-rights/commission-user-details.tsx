@@ -9,17 +9,20 @@ const CommissionUserDetailsHeaderRight = ({
 	id,
 	name,
 	phone_number,
+	default_commission_percent,
 }: {
 	editCommissionUserDetails: (
 		id: string,
 		form: {
 			name: string;
 			phone_number: string;
+			default_commission_percent: number;
 		},
 	) => Promise<void>;
 	id: string;
 	name: string;
 	phone_number: string;
+	default_commission_percent: number;
 }) => {
 	const [open, setOpen] = useState(false);
 
@@ -78,6 +81,7 @@ const CommissionUserDetailsHeaderRight = ({
 				editCommissionUserDetails={editCommissionUserDetails}
 				name={name}
 				phone_number={phone_number}
+				default_commission_percent={default_commission_percent}
 			/>
 		</>
 	);

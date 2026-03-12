@@ -1,7 +1,8 @@
+import { EVENT_NAMES } from "@/event-names";
 import { api } from "@/lib/api";
-import { formatDateRequest } from "@/lib/helpers";
+import { eventBus } from "@/lib/event-bus";
+import { formatDateRequest, ParsedErrors, parseErrors } from "@/lib/helpers";
 import {
-	Section,
 	SectionName,
 	SectionRange,
 	SectionSummaries,
@@ -18,15 +19,36 @@ export type ManageHookType = {
 
 	handleCreateSection: (section: SectionName, date?: Date) => Promise<void>;
 	onEditSave: (
-		form: Omit<Section, "id" | "manager" | "section" | "date">,
+		form:
+			| {
+					total_amount: number;
+					total_commission: number;
+					total_resold: number;
+					total_draw_value: number;
+			  }
+			| {
+					draw_number: string;
+					draw_times: number;
+			  },
 		id: string,
-	) => Promise<void>;
+	) => Promise<{
+		success: boolean;
+		errors: ParsedErrors<SectionSummaryEditFields>;
+	}>;
 	onConfirmDelete: (id: string, date: string) => Promise<void>;
 	fetchSection: (
 		signal: AbortSignal,
 		sectionRange: SectionRange,
 	) => Promise<void>;
 };
+
+export type SectionSummaryEditFields =
+	| "draw_number"
+	| "draw_times"
+	| "total_amount"
+	| "total_draw_value"
+	| "total_commission"
+	| "total_resold";
 
 function upsertByDate(
 	prev: SectionSummaries[] | null,
@@ -110,10 +132,19 @@ const useManageHook = (): ManageHookType => {
 	};
 
 	const onEditSave = async (
-		form: Omit<Section, "id" | "manager" | "section" | "date">,
+		form:
+			| {
+					total_amount: number;
+					total_commission: number;
+					total_resold: number;
+					total_draw_value: number;
+			  }
+			| {
+					draw_number: string;
+					draw_times: number;
+			  },
 		id: string,
 	) => {
-		setLoading(true);
 		try {
 			const { data } = await api.put<SectionSummaries>(
 				`/manager/sections/${id}/`,
@@ -122,10 +153,26 @@ const useManageHook = (): ManageHookType => {
 				},
 			);
 			setSections((prev) => upsertByDate(prev, data));
-		} catch {
-			setError("Failed to update section");
-		} finally {
-			setLoading(false);
+			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+				type: "success",
+				title: "Success",
+				description: "Edit successfully!",
+			});
+
+			return { success: true, errors: { fields: {} } };
+		} catch (err: any) {
+			const data = err?.response?.data || {};
+
+			const errors = parseErrors<SectionSummaryEditFields>(data, [
+				"draw_number",
+				"draw_times",
+				"total_amount",
+				"total_commission",
+				"total_draw_value",
+				"total_resold",
+			]);
+
+			return { success: false, errors };
 		}
 	};
 

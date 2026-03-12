@@ -66,7 +66,7 @@ export default function Index() {
 			{!liveData ? (
 				<Loading />
 			) : (
-				<View className="flex-1 bg-gray-100">
+				<View className="flex-1 bg-gray-100 px-2">
 					<ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
 						{isHoliday && <HolidayInfo />}
 

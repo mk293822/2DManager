@@ -43,16 +43,15 @@ const Login = () => {
 			return;
 		}
 
-		// field errors
-		setErrors(res.errors.fields);
-
 		// global error
-		if (res.errors.form) {
+		if (res.errors.form && Object.keys(res.errors.fields).length === 0) {
 			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-				title: "Login failed",
-				description: res.errors.form,
 				type: "error",
+				title: "Login Failed",
+				description: res.errors.form,
 			});
+		} else {
+			setErrors(res.errors.fields);
 		}
 	};
 

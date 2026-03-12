@@ -127,14 +127,6 @@ export function useAuth(): UseAuthInterface {
 					"password",
 				]);
 
-				if (errors.form && Object.keys(errors.fields).length === 0) {
-					eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-						type: "error",
-						title: "Login Failed",
-						description: errors.form,
-					});
-				}
-
 				return { success: false, errors };
 			}
 		},
@@ -172,14 +164,6 @@ export function useAuth(): UseAuthInterface {
 					"phone_number",
 					"password",
 				] as any);
-
-				if (errors.form && Object.keys(errors.fields).length === 0) {
-					eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-						type: "error",
-						title: "Register Failed",
-						description: errors.form,
-					});
-				}
 
 				return { success: false, errors };
 			}
@@ -239,14 +223,6 @@ export function useAuth(): UseAuthInterface {
 				"confirm_password",
 			]);
 
-			if (errors.form && Object.keys(errors.fields).length === 0) {
-				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-					type: "error",
-					title: "Error",
-					description: errors.form,
-				});
-			}
-
 			return { success: false, errors };
 		}
 	};
@@ -276,14 +252,6 @@ export function useAuth(): UseAuthInterface {
 				"name",
 				"phone_number",
 			]);
-
-			if (errors.form && Object.keys(errors.fields).length === 0) {
-				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-					type: "error",
-					title: "Update Failed",
-					description: errors.form,
-				});
-			}
 
 			return { success: false, errors };
 		}

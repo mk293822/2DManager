@@ -6,6 +6,7 @@ export type CommissionUserType = {
 	phone_number: string;
 	section_sales: SectionSaleGroup;
 	manager_name: string;
+	default_commission_percent: number;
 };
 
 export type SectionSaleGroup = {
@@ -30,6 +31,7 @@ export type ComUserSectionSaleType = {
 		draw_number: string;
 		draw_times: number;
 		section: SectionName;
+		sold_numbers_exists: boolean;
 	};
 	commission_percent: number;
 	total_amount: number;

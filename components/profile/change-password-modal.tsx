@@ -72,16 +72,16 @@ const ChangePasswordModal = ({
 				return;
 			}
 
-			// field errors
-			setErrors(res.errors.fields || {});
-
 			// form error (non field error)
-			if (res.errors.form) {
+			if (res.errors.form && Object.keys(res.errors.fields).length === 0) {
 				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
 					type: "error",
 					title: "Error",
 					description: res.errors.form,
 				});
+			} else {
+				// field errors
+				setErrors(res.errors.fields || {});
 			}
 
 			setForm({

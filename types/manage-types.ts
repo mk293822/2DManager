@@ -14,6 +14,7 @@ export type Section = {
 	profit_or_loss: number;
 	total_draw_amount: number;
 	total_draw_value: number;
+	sold_numbers_exists: boolean;
 };
 
 export type SectionSummary = {

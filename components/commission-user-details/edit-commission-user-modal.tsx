@@ -16,11 +16,13 @@ type Props = {
 		form: {
 			name: string;
 			phone_number: string;
+			default_commission_percent: number;
 		},
 	) => Promise<void>;
 	id: string;
 	name: string;
 	phone_number: string;
+	default_commission_percent: number;
 };
 
 const EditCommissionUserModal = ({
@@ -30,10 +32,16 @@ const EditCommissionUserModal = ({
 	id,
 	name,
 	phone_number,
+	default_commission_percent,
 }: Props) => {
-	const [form, setForm] = useState<{ name: string; phone_number: string }>({
+	const [form, setForm] = useState<{
+		name: string;
+		phone_number: string;
+		default_commission_percent: number;
+	}>({
 		name: name,
 		phone_number: phone_number,
+		default_commission_percent: default_commission_percent,
 	});
 
 	const handleChange = (key: keyof typeof form, value: string | number) => {
@@ -42,7 +50,12 @@ const EditCommissionUserModal = ({
 
 	const onCloseModal = () => {
 		onClose();
-		setForm({ name: "", phone_number: "" });
+		setForm({
+			name: "",
+			phone_number: "",
+			default_commission_percent:
+				process.env.EXPO_PUBLIC_DEFAULT_COMMISSION_PERCENT,
+		});
 	};
 
 	const handleSave = async () => {
@@ -73,6 +86,20 @@ const EditCommissionUserModal = ({
 						value={form.phone_number}
 						keyboardType="numeric"
 						onChangeText={(text) => handleChange("phone_number", text)}
+						className="border border-gray-300 rounded-lg px-3 py-2"
+					/>
+
+					<Text className="font-semibold text-gray-700">
+						Default Commission %
+					</Text>
+					<TextInput
+						value={form.default_commission_percent.toLocaleString()}
+						keyboardType="numeric"
+						maxLength={3}
+						onChangeText={(text) => {
+							const clean = text.replace(/,/g, "");
+							handleChange("default_commission_percent", Number(clean));
+						}}
 						className="border border-gray-300 rounded-lg px-3 py-2"
 					/>
 				</ScrollView>

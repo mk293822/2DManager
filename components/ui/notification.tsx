@@ -34,8 +34,10 @@ export const NotificationProvider = ({
 
 	return (
 		<>
-			{children}
-			<View className="absolute top-14 left-4 right-4 z-50">
+			<View
+				className="absolute top-14 left-4 right-4"
+				style={{ zIndex: 50 }}
+			>
 				{notifications.map((n) => (
 					<NotificationCard
 						key={n.id}
@@ -44,6 +46,7 @@ export const NotificationProvider = ({
 					/>
 				))}
 			</View>
+			{children}
 		</>
 	);
 };
@@ -107,6 +110,7 @@ export const NotificationCard = ({
 				transform: [{ translateY }],
 				alignSelf: "flex-end",
 				width: "78%",
+				zIndex: 100,
 			}}
 			className="mb-3"
 		>
