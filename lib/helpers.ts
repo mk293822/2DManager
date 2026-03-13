@@ -1,4 +1,8 @@
-import { SectionName } from "@/types/manage-types";
+import {
+	ComUserSectionSaleSummary,
+	ComUserSectionSaleType,
+} from "@/types/commission-user-types";
+import { Section, SectionName, SectionSummary } from "@/types/manage-types";
 
 export const DAYS: string[] = [
 	"Sunday",
@@ -113,4 +117,42 @@ export function parseErrors<T extends string>(
 		fields: fieldErrors,
 		form: formError,
 	};
+}
+
+const Fields = [
+	"total_amount",
+	"total_commission",
+	"total_resold",
+	"total_draw_value",
+	"total_draw_amount",
+	"profit_or_loss",
+] as const;
+
+type FieldNames = (typeof Fields)[number];
+
+export function calculateSummary<T extends Section | ComUserSectionSaleType>(
+	morning: T | null,
+	evening: T | null,
+): T extends Section ? SectionSummary : ComUserSectionSaleSummary {
+	const result: Partial<Record<FieldNames, number>> = {};
+
+	for (const field of Fields) {
+		if (field === "total_resold") {
+			result.total_resold =
+				Number(
+					morning && "total_resold" in morning ? morning.total_resold : 0,
+				) +
+				Number(evening && "total_resold" in evening ? evening.total_resold : 0);
+			continue;
+		}
+
+		const morningVal = Number((morning as any)?.[field] ?? 0);
+		const eveningVal = Number((evening as any)?.[field] ?? 0);
+
+		result[field] = morningVal + eveningVal;
+	}
+
+	return result as T extends Section
+		? SectionSummary
+		: ComUserSectionSaleSummary;
 }

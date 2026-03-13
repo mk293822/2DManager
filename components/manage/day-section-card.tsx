@@ -157,6 +157,12 @@ const DaySectionCard = ({
 				</Text>
 			</View>
 			<View className="flex-row justify-between py-2 border-b border-gray-100">
+				<Text className="text-gray-600">Sold Numbers Exists</Text>
+				<Text className="font-extrabold">
+					{data.sold_numbers_exists ? "Yes" : "No"}
+				</Text>
+			</View>
+			<View className="flex-row justify-between py-2 border-b border-gray-100">
 				<Text className="text-gray-600">Draw Number</Text>
 				<Text className="font-extrabold text-indigo-700">
 					{data.draw_number
@@ -170,12 +176,6 @@ const DaySectionCard = ({
 				<Text className="text-gray-600">Draw Times</Text>
 				<Text className="font-extrabold text-red-700">
 					&times; {data.draw_times}
-				</Text>
-			</View>
-			<View className="flex-row justify-between py-2 border-b border-gray-100">
-				<Text className="text-gray-600">Sold Numbers Exists</Text>
-				<Text className="font-extrabold text-red-700">
-					{data.sold_numbers_exists ? "Yes" : "No"}
 				</Text>
 			</View>
 			<View className="flex-row justify-between pt-3">

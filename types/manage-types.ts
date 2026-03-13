@@ -23,6 +23,7 @@ export type SectionSummary = {
 	total_resold: number;
 	profit_or_loss: number;
 	total_draw_value: number;
+	total_draw_amount: number;
 };
 
 export type SectionSummaries = {

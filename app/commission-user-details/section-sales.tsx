@@ -2,7 +2,9 @@
 import SectionSalesPageHeaderRight from "@/components/header-rights/section-sales";
 import { Loading } from "@/components/loading";
 import ManageDatePickerHeader from "@/components/manage/manage-date-picker-header";
+import SectionSaleList from "@/components/section-sales/section-sale-list";
 import WeekSectionSaleList from "@/components/section-sales/week-section-sale-list";
+import { useCommissionUserDetailsContext } from "@/hooks/commission-user-details/use-context";
 import useSectionSalesHook from "@/hooks/section-sales/use-section-sale-hook";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { getWeekOfMonth } from "@/lib/helpers";
@@ -22,6 +24,8 @@ const SectionSales = () => {
 
 	const { fetchSectionSales, sectionSales, loading, error, setError } =
 		useSectionSalesHook();
+	const { deleteComUserSection, createComUserSection, commissionUserDetails } =
+		useCommissionUserDetailsContext();
 
 	const date = new Date();
 	const [selectedSectionRange, setSelectedSectionRange] =
@@ -74,27 +78,7 @@ const SectionSales = () => {
 
 	if (!userId) {
 		router.replace("/commission-users");
-		return null;
-	}
-
-	if (error) {
-		return (
-			<View className="flex-1 items-center justify-center bg-white p-4">
-				<Text className="text-red-600 font-semibold text-center mb-4">
-					{error}
-				</Text>
-				<Pressable
-					onPress={onRefresh}
-					className="bg-indigo-600 px-6 py-3 rounded-lg"
-				>
-					<Text className="text-white font-semibold">Reload</Text>
-				</Pressable>
-			</View>
-		);
-	}
-
-	if (loading || !sectionSales) {
-		return <Loading />;
+		return;
 	}
 
 	// Flatten the content into an array for FlatList
@@ -110,6 +94,17 @@ const SectionSales = () => {
 					/>
 				);
 			case "sectionSales":
+				if (rangeMode === "day" && commissionUserDetails) {
+					return (
+						<SectionSaleList
+							deleteComUserSection={deleteComUserSection}
+							sales={commissionUserDetails.section_sales}
+							createComUserSection={createComUserSection}
+							userId={userId}
+							user_name={commissionUserDetails.name}
+						/>
+					);
+				}
 				return <WeekSectionSaleList sectionSales={sectionSales} />;
 			default:
 				return null;
@@ -128,21 +123,37 @@ const SectionSales = () => {
 					),
 				}}
 			/>
-			<PaperProvider>
-				<FlatList
-					data={flatListData}
-					renderItem={renderItem}
-					keyExtractor={(item, index) => item.type + index}
-					refreshControl={
-						<RefreshControl
-							colors={["#0000ff"]}
-							refreshing={refreshing}
-							onRefresh={onRefresh}
-						/>
-					}
-					contentContainerStyle={{ padding: 16, paddingBottom: 20, gap: 16 }}
-				/>
-			</PaperProvider>
+			{loading ? (
+				<Loading />
+			) : error || !commissionUserDetails || !sectionSales ? (
+				<View className="flex-1 items-center justify-center bg-white p-4">
+					<Text className="text-red-600 font-semibold text-center mb-4">
+						{error}
+					</Text>
+					<Pressable
+						onPress={onRefresh}
+						className="bg-indigo-600 px-6 py-3 rounded-lg"
+					>
+						<Text className="text-white font-semibold">Reload</Text>
+					</Pressable>
+				</View>
+			) : (
+				<PaperProvider>
+					<FlatList
+						data={flatListData}
+						renderItem={renderItem}
+						keyExtractor={(item, index) => item.type + index}
+						refreshControl={
+							<RefreshControl
+								colors={["#0000ff"]}
+								refreshing={refreshing}
+								onRefresh={onRefresh}
+							/>
+						}
+						contentContainerStyle={{ padding: 16, paddingBottom: 20, gap: 4 }}
+					/>
+				</PaperProvider>
+			)}
 		</>
 	);
 };

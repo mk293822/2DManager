@@ -1,7 +1,7 @@
 import { SectionSaleGroup } from "@/types/commission-user-types";
 import { SectionName } from "@/types/manage-types";
 import React from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import CommissionUserSectionCard from "./section-sale-card";
 import SectionSummaryCard from "./section-summary-card";
 
@@ -34,9 +34,6 @@ const SectionSaleList = ({
 	return (
 		<View>
 			<View>
-				<Text className="text-lg font-extrabold text-gray-800 mb-3">
-					Today’s Sections
-				</Text>
 				<SectionSummaryCard
 					summary={sales.summary}
 					date={date}

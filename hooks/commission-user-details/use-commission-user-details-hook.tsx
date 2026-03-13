@@ -1,7 +1,8 @@
 import { api } from "@/lib/api";
-import { formatDateRequest } from "@/lib/helpers";
+import { calculateSummary, formatDateRequest } from "@/lib/helpers";
 import {
 	CommissionUserType,
+	ComUserSectionSaleType,
 	SectionSaleGroup,
 } from "@/types/commission-user-types";
 import { SectionName } from "@/types/manage-types";
@@ -154,16 +155,26 @@ const useCommissionUserDetailsHook = () => {
 
 			setCommissionUserDetails((prev) => {
 				if (!prev) return prev;
+				const day = prev.section_sales;
+				const morning =
+					day.morning_section?.id === id ? null : day.morning_section;
 
+				const evening =
+					day.evening_section?.id === id ? null : day.evening_section;
+
+				const summary = calculateSummary<ComUserSectionSaleType>(
+					morning,
+					evening,
+				);
 				return {
 					...prev,
-					section_sales: { ...prev.section_sales, [section]: null },
+					section_sales: { ...day, [section]: null, summary: summary },
 				};
 			});
 		} catch (err: any) {
 			if (err.name === "CanceledError" || err.name === "AbortError") return;
 
-			setError("Failed to create section sale. Please try again.");
+			setError("Failed to delete section sale. Please try again.");
 			setCommissionUserDetails(null);
 		}
 	};

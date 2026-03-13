@@ -1,8 +1,14 @@
 import { EVENT_NAMES } from "@/event-names";
 import { api } from "@/lib/api";
 import { eventBus } from "@/lib/event-bus";
-import { formatDateRequest, ParsedErrors, parseErrors } from "@/lib/helpers";
 import {
+	calculateSummary,
+	formatDateRequest,
+	ParsedErrors,
+	parseErrors,
+} from "@/lib/helpers";
+import {
+	Section,
 	SectionName,
 	SectionRange,
 	SectionSummaries,
@@ -185,15 +191,19 @@ const useManageHook = (): ManageHookType => {
 
 				return prev.map((day) => {
 					if (day.date !== date) return day;
+					const morning =
+						day.morning_section?.id === id ? null : day.morning_section;
 
-					// Update morning/evening section
+					const evening =
+						day.evening_section?.id === id ? null : day.evening_section;
+
+					const summary = calculateSummary<Section>(morning, evening);
+
 					return {
-						date: day.date,
-						summary: day.summary,
-						morning_section:
-							day.morning_section?.id === id ? null : day.morning_section,
-						evening_section:
-							day.evening_section?.id === id ? null : day.evening_section,
+						...day,
+						summary,
+						morning_section: morning,
+						evening_section: evening,
 					};
 				});
 			});
