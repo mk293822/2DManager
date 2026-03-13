@@ -1,5 +1,12 @@
+import { EVENT_NAMES } from "@/event-names";
 import { api } from "@/lib/api";
-import { calculateSummary, formatDateRequest } from "@/lib/helpers";
+import { eventBus } from "@/lib/event-bus";
+import {
+	calculateSummary,
+	formatDateRequest,
+	ParsedErrors,
+	parseErrors,
+} from "@/lib/helpers";
 import {
 	CommissionUserType,
 	ComUserSectionSaleType,
@@ -30,13 +37,21 @@ export type ComUserDetailsHookTypes = {
 			phone_number: string;
 			default_commission_percent: number;
 		},
-	) => Promise<void>;
+	) => Promise<{
+		success: boolean;
+		errors: ParsedErrors<CommissionUserEditFields>;
+	}>;
 	deleteComUserSection: (
 		id: string,
 		userId: string,
 		section: SectionName,
 	) => Promise<void>;
 };
+
+export type CommissionUserEditFields =
+	| "name"
+	| "phone_number"
+	| "default_commission_percent";
 
 const useCommissionUserDetailsHook = () => {
 	const [loading, setLoading] = useState(false);
@@ -84,7 +99,6 @@ const useCommissionUserDetailsHook = () => {
 		},
 	) => {
 		try {
-			setLoading(true);
 			setError(null);
 
 			const { data } = await api.put<CommissionUserType>(
@@ -93,15 +107,23 @@ const useCommissionUserDetailsHook = () => {
 			);
 
 			setCommissionUserDetails(data);
-		} catch (err: any) {
-			if (err.name === "CanceledError" || err.name === "AbortError") {
-				// Request was cancelled → do nothing
-				return;
-			}
+			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+				type: "success",
+				title: "Success",
+				description: "Commission User edited successfully",
+			});
 
-			setError("Failed to edit commission user. Please try again.");
-		} finally {
-			setLoading(false);
+			return { success: true, errors: { fields: {} } };
+		} catch (err: any) {
+			const data = err?.response?.data || {};
+
+			const errors = parseErrors<CommissionUserEditFields>(data, [
+				"phone_number",
+				"name",
+				"default_commission_percent",
+			]);
+
+			return { success: false, errors };
 		}
 	};
 

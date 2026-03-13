@@ -42,6 +42,7 @@ const CommissionUserSectionCard = ({
 	const router = useRouter();
 	const { fetchSection, sections } = useManageContext();
 	const [open, setOpen] = useState(false);
+	const abortController = new AbortController();
 
 	const isProfit = sale?.profit_or_loss >= 0;
 
@@ -49,7 +50,7 @@ const CommissionUserSectionCard = ({
 		const handleCreate = async () => {
 			await createComUserSection(userId, section, date);
 			if (!sections?.[0][section])
-				fetchSection(new AbortController().signal, {
+				fetchSection(abortController.signal, {
 					type: "day",
 					date: date,
 				});
@@ -113,10 +114,17 @@ const CommissionUserSectionCard = ({
 	];
 
 	const handleDelete = async () => {
-		setLoading(true);
-		await deleteComUserSection(sale.id, userId, section);
-		setLoading(false);
-		setOpen(false);
+		try {
+			setLoading(true);
+			await deleteComUserSection(sale.id, userId, section);
+			fetchSection(abortController.signal, {
+				type: "day",
+				date: date,
+			});
+		} finally {
+			setOpen(false);
+			setLoading(false);
+		}
 	};
 
 	return (

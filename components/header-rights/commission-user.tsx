@@ -1,3 +1,5 @@
+import { CommissionUserEditFields } from "@/hooks/commission-user-details/use-commission-user-details-hook";
+import { ParsedErrors } from "@/lib/helpers";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import React, { useState } from "react";
 import { TouchableOpacity, View } from "react-native";
@@ -10,7 +12,10 @@ const CommissionUserPageHeaderRight = ({
 		name: string;
 		phone_number: string;
 		default_commission_percent: number;
-	}) => Promise<void>;
+	}) => Promise<{
+		success: boolean;
+		errors: ParsedErrors<CommissionUserEditFields>;
+	}>;
 }) => {
 	const [open, setOpen] = useState(false);
 

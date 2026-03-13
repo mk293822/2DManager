@@ -2,7 +2,7 @@ import { EVENT_NAMES } from "@/event-names";
 import { EditUserFields } from "@/hooks/use-auth";
 import { eventBus } from "@/lib/event-bus";
 import { ParsedErrors } from "@/lib/helpers";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
 	ScrollView,
 	Text,
@@ -46,19 +46,8 @@ const EditUserProfileModal = ({
 		setForm((prev) => ({ ...prev, [key]: value }));
 	};
 
-	useEffect(() => {
-		if (open) {
-			setForm({
-				name,
-				phone_number,
-			});
-			setErrors({});
-		}
-	}, [open, name, phone_number]);
-
 	const onCloseModal = () => {
 		onClose();
-		setForm({ name: "", phone_number: "" });
 		setErrors({});
 	};
 
@@ -150,7 +139,8 @@ const EditUserProfileModal = ({
 
 						<TouchableOpacity
 							onPress={handleSave}
-							className="px-4 py-2 rounded-lg bg-indigo-600 border border-indigo-600"
+							disabled={loading}
+							className="px-4 py-2 rounded-lg disabled:bg-indigo-500 bg-indigo-600 border border-indigo-600"
 						>
 							<Text className="font-semibold text-white">Save</Text>
 						</TouchableOpacity>

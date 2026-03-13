@@ -51,10 +51,7 @@ const EditDrawNumberModal = ({
 
 	const handleClose = () => {
 		onClose();
-		setForm({
-			draw_number: sectionObj.draw_number,
-			draw_times: sectionObj.draw_times,
-		});
+		setErrors({});
 	};
 
 	const handleSave = async () => {

@@ -1,7 +1,10 @@
+import { EVENT_NAMES } from "@/event-names";
 import { api } from "@/lib/api";
-import { formatDateRequest } from "@/lib/helpers";
+import { eventBus } from "@/lib/event-bus";
+import { formatDateRequest, ParsedErrors, parseErrors } from "@/lib/helpers";
 import { CommissionUserType } from "@/types/commission-user-types";
 import { useCallback, useState } from "react";
+import { CommissionUserEditFields } from "../commission-user-details/use-commission-user-details-hook";
 import { useAbortableEffect } from "../use-abortable-effect";
 
 export type CommissionUserHookType = {
@@ -13,7 +16,10 @@ export type CommissionUserHookType = {
 		name: string;
 		phone_number: string;
 		default_commission_percent: number;
-	}) => Promise<void>;
+	}) => Promise<{
+		success: boolean;
+		errors: ParsedErrors<CommissionUserEditFields>;
+	}>;
 	deleteCommissionUser: (id: string) => Promise<void>;
 	fetchCommissionUsers: (signal: AbortSignal) => Promise<void>;
 };
@@ -69,7 +75,7 @@ const useCommissionUserHook = (): CommissionUserHookType => {
 		phone_number: string;
 		default_commission_percent: number;
 	}) => {
-		setLoading(true);
+		console.log(payload);
 		try {
 			const { data } = await api.post<CommissionUserType>(
 				"/commission-users/",
@@ -82,10 +88,23 @@ const useCommissionUserHook = (): CommissionUserHookType => {
 				if (!pre) return [data];
 				return [...pre, data];
 			});
-		} catch {
-			setError("Failed to create commission user");
-		} finally {
-			setLoading(false);
+			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+				type: "success",
+				title: "Success",
+				description: "Commission User created successfully",
+			});
+
+			return { success: true, errors: { fields: {} } };
+		} catch (err: any) {
+			const data = err?.response?.data || {};
+
+			const errors = parseErrors<CommissionUserEditFields>(data, [
+				"phone_number",
+				"name",
+				"default_commission_percent",
+			]);
+
+			return { success: false, errors };
 		}
 	};
 

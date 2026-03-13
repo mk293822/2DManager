@@ -1,4 +1,4 @@
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 
 export const Loading = () => {
 	return (
@@ -7,6 +7,7 @@ export const Loading = () => {
 				size={50}
 				color="#2563eb"
 			/>
+			<Text className="font-semibold mt-1">Lodaing...</Text>
 		</View>
 	);
 };

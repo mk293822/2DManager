@@ -1,3 +1,5 @@
+import { CommissionUserEditFields } from "@/hooks/commission-user-details/use-commission-user-details-hook";
+import { ParsedErrors } from "@/lib/helpers";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -18,7 +20,10 @@ const CommissionUserDetailsHeaderRight = ({
 			phone_number: string;
 			default_commission_percent: number;
 		},
-	) => Promise<void>;
+	) => Promise<{
+		success: boolean;
+		errors: ParsedErrors<CommissionUserEditFields>;
+	}>;
 	id: string;
 	name: string;
 	phone_number: string;

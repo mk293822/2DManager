@@ -63,7 +63,6 @@ const EditManageSectionModal = ({
 	const handleClose = () => {
 		onClose();
 		setErrors({});
-		setForm(payload);
 	};
 
 	const handleSave = async () => {
