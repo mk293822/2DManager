@@ -31,6 +31,8 @@ export type ManageHookType = {
 					total_commission: number;
 					total_resold: number;
 					total_draw_value: number;
+					draw_number: string;
+					draw_times: number;
 			  }
 			| {
 					draw_number: string;
@@ -144,6 +146,8 @@ const useManageHook = (): ManageHookType => {
 					total_commission: number;
 					total_resold: number;
 					total_draw_value: number;
+					draw_number: string;
+					draw_times: number;
 			  }
 			| {
 					draw_number: string;

@@ -194,52 +194,54 @@ const CommissionUserSectionCard = ({
 						</Text>
 					</View>
 
-					<View className="flex-row items-center gap-2 w-full">
-						<TouchableOpacity
-							activeOpacity={0.85}
-							className="bg-indigo-600 w-1/2 py-3 rounded-xl shadow mt-4 flex-row gap-2 items-center justify-center"
-							onPress={() =>
-								router.push({
-									pathname: "/com-user-two-d-list/[id]",
-									params: {
-										id: String(sale.id),
-										user_name: user_name,
-										section: section,
-									},
-								})
-							}
-						>
-							<AntDesign
-								name="history"
-								color={"#fff"}
-								size={15}
-							/>
-							<Text className="text-white font-semibold text-center">
-								History
-							</Text>
-						</TouchableOpacity>
-						<TouchableOpacity
-							activeOpacity={0.85}
-							className="bg-green-600 w-1/2 py-3 rounded-xl shadow mt-4 flex-row gap-2 items-center justify-center"
-							onPress={() =>
-								router.push({
-									pathname: "/com-user-two-d-list/create-two-d-numbers",
-									params: {
-										section: section,
-									},
-								})
-							}
-						>
-							<AntDesign
-								name="plus"
-								color={"#fff"}
-								size={15}
-							/>
-							<Text className="text-white font-semibold text-center">
-								Add Numbers
-							</Text>
-						</TouchableOpacity>
-					</View>
+					{date.toDateString() === new Date().toDateString() && (
+						<View className="flex-row items-center gap-2 w-full">
+							<TouchableOpacity
+								activeOpacity={0.85}
+								className="bg-indigo-600 w-1/2 py-3 rounded-xl shadow mt-4 flex-row gap-2 items-center justify-center"
+								onPress={() =>
+									router.push({
+										pathname: "/com-user-two-d-list/[id]",
+										params: {
+											id: String(sale.id),
+											user_name: user_name,
+											section: section,
+										},
+									})
+								}
+							>
+								<AntDesign
+									name="history"
+									color={"#fff"}
+									size={15}
+								/>
+								<Text className="text-white font-semibold text-center">
+									History
+								</Text>
+							</TouchableOpacity>
+							<TouchableOpacity
+								activeOpacity={0.85}
+								className="bg-green-600 w-1/2 py-3 rounded-xl shadow mt-4 flex-row gap-2 items-center justify-center"
+								onPress={() =>
+									router.push({
+										pathname: "/com-user-two-d-list/create-two-d-numbers",
+										params: {
+											section: section,
+										},
+									})
+								}
+							>
+								<AntDesign
+									name="plus"
+									color={"#fff"}
+									size={15}
+								/>
+								<Text className="text-white font-semibold text-center">
+									Add Numbers
+								</Text>
+							</TouchableOpacity>
+						</View>
+					)}
 				</View>
 			)}
 

@@ -1,20 +1,30 @@
 import { formatDateDisplay, formatKs } from "@/lib/helpers";
 import { ComUserSectionSaleSummary } from "@/types/commission-user-types";
 import React from "react";
-import { Text, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 
 type Props = {
 	summary: ComUserSectionSaleSummary;
 	date: Date;
+	handleToggle: () => void;
 };
 
-const WeekSectionSaleSummaryCard = ({ summary, date }: Props) => {
+const WeekSectionSaleSummaryCard = ({ summary, date, handleToggle }: Props) => {
 	return (
 		<>
 			<View className="flex-row justify-between items-center mb-4 px-1">
 				<Text className="text-indigo-600 font-bold text-xl">
 					{formatDateDisplay(new Date(date))}
 				</Text>
+				<TouchableOpacity
+					activeOpacity={0.85}
+					hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+					onPress={handleToggle}
+				>
+					<Text className="text-indigo-600 underline font-semibold">
+						Details
+					</Text>
+				</TouchableOpacity>
 			</View>
 
 			<View className="bg-gray-100 rounded-2xl p-4 mb-4 shadow-sm">
@@ -23,7 +33,8 @@ const WeekSectionSaleSummaryCard = ({ summary, date }: Props) => {
 				{[
 					["Total Amount", summary.total_amount],
 					["Total Commission", summary.total_commission],
-					["Total Draw Amount", summary.total_draw_value],
+					["Total Draw Value", summary.total_draw_value],
+					["Total Draw Amount", summary.total_draw_amount],
 				].map(([label, value]) => (
 					<View
 						key={label}

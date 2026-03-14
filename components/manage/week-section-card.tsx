@@ -10,13 +10,13 @@ const WeekSectionCard = ({
 }: {
 	name: string;
 	data: Section | null;
-	date: string;
+	date: Date;
 }) => {
 	if (!data) {
 		return (
 			<View className="bg-gray-100 rounded-xl p-3 mb-4">
 				<Text className="text-gray-500 font-medium">
-					No {name} section for {formatDateDisplay(new Date(date))}
+					No {name} section for {formatDateDisplay(date)}
 				</Text>
 			</View>
 		);
@@ -35,13 +35,6 @@ const WeekSectionCard = ({
 					<Text className="font-semibold">{formatKs(value as number)}</Text>
 				</View>
 			))}
-
-			<View className="flex-row justify-between py-0.5">
-				<Text className="text-gray-500">Total Draw Amount</Text>
-				<Text className="font-semibold">
-					{formatKs(data.total_draw_amount as number)}
-				</Text>
-			</View>
 
 			<View className="flex-row justify-between py-0.5">
 				<Text className="text-gray-500">Draw Number</Text>

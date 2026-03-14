@@ -60,6 +60,7 @@ export const getTotalArray = (data: any): [string, number][] => [
 	["Total Resold", data.total_resold],
 	["Total Commission", data.total_commission],
 	["Total Draw Value", data.total_draw_value],
+	["Total Draw Amount", data.total_draw_amount],
 ];
 
 export function getWeekOfMonth(date: Date): number {

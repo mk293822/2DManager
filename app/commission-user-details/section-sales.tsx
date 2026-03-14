@@ -84,6 +84,8 @@ const SectionSales = () => {
 	// Flatten the content into an array for FlatList
 	const flatListData = [{ type: "datePicker" }, { type: "sectionSales" }];
 
+	if (!sectionSales) return;
+
 	const renderItem = ({ item }: { item: (typeof flatListData)[0] }) => {
 		switch (item.type) {
 			case "datePicker":
@@ -98,14 +100,20 @@ const SectionSales = () => {
 					return (
 						<SectionSaleList
 							deleteComUserSection={deleteComUserSection}
-							sales={commissionUserDetails.section_sales}
+							sales={sectionSales[0]}
 							createComUserSection={createComUserSection}
 							userId={userId}
 							user_name={commissionUserDetails.name}
 						/>
 					);
 				}
-				return <WeekSectionSaleList sectionSales={sectionSales} />;
+				return (
+					<WeekSectionSaleList
+						setRangeMode={setRangeMode}
+						setSelectedSectionRange={setSelectedSectionRange}
+						sectionSales={sectionSales}
+					/>
+				);
 			default:
 				return null;
 		}

@@ -27,9 +27,15 @@ const SectionSummaryCard = ({
 			</Text>
 		</View>
 		<View className="flex-row justify-between py-2 border-b border-gray-100">
-			<Text className="text-gray-600">Total Draw Amount</Text>
+			<Text className="text-gray-600">Total Draw Value</Text>
 			<Text className="font-semibold">
 				{formatKs(summary.total_draw_value)}
+			</Text>
+		</View>
+		<View className="flex-row justify-between py-2 border-b border-gray-100">
+			<Text className="text-gray-600">Total Draw Amount</Text>
+			<Text className="font-semibold">
+				{formatKs(summary.total_draw_amount)}
 			</Text>
 		</View>
 

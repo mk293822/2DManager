@@ -13,13 +13,7 @@ import DeleteManageSectionModal from "./delete-manage-section-modal";
 import EditDrawNumberModal from "./edit-draw-number-modal";
 import EditManageSectionModal from "./edit-manage-section-modal";
 
-const DaySectionCard = ({
-	section,
-	data,
-	onEditSave,
-	handleCreateSection,
-	onConfirmDelete,
-}: {
+type Props = {
 	section: SectionName;
 	data: Section | null;
 	handleCreateSection: (section: SectionName, date?: Date) => Promise<void>;
@@ -30,6 +24,8 @@ const DaySectionCard = ({
 					total_commission: number;
 					total_resold: number;
 					total_draw_value: number;
+					draw_number: string;
+					draw_times: number;
 			  }
 			| {
 					draw_number: string;
@@ -40,11 +36,22 @@ const DaySectionCard = ({
 		success: boolean;
 		errors: ParsedErrors<SectionSummaryEditFields>;
 	}>;
+	date: string;
 	onConfirmDelete: (id: string, date: string) => Promise<void>;
-}) => {
+};
+
+const DaySectionCard = ({
+	section,
+	data,
+	onEditSave,
+	handleCreateSection,
+	onConfirmDelete,
+	date,
+}: Props) => {
 	const [openModal, setOpenModal] = useState(false);
 	const [openDrawNumberModal, setOpenDrawNumberModal] = useState(false);
 	const [openDeleteModal, setOpenDeleteModal] = useState(false);
+	const d = new Date(date);
 
 	if (!data) {
 		return (
@@ -57,7 +64,7 @@ const DaySectionCard = ({
 				</Text>
 				<TouchableOpacity
 					activeOpacity={0.85}
-					onPress={() => handleCreateSection(section)}
+					onPress={() => handleCreateSection(section, d)}
 					className="bg-indigo-600 px-6 py-3 rounded-xl shadow"
 				>
 					<Text className="text-white font-bold">Create</Text>
@@ -151,12 +158,6 @@ const DaySectionCard = ({
 				</View>
 			))}
 			<View className="flex-row justify-between py-2 border-b border-gray-100">
-				<Text className="text-gray-600">Total Draw Amount</Text>
-				<Text className="font-semibold">
-					{formatKs(data.total_draw_amount)}
-				</Text>
-			</View>
-			<View className="flex-row justify-between py-2 border-b border-gray-100">
 				<Text className="text-gray-600">Sold Numbers Exists</Text>
 				<Text className="font-extrabold">
 					{data.sold_numbers_exists ? "Yes" : "No"}
@@ -186,15 +187,35 @@ const DaySectionCard = ({
 					{formatKs(data.profit_or_loss)}
 				</Text>
 			</View>
-			<TouchableOpacity
-				onPress={() => setOpenDrawNumberModal(true)}
-				activeOpacity={0.85}
-				className="bg-indigo-600 py-3 rounded-xl mt-3"
-			>
-				<Text className="text-white font-bold text-center">
-					Edit Draw Number and Times
-				</Text>
-			</TouchableOpacity>
+			{d.toDateString() === new Date().toDateString() && (
+				<View className="flex-row items-center gap-2 w-full">
+					<TouchableOpacity
+						activeOpacity={0.85}
+						className="bg-indigo-600 w-1/2 py-3 rounded-xl shadow mt-4 flex-row gap-2 items-center justify-center"
+					>
+						<AntDesign
+							name="retweet"
+							color={"#fff"}
+							size={15}
+						/>
+						<Text className="text-white font-semibold text-center">Resold</Text>
+					</TouchableOpacity>
+					<TouchableOpacity
+						activeOpacity={0.85}
+						className="bg-green-600 w-1/2 py-3 rounded-xl shadow mt-4 flex-row gap-2 items-center justify-center"
+						onPress={() => setOpenDrawNumberModal(true)}
+					>
+						<AntDesign
+							name="edit"
+							color={"#fff"}
+							size={15}
+						/>
+						<Text className="text-white font-semibold text-center">
+							Edit Number
+						</Text>
+					</TouchableOpacity>
+				</View>
+			)}
 
 			<EditManageSectionModal
 				open={openModal}

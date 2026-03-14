@@ -84,8 +84,8 @@ const Manage = () => {
 		} else {
 			return (
 				<ManageWeekSummary
-					setRangeMode={setRangeMode}
 					sections={item}
+					setRangeMode={setRangeMode}
 					setSelectedSectionRange={setSelectedSectionRange}
 					handleCreateSection={handleCreateSection}
 				/>

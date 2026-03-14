@@ -1,28 +1,15 @@
 import { formatDateDisplay, formatKs, getTotalArray } from "@/lib/helpers";
-import { RangeMode, SectionRange, SectionSummary } from "@/types/manage-types";
+import { SectionSummary } from "@/types/manage-types";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 type Props = {
 	summary: SectionSummary;
 	date: Date;
-	setSelectedSectionRange: React.Dispatch<React.SetStateAction<SectionRange>>;
-	setRangeMode: React.Dispatch<React.SetStateAction<RangeMode>>;
+	handleToggle: () => void;
 };
 
-const WeekSummaryCard = ({
-	summary,
-	date,
-	setSelectedSectionRange,
-	setRangeMode,
-}: Props) => {
-	const handleToggle = () => {
-		setRangeMode("day");
-		setSelectedSectionRange({
-			type: "day",
-			date: date,
-		});
-	};
+const WeekSummaryCard = ({ summary, date, handleToggle }: Props) => {
 	return (
 		<>
 			<View className="flex-row justify-between items-center mb-4 px-1">

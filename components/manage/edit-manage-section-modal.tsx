@@ -22,6 +22,8 @@ type EditManageSectionModalProps = {
 			total_commission: number;
 			total_resold: number;
 			total_draw_value: number;
+			draw_number: string;
+			draw_times: number;
 		},
 		id: string,
 	) => Promise<{
@@ -45,8 +47,6 @@ const EditManageSectionModal = ({
 		date,
 		profit_or_loss,
 		sold_numbers_exists,
-		draw_number,
-		draw_times,
 		total_draw_amount,
 		...payload
 	} = sectionObj;
@@ -105,6 +105,32 @@ const EditManageSectionModal = ({
 						showsVerticalScrollIndicator={false}
 						contentContainerClassName="flex-col gap-2"
 					>
+						{/* Draw Number */}
+						<Text className="font-semibold text-gray-700">Draw Number</Text>
+						<TextInput
+							value={form.draw_number}
+							onChangeText={(text) => handleChange("draw_number", text)}
+							className="border border-gray-300 rounded-lg px-3 py-2"
+							keyboardType="numeric"
+						/>
+						{errors.draw_number && (
+							<Text className="text-red-500 text-sm">{errors.draw_number}</Text>
+						)}
+
+						{/* Draw Times */}
+						<Text className="font-semibold text-gray-700">Draw Times</Text>
+						<TextInput
+							value={form.draw_times.toLocaleString()}
+							keyboardType="numeric"
+							onChangeText={(text) => {
+								const clean = text.replace(/,/g, "");
+								handleChange("draw_times", Number(clean || 0));
+							}}
+							className="border border-gray-300 rounded-lg px-3 py-2"
+						/>
+						{errors.draw_times && (
+							<Text className="text-red-500 text-sm">{errors.draw_times}</Text>
+						)}
 						{/* Total Amount */}
 						<Text className="font-semibold text-gray-700">Total Amount</Text>
 						<TextInput

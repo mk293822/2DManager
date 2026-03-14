@@ -1,15 +1,22 @@
 import { formatDateDisplay } from "@/lib/helpers";
 import { SectionSaleGroup } from "@/types/commission-user-types";
+import { RangeMode, SectionRange } from "@/types/manage-types";
 import React from "react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import WeekSectionSaleCard from "./week-section-sale-card";
 import WeekSectionSaleSummaryCard from "./week-section-sale-summary-card";
 
 type Props = {
 	sectionSales: SectionSaleGroup[] | null;
+	setSelectedSectionRange: React.Dispatch<React.SetStateAction<SectionRange>>;
+	setRangeMode: React.Dispatch<React.SetStateAction<RangeMode>>;
 };
 
-const WeekSectionSaleList = ({ sectionSales }: Props) => {
+const WeekSectionSaleList = ({
+	sectionSales,
+	setRangeMode,
+	setSelectedSectionRange,
+}: Props) => {
 	if (!sectionSales || sectionSales.length === 0) {
 		return (
 			<View className="flex-1 items-center justify-center bg-gray-100 p-6">
@@ -31,17 +38,38 @@ const WeekSectionSaleList = ({ sectionSales }: Props) => {
 			{sectionSales.map((section, idx) => {
 				const { summary, morning_section, evening_section } = section;
 				const date = new Date(section.date);
+				const handleToggle = () => {
+					setRangeMode("day");
+					setSelectedSectionRange({
+						type: "day",
+						date: date,
+					});
+				};
 
 				if (!morning_section && !evening_section) {
 					return (
-						<View
+						<Pressable
+							onPress={handleToggle}
 							key={idx}
-							className="bg-white rounded-2xl p-6 mb-4 items-center shadow"
 						>
-							<Text className="text-gray-500 font-medium text-center">
-								No sections available for {formatDateDisplay(new Date(date))}
-							</Text>
-						</View>
+							{({ pressed }) => (
+								<View
+									className={`bg-white border border-gray-200 rounded-2xl p-6 mb-4 shadow ${
+										pressed ? "opacity-70 scale-95" : ""
+									}`}
+								>
+									<View className="flex-row justify-between items-center">
+										<Text className="text-gray-500 font-medium">
+											No section for {formatDateDisplay(date)}
+										</Text>
+
+										<Text className="text-blue-500 text-sm font-semibold">
+											View
+										</Text>
+									</View>
+								</View>
+							)}
+						</Pressable>
 					);
 				}
 
@@ -53,6 +81,7 @@ const WeekSectionSaleList = ({ sectionSales }: Props) => {
 						<WeekSectionSaleSummaryCard
 							summary={summary}
 							date={date}
+							handleToggle={handleToggle}
 						/>
 						<WeekSectionSaleCard
 							data={morning_section}
