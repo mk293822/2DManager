@@ -32,10 +32,10 @@ function useFetchLiveTwoD<T = TwoDResponse>(
 	const MAX_RETRY = 3;
 
 	const fetchLive2D = useCallback(
-		async (signal: AbortSignal) => {
+		async (signal: AbortSignal, showLoading: boolean = true) => {
 			if (!isFocused) return;
 
-			if (retryCount.current === 0) setLoading(true);
+			if (retryCount.current === 0 && showLoading) setLoading(true);
 
 			try {
 				const { data } = await two_d_api.get<T>(url, { signal });
@@ -93,7 +93,7 @@ function useFetchLiveTwoD<T = TwoDResponse>(
 
 	const refetch = useCallback(() => {
 		const controller = new AbortController();
-		fetchLive2D(controller.signal);
+		fetchLive2D(controller.signal, false);
 	}, [fetchLive2D]);
 
 	return { liveData, loading, refetch };

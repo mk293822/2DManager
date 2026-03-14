@@ -21,7 +21,10 @@ export type CommissionUserHookType = {
 		errors: ParsedErrors<CommissionUserEditFields>;
 	}>;
 	deleteCommissionUser: (id: string) => Promise<void>;
-	fetchCommissionUsers: (signal: AbortSignal) => Promise<void>;
+	fetchCommissionUsers: (
+		signal: AbortSignal,
+		showLoading?: boolean,
+	) => Promise<void>;
 };
 
 const useCommissionUserHook = (): CommissionUserHookType => {
@@ -31,38 +34,41 @@ const useCommissionUserHook = (): CommissionUserHookType => {
 		CommissionUserType[] | null
 	>(null);
 
-	const fetchCommissionUsers = useCallback(async (signal: AbortSignal) => {
-		try {
-			setLoading(true);
-			setError(null);
+	const fetchCommissionUsers = useCallback(
+		async (signal: AbortSignal, showLoading: boolean = true) => {
+			try {
+				if (showLoading) setLoading(true);
+				setError(null);
 
-			const { data } = await api.get<CommissionUserType[]>(
-				"/commission-users/",
-				{
-					signal,
-					params: {
-						date: formatDateRequest(new Date()),
+				const { data } = await api.get<CommissionUserType[]>(
+					"/commission-users/",
+					{
+						signal,
+						params: {
+							date: formatDateRequest(new Date()),
+						},
 					},
-				},
-			);
+				);
 
-			if (!signal.aborted) {
-				setCommissionUsers(data);
-			}
-		} catch (err: any) {
-			if (err.name === "CanceledError" || err.name === "AbortError") {
-				// Request was cancelled → do nothing
-				return;
-			}
+				if (!signal.aborted) {
+					setCommissionUsers(data);
+				}
+			} catch (err: any) {
+				if (err.name === "CanceledError" || err.name === "AbortError") {
+					// Request was cancelled → do nothing
+					return;
+				}
 
-			setError("Failed to load commission users. Please try again.");
-			setCommissionUsers([]);
-		} finally {
-			if (!signal.aborted) {
-				setLoading(false);
+				setError("Failed to load commission users. Please try again.");
+				setCommissionUsers([]);
+			} finally {
+				if (!signal.aborted) {
+					setLoading(false);
+				}
 			}
-		}
-	}, []);
+		},
+		[],
+	);
 
 	// Date change
 	useAbortableEffect((signal) => {
@@ -75,7 +81,6 @@ const useCommissionUserHook = (): CommissionUserHookType => {
 		phone_number: string;
 		default_commission_percent: number;
 	}) => {
-		console.log(payload);
 		try {
 			const { data } = await api.post<CommissionUserType>(
 				"/commission-users/",

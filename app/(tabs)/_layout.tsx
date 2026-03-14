@@ -98,6 +98,7 @@ const TabsLayout = () => {
 				screenOptions={{
 					tabBarShowLabel: false,
 					tabBarButton: (props) => <HapticTab {...props} />,
+					animation: "shift",
 					tabBarItemStyle: {
 						justifyContent: "center",
 						alignItems: "center",

@@ -15,10 +15,12 @@ export type TwoDListHookType = {
 	fetchTwoDList: (
 		signal: AbortSignal,
 		section_sale_id: string | undefined,
+		showLoading?: boolean,
 	) => Promise<void>;
 	fetchTwoDListBySectionSale: (
 		signal: AbortSignal,
 		section_sale: string | undefined,
+		showLoading?: boolean,
 	) => Promise<void>;
 	setError: React.Dispatch<React.SetStateAction<string | null>>;
 
@@ -43,13 +45,14 @@ const useTwoDListHook = (): TwoDListHookType => {
 	const fetchTwoDList = async (
 		signal: AbortSignal,
 		section_summary_id: string | undefined,
+		showLoading: boolean = false,
 	) => {
 		if (!section_summary_id) {
 			setTwoDListGroup(null);
 			return;
 		}
 		try {
-			setLoading(true);
+			if (showLoading) setLoading(true);
 			setError(null);
 
 			const { data } = await api.get<TwoDListGroup>(
@@ -80,13 +83,14 @@ const useTwoDListHook = (): TwoDListHookType => {
 	const fetchTwoDListBySectionSale = async (
 		signal: AbortSignal,
 		section_sale: string | undefined,
+		showLoading: boolean = false,
 	) => {
 		if (!section_sale) {
 			setTwoDList(null);
 			return;
 		}
 		try {
-			setLoading(true);
+			if (showLoading) setLoading(true);
 			setError(null);
 
 			const { data } = await api.get<TwoDListType[]>(

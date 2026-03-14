@@ -16,13 +16,20 @@ import {
 
 const CommissionUsers = () => {
 	const router = useRouter();
-	const { commissionUsers, loading, error, reset, handleCreateCommissionUser } =
-		useCommissionUserContext();
+	const {
+		commissionUsers,
+		loading,
+		error,
+		fetchCommissionUsers,
+		handleCreateCommissionUser,
+	} = useCommissionUserContext();
 	const [refreshing, setRefreshing] = useState(false);
 
 	const onRefresh = async () => {
+		const controller = new AbortController();
+
 		setRefreshing(true);
-		await reset(); // assuming reset fetches data again
+		await fetchCommissionUsers(controller.signal, false); // assuming reset fetches data again
 		setRefreshing(false);
 	};
 

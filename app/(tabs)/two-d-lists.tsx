@@ -38,6 +38,7 @@ const TwoDLists = () => {
 		sections,
 		fetchSection,
 		loading: sectionLoading,
+		reset,
 	} = useManageContext();
 	const abortController = new AbortController();
 
@@ -56,13 +57,17 @@ const TwoDLists = () => {
 		}
 	}, [debouncedQuery]);
 
-	const reset = async () => {
+	const onRefresh = async () => {
 		setError(null);
-		setRefreshing(true); // show loading at top
-		await fetchSection(abortController.signal, {
-			type: "day",
-			date: date,
-		});
+		setRefreshing(true);
+		await fetchSection(
+			abortController.signal,
+			{
+				type: "day",
+				date: date,
+			},
+			false,
+		);
 		setRefreshing(false);
 	};
 
@@ -158,7 +163,7 @@ const TwoDLists = () => {
 								<RefreshControl
 									colors={["#0000ff"]}
 									refreshing={refreshing}
-									onRefresh={reset}
+									onRefresh={onRefresh}
 								/>
 							}
 							contentContainerStyle={{ paddingBottom: 120 }}

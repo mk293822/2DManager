@@ -1,9 +1,12 @@
+import { EVENT_NAMES } from "@/event-names";
+import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { three_d_api } from "@/lib/api";
+import { eventBus } from "@/lib/event-bus";
 import type {
 	ThreeDResultItem,
 	ThreeDResultResponse,
 } from "@/types/two-d-types";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
 	ActivityIndicator,
 	FlatList,
@@ -16,31 +19,44 @@ const ThreeDResult = () => {
 	const [refreshing, setRefreshing] = useState(false);
 	const [data, setData] = useState<ThreeDResultResponse | null>(null);
 	const [loading, setLoading] = useState<boolean>(true);
-	const [error, setError] = useState<string | null>(null);
 
-	const fetchData = useCallback(async () => {
-		try {
-			setLoading(true);
-			setError(null);
+	const fetchData = useCallback(
+		async (signal: AbortSignal, showLodaing: boolean = true) => {
+			try {
+				if (showLodaing) setLoading(true);
 
-			const response =
-				await three_d_api.get<ThreeDResultResponse>("/threed-result");
+				const response = await three_d_api.get<ThreeDResultResponse>(
+					"/threed-result",
+					{ signal },
+				);
 
-			setData(response.data);
-		} catch (err) {
-			setError("Failed to load 3D results");
-		} finally {
-			setLoading(false);
-		}
-	}, []);
+				setData(response.data);
+			} catch (err) {
+				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+					type: "error",
+					title: "Fetch Error",
+					description: JSON.stringify(err) || "Failed to load 3D results",
+				});
+			} finally {
+				if (!signal.aborted) {
+					setLoading(false);
+				}
+			}
+		},
+		[],
+	);
 
-	useEffect(() => {
-		fetchData();
-	}, [fetchData]);
+	useAbortableEffect(
+		(signal) => {
+			fetchData(signal);
+		},
+		[fetchData],
+	);
 
 	const onRefresh = async () => {
+		const controller = new AbortController();
 		setRefreshing(true);
-		await fetchData();
+		await fetchData(controller.signal, false);
 		setRefreshing(false);
 	};
 

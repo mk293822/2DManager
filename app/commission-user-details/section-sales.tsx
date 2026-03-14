@@ -66,12 +66,15 @@ const SectionSales = () => {
 
 	const onRefresh = async () => {
 		if (!userId) return;
+		const controller = new AbortController();
+
 		setRefreshing(true);
 		setError(null);
 		await fetchSectionSales(
-			new AbortController().signal,
+			controller.signal,
 			userId,
 			selectedSectionRange,
+			false,
 		);
 		setRefreshing(false);
 	};

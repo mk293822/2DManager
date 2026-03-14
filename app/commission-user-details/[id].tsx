@@ -37,7 +37,6 @@ const CommissionUserPage = () => {
 		commissionUserDetails,
 		loading,
 		error,
-		reset,
 		createComUserSection,
 		editCommissionUserDetails,
 		deleteComUserSection,
@@ -58,8 +57,10 @@ const CommissionUserPage = () => {
 
 	const onRefresh = async () => {
 		if (!userId) return;
+		const controller = new AbortController();
+
 		setRefreshing(true);
-		await reset(userId);
+		await fetchCommissionUserDetails(controller.signal, userId, false);
 		setRefreshing(false);
 	};
 

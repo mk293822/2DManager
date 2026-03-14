@@ -28,7 +28,7 @@ const Manage = () => {
 	} = useManageContext();
 
 	const [rangeMode, setRangeMode] = useState<RangeMode>("day");
-	const debounceRangeMode = useDebounce(rangeMode, 500);
+	const debounceRangeMode = useDebounce(rangeMode, 400);
 	registerTranslation("en-GB", enGB);
 
 	const date = new Date();
@@ -66,7 +66,7 @@ const Manage = () => {
 	const refreshData = async () => {
 		setRefreshing(true);
 		setError(null);
-		await fetchSection(abortController.signal, selectedSectionRange);
+		await fetchSection(abortController.signal, selectedSectionRange, false);
 		setRefreshing(false);
 	};
 

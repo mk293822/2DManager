@@ -23,8 +23,10 @@ const UserTwoDListNumbers = () => {
 
 	const reset = async () => {
 		if (!id) return;
+		const controller = new AbortController();
+
 		setRefreshing(true);
-		await fetchTwoDListBySectionSale(new AbortController().signal, id);
+		await fetchTwoDListBySectionSale(controller.signal, id);
 		setRefreshing(false);
 	};
 

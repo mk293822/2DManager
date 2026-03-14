@@ -14,11 +14,11 @@ export type SectionSalesHookTypes = {
 	// 	date?: Date,
 	// ) => Promise<void>;
 	setError: React.Dispatch<React.SetStateAction<string | null>>;
-
 	fetchSectionSales: (
 		signal: AbortSignal,
 		id: string,
 		sectionRange: SectionRange,
+		showLoading?: boolean,
 	) => Promise<void>;
 	sectionSales: SectionSaleGroup[] | null;
 };
@@ -33,9 +33,10 @@ const useSectionSalesHook = (): SectionSalesHookTypes => {
 		signal: AbortSignal,
 		id: string,
 		sectionRange: SectionRange,
+		showLoading: boolean = false,
 	) => {
 		try {
-			setLoading(true);
+			if (showLoading) setLoading(true);
 			setError(null);
 
 			const { data } = await api.get(`/commission-users/${id}/section-sales/`, {

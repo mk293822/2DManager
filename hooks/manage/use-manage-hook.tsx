@@ -47,7 +47,9 @@ export type ManageHookType = {
 	fetchSection: (
 		signal: AbortSignal,
 		sectionRange: SectionRange,
+		showLoading?: boolean,
 	) => Promise<void>;
+	reset: () => Promise<void>;
 };
 
 export type SectionSummaryEditFields =
@@ -82,9 +84,13 @@ const useManageHook = (): ManageHookType => {
 	const [error, setError] = useState<string | null>(null);
 
 	const fetchSection = useCallback(
-		async (signal: AbortSignal, sectionRange: SectionRange) => {
+		async (
+			signal: AbortSignal,
+			sectionRange: SectionRange,
+			showLoading: boolean = true,
+		) => {
 			try {
-				setLoading(true);
+				if (showLoading) setLoading(true);
 				setError(null);
 
 				const { data } = await api.get(`/manager/sections/`, {
@@ -116,6 +122,16 @@ const useManageHook = (): ManageHookType => {
 		},
 		[],
 	);
+
+	const reset = async () => {
+		const controller = new AbortController();
+
+		setError(null);
+		await fetchSection(controller.signal, {
+			type: "day",
+			date: new Date(),
+		});
+	};
 
 	useAbortableEffect((signal) => {
 		fetchSection(signal, {
@@ -232,6 +248,7 @@ const useManageHook = (): ManageHookType => {
 		onEditSave,
 		fetchSection,
 		onConfirmDelete,
+		reset,
 	};
 };
 

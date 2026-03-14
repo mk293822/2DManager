@@ -21,6 +21,7 @@ export type ComUserDetailsHookTypes = {
 	fetchCommissionUserDetails: (
 		signal: AbortSignal,
 		id: string,
+		showLodaing?: boolean,
 	) => Promise<void>;
 	commissionUserDetails: CommissionUserType | null;
 	reset: (id: string | undefined) => void;
@@ -62,9 +63,10 @@ const useCommissionUserDetailsHook = () => {
 	const fetchCommissionUserDetails = async (
 		signal: AbortSignal,
 		id: string,
+		showLodaing: boolean = true,
 	) => {
 		try {
-			setLoading(true);
+			if (showLodaing) setLoading(true);
 			setError(null);
 
 			const { data } = await api.get<CommissionUserType>(
