@@ -37,7 +37,7 @@ const EditDrawNumberModal = ({
 	open,
 }: EditManageSectionModalProps) => {
 	const [form, setForm] = useState({
-		draw_number: sectionObj.draw_number,
+		draw_number: sectionObj.draw_number || "",
 		draw_times: sectionObj.draw_times,
 	});
 	const [loading, setLoading] = useState(false);

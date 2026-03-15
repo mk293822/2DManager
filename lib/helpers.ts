@@ -55,18 +55,23 @@ export const formatDateRequest = (date: Date) => {
 export const changeSectionName = (section: SectionName) =>
 	section === "morning_section" ? "Morning" : "Evening";
 
-export const getTotalArray = (data: any): [string, number][] => [
+export const getTotalArray = (
+	data: SectionSummary | Section,
+): [string, number][] => [
 	["Total Sold", data.total_amount],
-	["Total Resold", data.total_resold],
 	["Total Commission", data.total_commission],
 	["Total Draw Value", data.total_draw_value],
 	["Total Draw Amount", data.total_draw_amount],
+	["Total Resold", data.total_resold],
+	["Total Resold Commission", data.total_resold_commission],
+	["Total Resold Draw Value", data.total_resold_draw_value],
+	["Total Resold Draw Amount", data.total_resold_draw_amount],
 ];
 
 export function getWeekOfMonth(date: Date): number {
 	const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
 	const dayOfMonth = date.getDate();
-	const startDay = firstDayOfMonth.getDay(); // 0–6
+	const startDay = firstDayOfMonth.getDay();
 
 	return Math.ceil((dayOfMonth + startDay) / 7);
 }
@@ -123,35 +128,52 @@ export function parseErrors<T extends string>(
 const Fields = [
 	"total_amount",
 	"total_commission",
-	"total_resold",
 	"total_draw_value",
 	"total_draw_amount",
+	"total_resold",
+	"total_resold_commission",
+	"total_resold_draw_value",
+	"total_resold_draw_amount",
 	"profit_or_loss",
 ] as const;
 
+const SectionFields = [
+	"total_resold",
+	"total_resold_commission",
+	"total_resold_draw_value",
+	"total_resold_draw_amount",
+] as const;
+
 type FieldNames = (typeof Fields)[number];
+type SectionFieldNames = (typeof SectionFields)[number];
+type NonSectionFields = Exclude<FieldNames, SectionFieldNames>;
+
+// Helper to sum optional numbers safely
+function sum(a?: number, b?: number): number {
+	return (a ?? 0) + (b ?? 0);
+}
 
 export function calculateSummary<T extends Section | ComUserSectionSaleType>(
 	morning: T | null,
 	evening: T | null,
 ): T extends Section ? SectionSummary : ComUserSectionSaleSummary {
-	const result: Partial<Record<FieldNames, number>> = {};
+	const result = {} as Record<FieldNames, number>;
 
-	for (const field of Fields) {
-		if (field === "total_resold") {
-			result.total_resold =
-				Number(
-					morning && "total_resold" in morning ? morning.total_resold : 0,
-				) +
-				Number(evening && "total_resold" in evening ? evening.total_resold : 0);
-			continue;
-		}
+	// === Sum SectionFields safely ===
+	(SectionFields as readonly SectionFieldNames[]).forEach((field) => {
+		const morningVal = (morning as Section | null)?.[field] ?? 0;
+		const eveningVal = (evening as Section | null)?.[field] ?? 0;
+		result[field] = sum(morningVal, eveningVal);
+	});
 
-		const morningVal = Number((morning as any)?.[field] ?? 0);
-		const eveningVal = Number((evening as any)?.[field] ?? 0);
-
-		result[field] = morningVal + eveningVal;
-	}
+	// === Sum remaining fields safely ===
+	Fields.filter(
+		(f): f is NonSectionFields => !SectionFields.includes(f as any),
+	).forEach((field) => {
+		const morningVal = (morning as ComUserSectionSaleType | null)?.[field] ?? 0;
+		const eveningVal = (evening as ComUserSectionSaleType | null)?.[field] ?? 0;
+		result[field] = sum(morningVal, eveningVal);
+	});
 
 	return result as T extends Section
 		? SectionSummary

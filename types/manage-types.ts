@@ -1,29 +1,47 @@
-import { User } from "./main";
-
 export type SectionName = "morning_section" | "evening_section";
+
 export type Section = {
 	id: string;
-	manager: User;
+	date: string;
 	section: SectionName;
-	draw_number: string;
+
+	manager_name: string;
+
+	draw_number: string | null;
 	draw_times: number;
+
+	numbers_exists: boolean;
+
 	total_amount: number;
 	total_commission: number;
 	total_resold: number;
-	date: string;
-	profit_or_loss: number;
+
+	total_resold_commission: number;
+	total_resold_draw_value: number;
+	total_resold_draw_amount: number;
+
 	total_draw_amount: number;
 	total_draw_value: number;
-	sold_numbers_exists: boolean;
+
+	profit_or_loss: number;
+
+	created_at: string;
+	updated_at: string;
 };
 
 export type SectionSummary = {
 	total_amount: number;
 	total_commission: number;
 	total_resold: number;
-	profit_or_loss: number;
-	total_draw_value: number;
+
 	total_draw_amount: number;
+	total_draw_value: number;
+
+	total_resold_commission: number;
+	total_resold_draw_amount: number;
+	total_resold_draw_value: number;
+
+	profit_or_loss: number;
 };
 
 export type SectionSummaries = {

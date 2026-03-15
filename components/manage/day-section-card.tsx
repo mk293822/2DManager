@@ -7,6 +7,7 @@ import {
 } from "@/lib/helpers";
 import { Section, SectionName } from "@/types/manage-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import DeleteManageSectionModal from "./delete-manage-section-modal";
@@ -160,7 +161,7 @@ const DaySectionCard = ({
 			<View className="flex-row justify-between py-2 border-b border-gray-100">
 				<Text className="text-gray-600">Sold Numbers Exists</Text>
 				<Text className="font-extrabold">
-					{data.sold_numbers_exists ? "Yes" : "No"}
+					{data.numbers_exists ? "Yes" : "No"}
 				</Text>
 			</View>
 			<View className="flex-row justify-between py-2 border-b border-gray-100">
@@ -192,6 +193,12 @@ const DaySectionCard = ({
 					<TouchableOpacity
 						activeOpacity={0.85}
 						className="bg-indigo-600 w-1/2 py-3 rounded-xl shadow mt-4 flex-row gap-2 items-center justify-center"
+						onPress={() => {
+							router.push({
+								pathname: "/resold/[id]",
+								params: { id: data.id },
+							});
+						}}
 					>
 						<AntDesign
 							name="retweet"

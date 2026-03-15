@@ -42,15 +42,18 @@ const EditManageSectionModal = ({
 }: EditManageSectionModalProps) => {
 	const {
 		id,
-		manager,
+		manager_name,
 		section,
 		date,
 		profit_or_loss,
-		sold_numbers_exists,
+		numbers_exists,
 		total_draw_amount,
 		...payload
 	} = sectionObj;
-	const [form, setForm] = useState(payload);
+	const [form, setForm] = useState({
+		...payload,
+		draw_number: payload.draw_number || "",
+	});
 	const [loading, setLoading] = useState(false);
 
 	const [errors, setErrors] = useState<

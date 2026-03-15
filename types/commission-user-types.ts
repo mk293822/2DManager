@@ -32,7 +32,7 @@ export type ComUserSectionSaleType = {
 		draw_number: string;
 		draw_times: number;
 		section: SectionName;
-		sold_numbers_exists: boolean;
+		numbers_exists: boolean;
 	};
 	commission_percent: number;
 	total_amount: number;
