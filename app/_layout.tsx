@@ -7,8 +7,7 @@ import "./global.css";
 
 import { Loading } from "@/components/loading";
 import NoInternetScreen from "@/components/ui/no-internet-screen";
-import CommissionUserDetailsProvider from "@/contexts/commission-user-details-provider";
-import CommissionUserProvider from "@/contexts/commission-user-provider";
+import BussinessUserProvider from "@/contexts/bussiness-user-provider";
 import ManageProvider from "@/contexts/manage-provider";
 import { useInternet } from "@/hooks/use-internet";
 
@@ -27,16 +26,14 @@ export default function RootLayout() {
 			<SafeAreaProvider>
 				<NotificationProvider>
 					<ManageProvider>
-						<CommissionUserProvider>
+						<BussinessUserProvider>
 							<TwoDListProvider>
-								<CommissionUserDetailsProvider>
-									<Stack screenOptions={{ headerShown: false }}>
-										<Stack.Screen name="(tabs)" />
-										<Stack.Screen name="(auth)" />
-									</Stack>
-								</CommissionUserDetailsProvider>
+								<Stack screenOptions={{ headerShown: false }}>
+									<Stack.Screen name="(tabs)" />
+									<Stack.Screen name="(auth)" />
+								</Stack>
 							</TwoDListProvider>
-						</CommissionUserProvider>
+						</BussinessUserProvider>
 					</ManageProvider>
 				</NotificationProvider>
 			</SafeAreaProvider>

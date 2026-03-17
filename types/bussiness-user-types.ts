@@ -1,6 +1,8 @@
 import { SectionName } from "./manage-types";
 
-export type CommissionUserType = {
+export type BussinessUserType = "commission_user" | "resold_user";
+
+export type BussinessUser = {
 	id: string;
 	name: string;
 	phone_number: string;
@@ -11,12 +13,12 @@ export type CommissionUserType = {
 
 export type SectionSaleGroup = {
 	date: string;
-	morning_section: ComUserSectionSaleType;
-	evening_section: ComUserSectionSaleType;
-	summary: ComUserSectionSaleSummary;
+	morning_section: SectionSale;
+	evening_section: SectionSale;
+	summary: SectionSaleSummary;
 };
 
-export type ComUserSectionSaleSummary = {
+export type SectionSaleSummary = {
 	total_amount: number;
 	total_commission: number;
 	profit_or_loss: number;
@@ -24,7 +26,7 @@ export type ComUserSectionSaleSummary = {
 	total_draw_amount: number;
 };
 
-export type ComUserSectionSaleType = {
+export type SectionSale = {
 	id: string;
 	section_summary: {
 		id: string;

@@ -1,23 +1,21 @@
 import { api } from "@/lib/api";
 import { formatDateRequest } from "@/lib/helpers";
-import { SectionSaleGroup } from "@/types/commission-user-types";
+import {
+	BussinessUserType,
+	SectionSaleGroup,
+} from "@/types/bussiness-user-types";
 import { SectionRange } from "@/types/manage-types";
 import { useState } from "react";
 
 export type SectionSalesHookTypes = {
 	loading: boolean;
 	error: string | null;
-	// reset: (id: string | undefined) => void;
-	// createComUserSection: (
-	// 	id: string,
-	// 	section: SectionName,
-	// 	date?: Date,
-	// ) => Promise<void>;
 	setError: React.Dispatch<React.SetStateAction<string | null>>;
 	fetchSectionSales: (
 		signal: AbortSignal,
 		id: string,
 		sectionRange: SectionRange,
+		userType: BussinessUserType,
 		showLoading?: boolean,
 	) => Promise<void>;
 	sectionSales: SectionSaleGroup[] | null;
@@ -33,13 +31,17 @@ const useSectionSalesHook = (): SectionSalesHookTypes => {
 		signal: AbortSignal,
 		id: string,
 		sectionRange: SectionRange,
+		userType: BussinessUserType,
 		showLoading: boolean = false,
 	) => {
 		try {
 			if (showLoading) setLoading(true);
 			setError(null);
 
-			const { data } = await api.get(`/commission-users/${id}/section-sales/`, {
+			const endpoint =
+				userType === "commission_user" ? "commission-users" : "resold-users";
+
+			const { data } = await api.get(`/${endpoint}/${id}/section-sales/`, {
 				signal,
 				params:
 					sectionRange.type === "day"

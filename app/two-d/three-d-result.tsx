@@ -1,3 +1,4 @@
+import { Loading } from "@/components/loading";
 import { EVENT_NAMES } from "@/event-names";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { three_d_api } from "@/lib/api";
@@ -7,13 +8,7 @@ import type {
 	ThreeDResultResponse,
 } from "@/types/two-d-types";
 import React, { useCallback, useState } from "react";
-import {
-	ActivityIndicator,
-	FlatList,
-	RefreshControl,
-	Text,
-	View,
-} from "react-native";
+import { FlatList, RefreshControl, Text, View } from "react-native";
 
 const ThreeDResult = () => {
 	const [refreshing, setRefreshing] = useState(false);
@@ -74,16 +69,7 @@ const ThreeDResult = () => {
 		</View>
 	);
 
-	if (loading)
-		return (
-			<View className="flex-1 items-center justify-center">
-				<ActivityIndicator
-					size={50}
-					color={"#0000ff"}
-					className="my-3"
-				/>
-			</View>
-		);
+	if (loading) return <Loading />;
 
 	return (
 		<View className="flex-1 bg-gray-100 px-4 pt-6">

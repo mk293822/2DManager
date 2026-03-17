@@ -1,6 +1,6 @@
 import { useManageContext } from "@/hooks/manage/use-manage-context";
 import { changeSectionName, formatKs, formatSmartNumber } from "@/lib/helpers";
-import { ComUserSectionSaleType } from "@/types/commission-user-types";
+import { BussinessUserType, SectionSale } from "@/types/bussiness-user-types";
 import { SectionName } from "@/types/manage-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
@@ -11,31 +11,35 @@ import { Loading } from "../loading";
 import DeleteSectionSaleModal from "./delete-section-sale-modal";
 
 type Props = {
-	sale: ComUserSectionSaleType;
-	createComUserSection: (
-		id: string,
-		section: SectionName,
-		date?: Date,
-	) => Promise<void>;
+	sale: SectionSale;
 	userId: string;
 	date: Date;
 	section: SectionName;
 	user_name: string;
-	deleteComUserSection: (
+	userType: BussinessUserType;
+	createBussinessUserSection: (
 		id: string,
-		userId: string,
 		section: SectionName,
+		userType: BussinessUserType,
+		date?: Date,
+	) => Promise<void>;
+	deleteBussinessUserSection: (
+		id: string,
+		bussinessUserId: string,
+		section: SectionName,
+		userType: BussinessUserType,
 	) => Promise<void>;
 };
 
-const CommissionUserSectionCard = ({
+const SectionSaleCard = ({
 	sale,
-	createComUserSection,
+	createBussinessUserSection,
 	userId,
 	date,
 	section,
 	user_name,
-	deleteComUserSection,
+	userType,
+	deleteBussinessUserSection,
 }: Props) => {
 	const section_summary = sale?.section_summary;
 	const [loading, setLoading] = useState(false);
@@ -48,7 +52,7 @@ const CommissionUserSectionCard = ({
 
 	if (!sale || !section_summary) {
 		const handleCreate = async () => {
-			await createComUserSection(userId, section, date);
+			await createBussinessUserSection(userId, section, userType, date);
 			if (!sections?.[0][section])
 				fetchSection(abortController.signal, {
 					type: "day",
@@ -116,7 +120,7 @@ const CommissionUserSectionCard = ({
 	const handleDelete = async () => {
 		try {
 			setLoading(true);
-			await deleteComUserSection(sale.id, userId, section);
+			await deleteBussinessUserSection(sale.id, userId, section, userType);
 			fetchSection(abortController.signal, {
 				type: "day",
 				date: date,
@@ -255,4 +259,4 @@ const CommissionUserSectionCard = ({
 	);
 };
 
-export default CommissionUserSectionCard;
+export default SectionSaleCard;

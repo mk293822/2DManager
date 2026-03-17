@@ -1,5 +1,5 @@
 import { formatDateDisplay, formatKs } from "@/lib/helpers";
-import { ComUserSectionSaleSummary } from "@/types/commission-user-types";
+import { ComUserSectionSaleSummary } from "@/types/bussiness-user-types";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 

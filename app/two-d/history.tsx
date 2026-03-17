@@ -1,4 +1,5 @@
 import HolidayInfo from "@/components/holiday-info";
+import { Loading } from "@/components/loading";
 import { useBlink } from "@/hooks/use-blink";
 import useFetchLiveTwoD from "@/hooks/use-fetch-live-two-d";
 import { getTwoDResultTime, toSeconds } from "@/lib/get-twod-result-time";
@@ -8,14 +9,7 @@ import { TwoDData, TwoDHistoryItem, TwoDResponse } from "@/types/two-d-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import {
-	ActivityIndicator,
-	Modal,
-	Pressable,
-	ScrollView,
-	Text,
-	View,
-} from "react-native";
+import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 
 const History = () => {
 	const options = ["/history", "11:00:00", "12:01:00", "15:00:00", "16:30:00"];
@@ -59,16 +53,7 @@ const History = () => {
 		setIsBlinking(!m_Result);
 	}, [data, currentTime]);
 
-	if (!data.liveData)
-		return (
-			<View className="flex-1 items-center justify-center">
-				<ActivityIndicator
-					size={50}
-					color={"#0000ff"}
-					className="my-3"
-				/>
-			</View>
-		);
+	if (!data.liveData) return <Loading />;
 
 	return (
 		<ScrollView className="bg-gray-100">

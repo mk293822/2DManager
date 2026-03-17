@@ -1,29 +1,29 @@
 // TwoDLists.tsx
-import TwoDListsHeaderRight from "@/components/header-rights/two-d-lists";
 import HolidayInfo from "@/components/holiday-info";
 import { Loading } from "@/components/loading";
 import TwoDListToolBar from "@/components/two-d-lists/toolbar";
 import TwoDListsRow from "@/components/two-d-lists/two-d-lists-row";
-import { useCommissionUserContext } from "@/hooks/commission-users/use-commission-user-context";
+import { useBussinessUserContext } from "@/hooks/bussiness-users/use-context";
 import { useManageContext } from "@/hooks/manage/use-manage-context";
-import { useCalculatedData } from "@/hooks/two-d-list/use-calculated-data";
 import { useTwoDListsContext } from "@/hooks/two-d-list/use-two-d-list-context";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
+import { useCalculatedNumbersData } from "@/hooks/use-calculated-numbers-data";
 import { useDebounce } from "@/hooks/use-debounce";
 import { changeSectionName } from "@/lib/helpers";
 import { chunkIntoPairs } from "@/lib/two-d-list-helper";
 import { SectionName } from "@/types/manage-types";
-import { FilterModeType, SoldNumberItem } from "@/types/two-d-list-types";
-import { Tabs } from "expo-router";
+import { FilterModeType, NumberItem } from "@/types/two-d-list-types";
+import { Stack, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
 
 const TwoDLists = () => {
+	const { section: sec } = useLocalSearchParams<{ section?: SectionName }>();
+	const section = sec ?? "morning_section";
 	const date = new Date();
 	const { twoDListGroup, loading, error, setError, fetchTwoDList } =
 		useTwoDListsContext();
-	const [section, setSection] = useState<SectionName>("morning_section");
-	const { commissionUsers } = useCommissionUserContext();
+	const { bussinessUsers } = useBussinessUserContext();
 	const [filterMode, setFilterMode] = useState<FilterModeType>("all");
 	const [limit, setLimit] = useState<number>(1000);
 	const [inputValue, setInputValue] = useState(limit);
@@ -33,7 +33,6 @@ const TwoDLists = () => {
 	const [refreshing, setRefreshing] = useState(false); // ⬅️ for pull-to-refresh
 	const isHoliday = false;
 	const debouncedQuery = useDebounce(inputValue, 500);
-	const debouncedSection = useDebounce(section, 500);
 	const {
 		sections,
 		fetchSection,
@@ -44,11 +43,9 @@ const TwoDLists = () => {
 
 	useAbortableEffect(
 		(signal) => {
-			if (debouncedSection) {
-				fetchTwoDList(signal, sections?.[0][debouncedSection]?.id);
-			}
+			fetchTwoDList(signal, sections?.[0][section]?.id);
 		},
-		[sections, debouncedSection],
+		[sections],
 	);
 
 	useEffect(() => {
@@ -73,17 +70,17 @@ const TwoDLists = () => {
 
 	const users = [
 		{ id: "all", name: "All Users" },
-		...(commissionUsers || []).map((u) => ({ id: u.id, name: u.name })),
+		...(bussinessUsers || []).map((u) => ({ id: u.id, name: u.name })),
 	];
 
-	const numbers: SoldNumberItem[] = twoDListGroup
+	const numbers: NumberItem[] = twoDListGroup
 		? Object.entries(twoDListGroup.sold_numbers_by_user ?? {})
 				.filter(([user]) => selectedUserId === "all" || user === selectedUserId)
 				.flatMap(([, twoDListArray]) => twoDListArray)
 				.flatMap((item) => item.numbers_data)
 		: [];
 
-	const calculatedData = useCalculatedData(numbers, filterMode, limit);
+	const calculatedData = useCalculatedNumbersData(numbers, filterMode, limit);
 	const chunkedData = chunkIntoPairs(calculatedData);
 
 	const renderItem = ({ item }: { item: (typeof chunkedData)[0] }) => (
@@ -97,14 +94,9 @@ const TwoDLists = () => {
 
 	return (
 		<>
-			<Tabs.Screen
+			<Stack.Screen
 				options={{
-					headerRight: () => (
-						<TwoDListsHeaderRight
-							section={section}
-							setSection={setSection}
-						/>
-					),
+					headerTitle: `${changeSectionName(section)} Section`,
 				}}
 			/>
 

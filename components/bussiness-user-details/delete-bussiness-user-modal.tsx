@@ -3,19 +3,19 @@ import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import AppModal from "../ui/app-modal";
 
-type DeleteComUserModalProps = {
+type DeleteBussinessUserModalProps = {
 	open: boolean;
 	onClose: () => void;
 	handleDelete: () => Promise<void>;
 	user_name: string;
 };
 
-const DeleteComUserModal = ({
+const DeleteBussinessUserModal = ({
 	open,
 	onClose,
 	user_name,
 	handleDelete,
-}: DeleteComUserModalProps) => {
+}: DeleteBussinessUserModalProps) => {
 	return (
 		<AppModal open={open}>
 			<View className="bg-white w-full max-w-md mx-auto p-6 rounded-3xl shadow-xl">
@@ -64,4 +64,4 @@ const DeleteComUserModal = ({
 	);
 };
 
-export default DeleteComUserModal;
+export default DeleteBussinessUserModal;

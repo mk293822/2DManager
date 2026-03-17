@@ -1,33 +1,34 @@
-import { CommissionUserEditFields } from "@/hooks/commission-user-details/use-commission-user-details-hook";
+import { BussinessUserEditFields } from "@/hooks/bussiness-user-details/use-user-details-hook";
 import { ParsedErrors } from "@/lib/helpers";
+import { BussinessUser, BussinessUserType } from "@/types/bussiness-user-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { TouchableOpacity, View } from "react-native";
-import EditCommissionUserModal from "../commission-user-details/edit-commission-user-modal";
+import EditBussinessUserModal from "../bussiness-user-details/edit-bussiness-user-modal";
 
-const CommissionUserDetailsHeaderRight = ({
-	editCommissionUserDetails,
+const BussinessUserDetailsHeaderRight = ({
+	editBussinessUserDetails,
 	id,
 	name,
 	phone_number,
 	default_commission_percent,
+	userType,
 }: {
-	editCommissionUserDetails: (
+	editBussinessUserDetails: (
 		id: string,
-		form: {
-			name: string;
-			phone_number: string;
-			default_commission_percent: number;
-		},
+		form: Partial<BussinessUser>,
+		userType: BussinessUserType,
 	) => Promise<{
 		success: boolean;
-		errors: ParsedErrors<CommissionUserEditFields>;
+		errors: ParsedErrors<BussinessUserEditFields>;
 	}>;
+
 	id: string;
 	name: string;
 	phone_number: string;
 	default_commission_percent: number;
+	userType: BussinessUserType;
 }) => {
 	const [open, setOpen] = useState(false);
 
@@ -63,8 +64,8 @@ const CommissionUserDetailsHeaderRight = ({
 					hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
 					onPress={() =>
 						router.push({
-							pathname: "/commission-user-details/section-sales",
-							params: { id: userId },
+							pathname: "/bussiness-user-details/section-sales",
+							params: { id: userId, userType: userType },
 						})
 					}
 					style={{
@@ -79,11 +80,12 @@ const CommissionUserDetailsHeaderRight = ({
 					/>
 				</TouchableOpacity>
 			</View>
-			<EditCommissionUserModal
+			<EditBussinessUserModal
+				userType={userType}
 				open={open}
 				onClose={() => setOpen(false)}
 				id={id}
-				editCommissionUserDetails={editCommissionUserDetails}
+				editCommissionUserDetails={editBussinessUserDetails}
 				name={name}
 				phone_number={phone_number}
 				default_commission_percent={default_commission_percent}
@@ -92,4 +94,4 @@ const CommissionUserDetailsHeaderRight = ({
 	);
 };
 
-export default CommissionUserDetailsHeaderRight;
+export default BussinessUserDetailsHeaderRight;

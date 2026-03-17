@@ -1,5 +1,5 @@
 import { formatDateDisplay } from "@/lib/helpers";
-import { SectionSaleGroup } from "@/types/commission-user-types";
+import { SectionSaleGroup } from "@/types/bussiness-user-types";
 import { RangeMode, SectionRange } from "@/types/manage-types";
 import React from "react";
 import { Pressable, Text, View } from "react-native";

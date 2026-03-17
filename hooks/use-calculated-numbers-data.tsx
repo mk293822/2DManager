@@ -1,4 +1,4 @@
-// useCalculatedData.ts
+// useCalculatedNumbersData.ts
 
 import { changePlace } from "@/lib/helpers";
 import {
@@ -13,7 +13,7 @@ import {
 import {
 	FilterModeType,
 	NumberEntry,
-	SoldNumberItem,
+	NumberItem,
 } from "@/types/two-d-list-types";
 import { useMemo } from "react";
 
@@ -44,8 +44,8 @@ export const NAK_KAT_NUMBERS = [
 	"96",
 ];
 
-export const useCalculatedData = (
-	numbers: SoldNumberItem[] | null,
+export const useCalculatedNumbersData = (
+	numbers: NumberItem[] | null,
 	filterMode: FilterModeType = "all",
 	limit: number = 0,
 	isFull: boolean = true,
@@ -90,7 +90,7 @@ export const useCalculatedData = (
 					entry.items.push({
 						...num,
 						number: n,
-					} as SoldNumberItem);
+					} as NumberItem);
 
 					entry.value += Number(num.amount1 || 0);
 				}
@@ -112,7 +112,7 @@ export const useCalculatedData = (
 					entry.items.push({
 						...num,
 						number: n,
-					} as SoldNumberItem);
+					} as NumberItem);
 
 					entry.value += Number(num.amount1 || 0);
 				}

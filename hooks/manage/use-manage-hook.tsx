@@ -1,14 +1,9 @@
 import { EVENT_NAMES } from "@/event-names";
 import { api } from "@/lib/api";
+import { calculateSectionSummary } from "@/lib/calculate-summary";
 import { eventBus } from "@/lib/event-bus";
+import { formatDateRequest, ParsedErrors, parseErrors } from "@/lib/helpers";
 import {
-	calculateSummary,
-	formatDateRequest,
-	ParsedErrors,
-	parseErrors,
-} from "@/lib/helpers";
-import {
-	Section,
 	SectionName,
 	SectionRange,
 	SectionSummaries,
@@ -217,7 +212,7 @@ const useManageHook = (): ManageHookType => {
 					const evening =
 						day.evening_section?.id === id ? null : day.evening_section;
 
-					const summary = calculateSummary<Section>(morning, evening);
+					const summary = calculateSectionSummary(morning, evening);
 
 					return {
 						...day,

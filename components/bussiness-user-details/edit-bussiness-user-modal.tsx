@@ -1,7 +1,8 @@
 import { EVENT_NAMES } from "@/event-names";
-import { CommissionUserEditFields } from "@/hooks/commission-user-details/use-commission-user-details-hook";
+import { BussinessUserEditFields } from "@/hooks/bussiness-user-details/use-user-details-hook";
 import { eventBus } from "@/lib/event-bus";
 import { ParsedErrors } from "@/lib/helpers";
+import { BussinessUserType } from "@/types/bussiness-user-types";
 import React, { useState } from "react";
 import {
 	ScrollView,
@@ -23,17 +24,19 @@ type Props = {
 			phone_number: string;
 			default_commission_percent: number;
 		},
+		userType: BussinessUserType,
 	) => Promise<{
 		success: boolean;
-		errors: ParsedErrors<CommissionUserEditFields>;
+		errors: ParsedErrors<BussinessUserEditFields>;
 	}>;
 	id: string;
 	name: string;
 	phone_number: string;
 	default_commission_percent: number;
+	userType: BussinessUserType;
 };
 
-const EditCommissionUserModal = ({
+const EditBussinessUserModal = ({
 	open,
 	onClose,
 	editCommissionUserDetails,
@@ -41,6 +44,7 @@ const EditCommissionUserModal = ({
 	name,
 	phone_number,
 	default_commission_percent,
+	userType,
 }: Props) => {
 	const [form, setForm] = useState<{
 		name: string;
@@ -54,7 +58,7 @@ const EditCommissionUserModal = ({
 	const [loading, setLoading] = useState(false);
 
 	const [errors, setErrors] = useState<
-		Partial<Record<CommissionUserEditFields, string>>
+		Partial<Record<BussinessUserEditFields, string>>
 	>({});
 
 	const handleChange = (key: keyof typeof form, value: string | number) => {
@@ -69,7 +73,7 @@ const EditCommissionUserModal = ({
 	const handleSave = async () => {
 		try {
 			setLoading(true);
-			const res = await editCommissionUserDetails(id, form);
+			const res = await editCommissionUserDetails(id, form, userType);
 			if (res.success) {
 				handleClose();
 				setErrors({});
@@ -175,4 +179,4 @@ const EditCommissionUserModal = ({
 	);
 };
 
-export default EditCommissionUserModal;
+export default EditBussinessUserModal;

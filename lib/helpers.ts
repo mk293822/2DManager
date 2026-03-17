@@ -1,7 +1,3 @@
-import {
-	ComUserSectionSaleSummary,
-	ComUserSectionSaleType,
-} from "@/types/commission-user-types";
 import { Section, SectionName, SectionSummary } from "@/types/manage-types";
 
 export const DAYS: string[] = [
@@ -123,59 +119,4 @@ export function parseErrors<T extends string>(
 		fields: fieldErrors,
 		form: formError,
 	};
-}
-
-const Fields = [
-	"total_amount",
-	"total_commission",
-	"total_draw_value",
-	"total_draw_amount",
-	"total_resold",
-	"total_resold_commission",
-	"total_resold_draw_value",
-	"total_resold_draw_amount",
-	"profit_or_loss",
-] as const;
-
-const SectionFields = [
-	"total_resold",
-	"total_resold_commission",
-	"total_resold_draw_value",
-	"total_resold_draw_amount",
-] as const;
-
-type FieldNames = (typeof Fields)[number];
-type SectionFieldNames = (typeof SectionFields)[number];
-type NonSectionFields = Exclude<FieldNames, SectionFieldNames>;
-
-// Helper to sum optional numbers safely
-function sum(a?: number, b?: number): number {
-	return (a ?? 0) + (b ?? 0);
-}
-
-export function calculateSummary<T extends Section | ComUserSectionSaleType>(
-	morning: T | null,
-	evening: T | null,
-): T extends Section ? SectionSummary : ComUserSectionSaleSummary {
-	const result = {} as Record<FieldNames, number>;
-
-	// === Sum SectionFields safely ===
-	(SectionFields as readonly SectionFieldNames[]).forEach((field) => {
-		const morningVal = (morning as Section | null)?.[field] ?? 0;
-		const eveningVal = (evening as Section | null)?.[field] ?? 0;
-		result[field] = sum(morningVal, eveningVal);
-	});
-
-	// === Sum remaining fields safely ===
-	Fields.filter(
-		(f): f is NonSectionFields => !SectionFields.includes(f as any),
-	).forEach((field) => {
-		const morningVal = (morning as ComUserSectionSaleType | null)?.[field] ?? 0;
-		const eveningVal = (evening as ComUserSectionSaleType | null)?.[field] ?? 0;
-		result[field] = sum(morningVal, eveningVal);
-	});
-
-	return result as T extends Section
-		? SectionSummary
-		: ComUserSectionSaleSummary;
 }

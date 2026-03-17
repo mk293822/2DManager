@@ -2,7 +2,7 @@ import CustomKeyboard from "@/components/custom-keyboard";
 import CreateTwoDNumbersHeaderRight from "@/components/header-rights/create-two-d-numbers";
 import { Loading } from "@/components/loading";
 import { EVENT_NAMES } from "@/event-names";
-import { useCommissionUserDetailsContext } from "@/hooks/commission-user-details/use-context";
+import { useBussinessUserDetailsContext } from "@/hooks/bussiness-user-details/use-context";
 import { useManageContext } from "@/hooks/manage/use-manage-context";
 import { useTwoDListsContext } from "@/hooks/two-d-list/use-two-d-list-context";
 import {
@@ -15,7 +15,7 @@ import { SectionName } from "@/types/manage-types";
 import {
 	DigitRelatedItem,
 	NormalItem,
-	SoldNumberItem,
+	NumberItem,
 	SpecialGroupItem,
 } from "@/types/two-d-list-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -32,11 +32,12 @@ import {
 const CreateTwoDNumbersPage = () => {
 	const scrollRef = useRef(null);
 	const {
-		commissionUserDetails: user,
+		bussinessUserDetails: user,
 		error,
 		loading,
 		reset,
-	} = useCommissionUserDetailsContext();
+		fetchBussinessUserDetails,
+	} = useBussinessUserDetailsContext();
 	const { section } = useLocalSearchParams<{
 		section: SectionName;
 	}>();
@@ -44,10 +45,9 @@ const CreateTwoDNumbersPage = () => {
 
 	const section_sale = user?.section_sales?.[section];
 
-	const [list, setList] = useState<SoldNumberItem[] | null>(null);
+	const [list, setList] = useState<NumberItem[] | null>(null);
 	const { handleCreateTwoDList } = useTwoDListsContext();
 	const { fetchSection } = useManageContext();
-	const { fetchCommissionUserDetails } = useCommissionUserDetailsContext();
 
 	const [twoDValue, setTwoDValue] = useState<string>("");
 	const [amount1Value, setAmount1Value] = useState<string>("");
@@ -93,7 +93,7 @@ const CreateTwoDNumbersPage = () => {
 			return;
 		}
 
-		let value: SoldNumberItem;
+		let value: NumberItem;
 
 		if (SPECIAL_KEYS1.includes(twoDValue)) {
 			value = {
@@ -136,7 +136,7 @@ const CreateTwoDNumbersPage = () => {
 			type: "day",
 			date: new Date(),
 		});
-		await fetchCommissionUserDetails(abordController.signal, user.id);
+		await fetchBussinessUserDetails(abordController.signal, user.id);
 		setList(null);
 	};
 

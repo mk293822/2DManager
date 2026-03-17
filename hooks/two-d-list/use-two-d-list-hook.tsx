@@ -1,7 +1,7 @@
 import { api } from "@/lib/api";
 import { SectionName } from "@/types/manage-types";
 import {
-	SoldNumberItem,
+	NumberItem,
 	TwoDListGroup,
 	TwoDListType,
 } from "@/types/two-d-list-types";
@@ -26,7 +26,7 @@ export type TwoDListHookType = {
 
 	handleCreateTwoDList: (
 		section_sale_id: string,
-		numbers_data: SoldNumberItem[],
+		numbers_data: NumberItem[],
 		section_summary: string,
 		commission_user: string,
 		section: SectionName,
@@ -120,7 +120,7 @@ const useTwoDListHook = (): TwoDListHookType => {
 
 	const handleCreateTwoDList = async (
 		section_sale_id: string,
-		numbers_data: SoldNumberItem[],
+		numbers_data: NumberItem[],
 		section_summary: string,
 		commission_user: string,
 		section: SectionName,

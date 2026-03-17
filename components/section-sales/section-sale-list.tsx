@@ -1,32 +1,39 @@
-import { SectionSaleGroup } from "@/types/commission-user-types";
+import {
+	BussinessUserType,
+	SectionSaleGroup,
+} from "@/types/bussiness-user-types";
 import { SectionName } from "@/types/manage-types";
 import React from "react";
 import { View } from "react-native";
-import CommissionUserSectionCard from "./section-sale-card";
+import SectionSaleCard from "./section-sale-card";
 import SectionSummaryCard from "./section-summary-card";
 
 type Props = {
 	sales: SectionSaleGroup;
-	createComUserSection: (
-		id: string,
-		section: SectionName,
-		date?: Date,
-	) => Promise<void>;
 	userId: string;
 	user_name: string;
-	deleteComUserSection: (
+	createBussinessUserSection: (
 		id: string,
-		userId: string,
 		section: SectionName,
+		userType: BussinessUserType,
+		date?: Date,
 	) => Promise<void>;
+	deleteBussinessUserSection: (
+		id: string,
+		bussinessUserId: string,
+		section: SectionName,
+		userType: BussinessUserType,
+	) => Promise<void>;
+	userType: BussinessUserType;
 };
 
 const SectionSaleList = ({
 	sales,
-	createComUserSection,
+	createBussinessUserSection,
 	userId,
 	user_name,
-	deleteComUserSection,
+	deleteBussinessUserSection,
+	userType,
 }: Props) => {
 	const date = new Date(sales.date);
 	const sectionList: SectionName[] = ["morning_section", "evening_section"];
@@ -40,11 +47,12 @@ const SectionSaleList = ({
 				/>
 			</View>
 			{sectionList.map((sec) => (
-				<CommissionUserSectionCard
-					deleteComUserSection={deleteComUserSection}
+				<SectionSaleCard
+					userType={userType}
+					deleteBussinessUserSection={deleteBussinessUserSection}
 					key={sec}
 					sale={sales[sec]}
-					createComUserSection={createComUserSection}
+					createBussinessUserSection={createBussinessUserSection}
 					userId={userId}
 					date={date}
 					section={sec}

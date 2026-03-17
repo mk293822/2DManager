@@ -2,8 +2,8 @@
 import { Loading } from "@/components/loading";
 import TwoDListsRow from "@/components/two-d-lists/two-d-lists-row";
 import { useManageContext } from "@/hooks/manage/use-manage-context";
-import { useCalculatedData } from "@/hooks/two-d-list/use-calculated-data";
 import { useTwoDListsContext } from "@/hooks/two-d-list/use-two-d-list-context";
+import { useCalculatedNumbersData } from "@/hooks/use-calculated-numbers-data";
 import { chunkIntoPairs } from "@/lib/two-d-list-helper";
 import { SectionName } from "@/types/manage-types";
 import { Stack, useLocalSearchParams } from "expo-router";
@@ -30,7 +30,7 @@ const UserTwoDListNumbers = () => {
 		setRefreshing(false);
 	};
 
-	const numbers = useCalculatedData(
+	const numbers = useCalculatedNumbersData(
 		twoDList?.flatMap((value) => value.numbers_data) || [],
 		"all",
 		0,

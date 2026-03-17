@@ -36,12 +36,12 @@ export type SpecialGroupItem = {
 	amount2?: null;
 };
 
-export type SoldNumberItem = NormalItem | DigitRelatedItem | SpecialGroupItem;
+export type NumberItem = NormalItem | DigitRelatedItem | SpecialGroupItem;
 
 export type TwoDListType = {
 	id: string;
 	section_sale: string;
-	numbers_data: SoldNumberItem[];
+	numbers_data: NumberItem[];
 	created_at: string;
 	updated_at: string;
 };
@@ -56,6 +56,6 @@ export type TwoDListGroup = {
 
 export type NumberEntry = {
 	number: string;
-	items: SoldNumberItem[];
+	items: NumberItem[];
 	value: number;
 };

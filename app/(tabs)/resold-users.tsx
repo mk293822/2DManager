@@ -12,7 +12,7 @@ import {
 	View,
 } from "react-native";
 
-const CommissionUsers = () => {
+const ResoldUsers = () => {
 	const router = useRouter();
 	const {
 		bussinessUsers,
@@ -24,7 +24,7 @@ const CommissionUsers = () => {
 	} = useBussinessUserContext();
 
 	useFocusEffect(() => {
-		setUserType("commission_user");
+		setUserType("resold_user");
 	});
 
 	const [refreshing, setRefreshing] = useState(false);
@@ -45,7 +45,7 @@ const CommissionUsers = () => {
 				onPress={() =>
 					router.push({
 						pathname: "/bussiness-user-details/[id]",
-						params: { id: String(item.id), userType: "commission_user" },
+						params: { id: String(item.id), userType: "resold_user" },
 					})
 				}
 				activeOpacity={0.8}
@@ -65,7 +65,7 @@ const CommissionUsers = () => {
 				options={{
 					headerRight: () => (
 						<BussinessUserPageHeaderRight
-							userType="commission_user"
+							userType="resold_user"
 							handleCreateBussinessUser={handleCreateBussinessUser}
 						/>
 					),
@@ -76,7 +76,7 @@ const CommissionUsers = () => {
 				error={error}
 				onReload={onRefresh}
 				empty={!bussinessUsers || bussinessUsers.length === 0}
-				emptyMessage="No Commission user yet!"
+				emptyMessage="No Resold user yet!"
 			>
 				<FlatList
 					data={bussinessUsers}
@@ -96,4 +96,4 @@ const CommissionUsers = () => {
 	);
 };
 
-export default CommissionUsers;
+export default ResoldUsers;

@@ -1,5 +1,5 @@
 import { formatDateDisplay, formatKs } from "@/lib/helpers";
-import { ComUserSectionSaleSummary } from "@/types/commission-user-types";
+import { SectionSaleSummary } from "@/types/bussiness-user-types";
 import React from "react";
 import { Text, View } from "react-native";
 
@@ -7,7 +7,7 @@ const SectionSummaryCard = ({
 	summary,
 	date,
 }: {
-	summary: ComUserSectionSaleSummary;
+	summary: SectionSaleSummary;
 	date: Date;
 }) => (
 	<View className="bg-white rounded-2xl shadow p-6 mb-6">

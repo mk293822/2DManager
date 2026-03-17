@@ -1,5 +1,5 @@
 import HapticTab from "@/components/haptic-tab";
-import { useCommissionUserContext } from "@/hooks/commission-users/use-commission-user-context";
+import { useBussinessUserContext } from "@/hooks/bussiness-users/use-context";
 import { useManageContext } from "@/hooks/manage/use-manage-context";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { useAuthContext } from "@/hooks/use-auth-context";
@@ -22,9 +22,9 @@ const pages: Page[] = [
 		icon: "home",
 	},
 	{
-		name: "two-d-lists",
-		title: "2D Lists",
-		icon: "unordered-list",
+		name: "commission-users",
+		title: "Commission Users",
+		icon: "percentage",
 	},
 	{
 		name: "manage",
@@ -32,8 +32,8 @@ const pages: Page[] = [
 		icon: "appstore",
 	},
 	{
-		name: "commission-users",
-		title: "Commission Users",
+		name: "resold-users",
+		title: "Resold Users",
 		icon: "usergroup-add",
 	},
 	{
@@ -61,7 +61,7 @@ const TabsLayout = () => {
 	const { authLoading, isAuthenticated } = useAuthContext();
 	const router = useRouter();
 	const { fetchSection } = useManageContext();
-	const { fetchCommissionUsers } = useCommissionUserContext();
+	const { fetchBussinessUsers } = useBussinessUserContext();
 
 	useAbortableEffect((signal) => {
 		if (isAuthenticated)
@@ -72,7 +72,7 @@ const TabsLayout = () => {
 	}, []);
 
 	useAbortableEffect((signal) => {
-		if (isAuthenticated) fetchCommissionUsers(signal);
+		if (isAuthenticated) fetchBussinessUsers(signal);
 	}, []);
 
 	useEffect(() => {

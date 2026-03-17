@@ -5,7 +5,7 @@ import { useTwoDListsContext } from "@/hooks/two-d-list/use-two-d-list-context";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { ENGLISH_TO_BURMESE_MAP } from "@/lib/custom-keyboard-helper";
 import { SectionName } from "@/types/manage-types";
-import { SoldNumberItem, TwoDListType } from "@/types/two-d-list-types";
+import { NumberItem, TwoDListType } from "@/types/two-d-list-types";
 import { Stack, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
@@ -36,7 +36,7 @@ const UserTwoDList = () => {
 		setRefreshing(false);
 	};
 
-	const renderNumberBox = (val: SoldNumberItem) => {
+	const renderNumberBox = (val: NumberItem) => {
 		if (val.type === "normal" && val.number) {
 			return (
 				<View className="bg-indigo-600 px-4 py-2 rounded-xl">

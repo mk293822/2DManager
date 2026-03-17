@@ -1,4 +1,4 @@
-// CommissionUserPage.tsx
+// BussinessUserPage.tsx
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -10,81 +10,81 @@ import {
 	TouchableOpacity,
 	View,
 } from "react-native";
-import {
-	ActivityIndicator,
-	Provider as PaperProvider,
-} from "react-native-paper";
+import { Provider as PaperProvider } from "react-native-paper";
 
-import DeleteComUserModal from "@/components/commission-user-details/delete-com-user-modal";
-import CommissionUserDetailsHeaderRight from "@/components/header-rights/commission-user-details";
+import DeleteBussinessUserModal from "@/components/bussiness-user-details/delete-bussiness-user-modal";
+import BussinessUserDetailsHeaderRight from "@/components/header-rights/bussiness-user-details";
+import { Loading } from "@/components/loading";
 import SectionSaleList from "@/components/section-sales/section-sale-list";
-import { useCommissionUserDetailsContext } from "@/hooks/commission-user-details/use-context";
-import { useCommissionUserContext } from "@/hooks/commission-users/use-commission-user-context";
+import { useBussinessUserDetailsContext } from "@/hooks/bussiness-user-details/use-context";
+import { useBussinessUserContext } from "@/hooks/bussiness-users/use-context";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { usePhoneActions } from "@/hooks/use-phone-actions";
+import { BussinessUserType } from "@/types/bussiness-user-types";
 
-const CommissionUserPage = () => {
-	const { id } = useLocalSearchParams<{ id?: string | string[] }>();
+const BussinessUserPage = () => {
+	const { id, userType } = useLocalSearchParams<{
+		id?: string;
+		userType?: BussinessUserType;
+	}>();
 	const router = useRouter();
 	const { call, message } = usePhoneActions();
-	const { deleteCommissionUser } = useCommissionUserContext();
+	const { deleteBussinessUser } = useBussinessUserContext();
 	const [open, setOpen] = useState(false);
 
-	const userId = Array.isArray(id) ? id[0] : id;
-
 	const {
-		fetchCommissionUserDetails,
-		commissionUserDetails,
+		fetchBussinessUserDetails,
+		bussinessUserDetails,
 		loading,
 		error,
-		createComUserSection,
-		editCommissionUserDetails,
-		deleteComUserSection,
-	} = useCommissionUserDetailsContext();
+		createBussinessUserSection,
+		editBussinessUserDetails,
+		deleteBussinessUserSection,
+	} = useBussinessUserDetailsContext();
 
 	const [refreshing, setRefreshing] = useState(false);
 
 	useAbortableEffect(
 		(signal) => {
-			if (!userId) {
-				router.replace("/commission-users");
+			if (!id) {
+				router.replace(
+					userType === "commission_user"
+						? "/commission-users"
+						: "/resold-users",
+				);
 				return;
 			}
-			fetchCommissionUserDetails(signal, userId);
+			fetchBussinessUserDetails(signal, id);
 		},
-		[userId],
+		[id],
 	);
 
 	const onRefresh = async () => {
-		if (!userId) return;
+		if (!id) return;
 		const controller = new AbortController();
 
 		setRefreshing(true);
-		await fetchCommissionUserDetails(controller.signal, userId, false);
+		await fetchBussinessUserDetails(controller.signal, id, false);
 		setRefreshing(false);
 	};
 
 	const handleDeleteUser = async () => {
-		if (!userId) return;
-		await deleteCommissionUser(userId);
+		if (!id || !userType) return;
+		await deleteBussinessUser(id, userType);
 		setOpen(false);
-		router.replace("/(tabs)/commission-users");
+		router.replace(
+			userType === "commission_user" ? "/commission-users" : "/resold-users",
+		);
 	};
 
-	if (!userId) {
-		router.replace("/commission-users");
+	if (!id) {
+		router.replace(
+			userType === "commission_user" ? "/commission-users" : "/resold-users",
+		);
 		return null;
 	}
 
-	if (loading)
-		return (
-			<View className="flex-1 items-center justify-center bg-gray-100">
-				<ActivityIndicator
-					size={50}
-					color="#2563eb"
-				/>
-			</View>
-		);
+	if (loading) return <Loading />;
 
 	if (error) {
 		return (
@@ -102,7 +102,7 @@ const CommissionUserPage = () => {
 		);
 	}
 
-	if (!commissionUserDetails) return null;
+	if (!bussinessUserDetails || !userType) return null;
 
 	// Flatten all sections into a list
 	const flatListData = [
@@ -117,33 +117,33 @@ const CommissionUserPage = () => {
 				return (
 					<View className="bg-white rounded-2xl shadow p-6 mb-4">
 						<Text className="text-indigo-700 font-extrabold text-2xl mb-1">
-							{commissionUserDetails.name}
+							{bussinessUserDetails.name}
 						</Text>
 						<Text className="text-gray-500 mb-4">
-							ID: {commissionUserDetails.id}
+							ID: {bussinessUserDetails.id}
 						</Text>
 						<View className="flex-row justify-between py-2">
 							<Text className="text-gray-600">Manager</Text>
 							<Text className="font-semibold">
-								{commissionUserDetails.manager_name}
+								{bussinessUserDetails.manager_name}
 							</Text>
 						</View>
 						<View className="flex-row justify-between py-2">
 							<Text className="text-gray-600">Phone Number</Text>
 							<Text className="font-semibold">
-								{commissionUserDetails.phone_number}
+								{bussinessUserDetails.phone_number}
 							</Text>
 						</View>
 						<View className="flex-row justify-between py-2">
 							<Text className="text-gray-600">Default Commission %</Text>
 							<Text className="font-semibold">
-								{commissionUserDetails.default_commission_percent}%
+								{bussinessUserDetails.default_commission_percent}%
 							</Text>
 						</View>
 						<View className="mt-2 flex-row gap-3">
 							<TouchableOpacity
 								activeOpacity={0.85}
-								onPress={() => call(commissionUserDetails.phone_number)}
+								onPress={() => call(bussinessUserDetails.phone_number)}
 								className="flex-1 bg-blue-600 rounded-2xl py-3 flex-row items-center justify-center gap-2 shadow"
 							>
 								<AntDesign
@@ -155,7 +155,7 @@ const CommissionUserPage = () => {
 							</TouchableOpacity>
 							<TouchableOpacity
 								activeOpacity={0.85}
-								onPress={() => message(commissionUserDetails.phone_number)}
+								onPress={() => message(bussinessUserDetails.phone_number)}
 								className="flex-1 bg-green-600 rounded-2xl py-3 flex-row items-center justify-center gap-2 shadow"
 							>
 								<AntDesign
@@ -171,11 +171,12 @@ const CommissionUserPage = () => {
 			case "sectionSales":
 				return (
 					<SectionSaleList
-						deleteComUserSection={deleteComUserSection}
-						sales={commissionUserDetails.section_sales}
-						createComUserSection={createComUserSection}
-						userId={userId}
-						user_name={commissionUserDetails.name}
+						userType={userType}
+						deleteBussinessUserSection={deleteBussinessUserSection}
+						sales={bussinessUserDetails.section_sales}
+						createBussinessUserSection={createBussinessUserSection}
+						userId={id}
+						user_name={bussinessUserDetails.name}
 					/>
 				);
 			case "dangerZone":
@@ -209,14 +210,15 @@ const CommissionUserPage = () => {
 			<Stack.Screen
 				options={{
 					headerRight: () => (
-						<CommissionUserDetailsHeaderRight
+						<BussinessUserDetailsHeaderRight
 							default_commission_percent={
-								commissionUserDetails.default_commission_percent
+								bussinessUserDetails.default_commission_percent
 							}
-							id={userId}
-							editCommissionUserDetails={editCommissionUserDetails}
-							name={commissionUserDetails.name}
-							phone_number={commissionUserDetails.phone_number}
+							userType={userType}
+							id={id}
+							editBussinessUserDetails={editBussinessUserDetails}
+							name={bussinessUserDetails.name}
+							phone_number={bussinessUserDetails.phone_number}
 						/>
 					),
 				}}
@@ -242,14 +244,14 @@ const CommissionUserPage = () => {
 				/>
 			</PaperProvider>
 
-			<DeleteComUserModal
+			<DeleteBussinessUserModal
 				handleDelete={handleDeleteUser}
 				open={open}
 				onClose={() => setOpen(false)}
-				user_name={commissionUserDetails.name}
+				user_name={bussinessUserDetails.name}
 			/>
 		</>
 	);
 };
 
-export default CommissionUserPage;
+export default BussinessUserPage;

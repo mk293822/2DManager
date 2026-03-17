@@ -4,10 +4,11 @@ import { Loading } from "@/components/loading";
 import ManageDatePickerHeader from "@/components/manage/manage-date-picker-header";
 import SectionSaleList from "@/components/section-sales/section-sale-list";
 import WeekSectionSaleList from "@/components/section-sales/week-section-sale-list";
-import { useCommissionUserDetailsContext } from "@/hooks/commission-user-details/use-context";
+import { useBussinessUserDetailsContext } from "@/hooks/bussiness-user-details/use-context";
 import useSectionSalesHook from "@/hooks/section-sales/use-section-sale-hook";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { getWeekOfMonth } from "@/lib/helpers";
+import { BussinessUserType } from "@/types/bussiness-user-types";
 import { RangeMode, SectionRange } from "@/types/manage-types";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -16,16 +17,21 @@ import { Provider as PaperProvider } from "react-native-paper";
 import { enGB, registerTranslation } from "react-native-paper-dates";
 
 const SectionSales = () => {
-	const { id } = useLocalSearchParams<{ id?: string | string[] }>();
+	const { id, userType } = useLocalSearchParams<{
+		id?: string;
+		userType: BussinessUserType;
+	}>();
 	const router = useRouter();
 	const [rangeMode, setRangeMode] = useState<RangeMode>("day");
-	const userId = Array.isArray(id) ? id[0] : id;
 	registerTranslation("en-GB", enGB);
 
 	const { fetchSectionSales, sectionSales, loading, error, setError } =
 		useSectionSalesHook();
-	const { deleteComUserSection, createComUserSection, commissionUserDetails } =
-		useCommissionUserDetailsContext();
+	const {
+		deleteBussinessUserSection,
+		createBussinessUserSection,
+		bussinessUserDetails,
+	} = useBussinessUserDetailsContext();
 
 	const date = new Date();
 	const [selectedSectionRange, setSelectedSectionRange] =
@@ -55,32 +61,39 @@ const SectionSales = () => {
 
 	useAbortableEffect(
 		(signal) => {
-			if (!userId) {
-				router.replace("/commission-users");
+			if (!id) {
+				router.replace(
+					userType === "commission_user"
+						? "/commission-users"
+						: "/resold-users",
+				);
 				return;
 			}
-			fetchSectionSales(signal, userId, selectedSectionRange);
+			fetchSectionSales(signal, id, selectedSectionRange, userType);
 		},
-		[userId, selectedSectionRange],
+		[id, selectedSectionRange],
 	);
 
 	const onRefresh = async () => {
-		if (!userId) return;
+		if (!id) return;
 		const controller = new AbortController();
 
 		setRefreshing(true);
 		setError(null);
 		await fetchSectionSales(
 			controller.signal,
-			userId,
+			id,
 			selectedSectionRange,
+			userType,
 			false,
 		);
 		setRefreshing(false);
 	};
 
-	if (!userId) {
-		router.replace("/commission-users");
+	if (!id) {
+		router.replace(
+			userType === "commission_user" ? "/commission-users" : "/resold-users",
+		);
 		return;
 	}
 
@@ -99,14 +112,15 @@ const SectionSales = () => {
 					/>
 				);
 			case "sectionSales":
-				if (rangeMode === "day" && commissionUserDetails) {
+				if (rangeMode === "day" && bussinessUserDetails) {
 					return (
 						<SectionSaleList
-							deleteComUserSection={deleteComUserSection}
+							deleteBussinessUserSection={deleteBussinessUserSection}
 							sales={sectionSales[0]}
-							createComUserSection={createComUserSection}
-							userId={userId}
-							user_name={commissionUserDetails.name}
+							userType={userType}
+							createBussinessUserSection={createBussinessUserSection}
+							userId={id}
+							user_name={bussinessUserDetails.name}
 						/>
 					);
 				}
@@ -136,7 +150,7 @@ const SectionSales = () => {
 			/>
 			{loading ? (
 				<Loading />
-			) : error || !commissionUserDetails || !sectionSales ? (
+			) : error || !bussinessUserDetails || !sectionSales ? (
 				<View className="flex-1 items-center justify-center bg-white p-4">
 					<Text className="text-red-600 font-semibold text-center mb-4">
 						{error}

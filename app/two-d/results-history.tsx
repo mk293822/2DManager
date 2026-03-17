@@ -1,14 +1,9 @@
+import { Loading } from "@/components/loading";
 import useFetchLiveTwoD from "@/hooks/use-fetch-live-two-d";
 import { formatTimeIntl } from "@/lib/helpers";
 import { TwoDData } from "@/types/two-d-types";
 import React, { useState } from "react";
-import {
-	ActivityIndicator,
-	FlatList,
-	RefreshControl,
-	Text,
-	View,
-} from "react-native";
+import { FlatList, RefreshControl, Text, View } from "react-native";
 
 const ResultsHistory = () => {
 	const { liveData, loading, refetch } = useFetchLiveTwoD<TwoDData[]>(
@@ -87,11 +82,7 @@ const ResultsHistory = () => {
 	return (
 		<View className="flex-1 items-center justify-center">
 			{loading ? (
-				<ActivityIndicator
-					size={50}
-					color={"#0000ff"}
-					className="my-3"
-				/>
+				<Loading />
 			) : (
 				<FlatList
 					data={liveData || []}

@@ -195,17 +195,19 @@ const DaySectionCard = ({
 						className="bg-indigo-600 w-1/2 py-3 rounded-xl shadow mt-4 flex-row gap-2 items-center justify-center"
 						onPress={() => {
 							router.push({
-								pathname: "/resold/[id]",
-								params: { id: data.id },
+								pathname: "/two-d-lists",
+								params: { section: data.section },
 							});
 						}}
 					>
 						<AntDesign
-							name="retweet"
+							name="unordered-list"
 							color={"#fff"}
 							size={15}
 						/>
-						<Text className="text-white font-semibold text-center">Resold</Text>
+						<Text className="text-white font-semibold text-center">
+							Numbers
+						</Text>
 					</TouchableOpacity>
 					<TouchableOpacity
 						activeOpacity={0.85}

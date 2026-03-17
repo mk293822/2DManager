@@ -1,7 +1,8 @@
 import { EVENT_NAMES } from "@/event-names";
-import { CommissionUserEditFields } from "@/hooks/commission-user-details/use-commission-user-details-hook";
+import { BussinessUserEditFields } from "@/hooks/bussiness-user-details/use-user-details-hook";
 import { eventBus } from "@/lib/event-bus";
 import { ParsedErrors } from "@/lib/helpers";
+import { BussinessUserType } from "@/types/bussiness-user-types";
 import React, { useState } from "react";
 import {
 	ScrollView,
@@ -16,20 +17,25 @@ import AppModal from "../ui/app-modal";
 type Props = {
 	open: boolean;
 	onClose: () => void;
-	handleCreateCommissionUser: (payload: {
-		name: string;
-		phone_number: string;
-		default_commission_percent: number;
-	}) => Promise<{
+	handleCreateBussinessUser: (
+		payload: {
+			name: string;
+			phone_number: string;
+			default_commission_percent: number;
+		},
+		userType: BussinessUserType,
+	) => Promise<{
 		success: boolean;
-		errors: ParsedErrors<CommissionUserEditFields>;
+		errors: ParsedErrors<BussinessUserEditFields>;
 	}>;
+	userType: BussinessUserType;
 };
 
-const CreateCommissionUserModal = ({
+const CreateBussinessUserModal = ({
 	open,
 	onClose,
-	handleCreateCommissionUser,
+	handleCreateBussinessUser,
+	userType,
 }: Props) => {
 	const [form, setForm] = useState<{
 		name: string;
@@ -44,7 +50,7 @@ const CreateCommissionUserModal = ({
 	const [loading, setLoading] = useState(false);
 
 	const [errors, setErrors] = useState<
-		Partial<Record<CommissionUserEditFields, string>>
+		Partial<Record<BussinessUserEditFields, string>>
 	>({});
 
 	const handleChange = (key: keyof typeof form, value: string | number) => {
@@ -65,7 +71,7 @@ const CreateCommissionUserModal = ({
 	const handleSave = async () => {
 		try {
 			setLoading(true);
-			const res = await handleCreateCommissionUser(form);
+			const res = await handleCreateBussinessUser(form, userType);
 			if (res.success) {
 				onCloseModal();
 				setErrors({});
@@ -171,4 +177,4 @@ const CreateCommissionUserModal = ({
 	);
 };
 
-export default CreateCommissionUserModal;
+export default CreateBussinessUserModal;

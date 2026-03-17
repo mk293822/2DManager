@@ -1,8 +1,9 @@
-import { ComUserDetailsHookTypes } from "@/hooks/commission-user-details/use-commission-user-details-hook";
-import { CommissionUserHookType } from "@/hooks/commission-users/use-commission-user-hook";
+import { BussinessUserDetailsHookType } from "@/hooks/bussiness-user-details/use-user-details-hook";
+import { BussinessUserHookType } from "@/hooks/bussiness-users/use-bussiness-user-hook";
 import { ManageHookType } from "@/hooks/manage/use-manage-hook";
 import { TwoDListHookType } from "@/hooks/two-d-list/use-two-d-list-hook";
 import { UseAuthInterface } from "@/hooks/use-auth";
+import { BussinessUserType } from "@/types/bussiness-user-types";
 import { createContext } from "react";
 
 export const AuthContext = createContext<UseAuthInterface | undefined>(
@@ -13,12 +14,16 @@ export const TwoDListContext = createContext<TwoDListHookType | undefined>(
 	undefined,
 );
 
-export const CommissionUserContext = createContext<
-	CommissionUserHookType | undefined
+export const BussinessUserContext = createContext<
+	| (BussinessUserHookType & {
+			userType: BussinessUserType;
+			setUserType: React.Dispatch<React.SetStateAction<BussinessUserType>>;
+	  })
+	| undefined
 >(undefined);
 
-export const CommissionUserDetailsContext = createContext<
-	ComUserDetailsHookTypes | undefined
+export const BussinessUserDetailsContext = createContext<
+	BussinessUserDetailsHookType | undefined
 >(undefined);
 
 export const ManageContext = createContext<ManageHookType | undefined>(
