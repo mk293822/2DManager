@@ -7,7 +7,6 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import { Tabs, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
 
 interface Page {
 	name?: string;
@@ -93,61 +92,59 @@ const TabsLayout = () => {
 	}
 
 	return (
-		<SafeAreaProvider>
-			<Tabs
-				screenOptions={{
-					tabBarShowLabel: false,
-					tabBarButton: (props) => <HapticTab {...props} />,
-					animation: "shift",
-					tabBarItemStyle: {
-						justifyContent: "center",
-						alignItems: "center",
-						width: "auto",
-						height: "100%",
-					},
-					tabBarStyle: {
-						borderRadius: 50,
-						marginHorizontal: 20,
-						marginBottom: 30,
-						height: 60,
-						position: "absolute",
-						overflow: "hidden",
-						borderWidth: 1,
-						paddingHorizontal: 14,
-						backgroundColor: "rgba(49, 46, 129, 0.75)",
-					},
-				}}
-			>
-				{pages.map((page) => (
-					<Tabs.Screen
-						key={page.name}
-						name={page.name}
-						options={{
-							tabBarIcon: ({ focused }) => (
-								<TabIcon
-									icon={page.icon}
-									focused={focused}
-								/>
-							),
-							title: page.title,
-							headerStyle: {
-								backgroundColor: "rgba(49, 46, 129, 0.85)",
-							},
+		<Tabs
+			screenOptions={{
+				tabBarShowLabel: false,
+				tabBarButton: (props) => <HapticTab {...props} />,
+				animation: "shift",
+				tabBarItemStyle: {
+					justifyContent: "center",
+					alignItems: "center",
+					width: "auto",
+					height: "100%",
+				},
+				tabBarStyle: {
+					borderRadius: 50,
+					marginHorizontal: 20,
+					marginBottom: 30,
+					height: 60,
+					position: "absolute",
+					overflow: "hidden",
+					borderWidth: 1,
+					paddingHorizontal: 14,
+					backgroundColor: "rgba(49, 46, 129, 0.75)",
+				},
+			}}
+		>
+			{pages.map((page) => (
+				<Tabs.Screen
+					key={page.name}
+					name={page.name}
+					options={{
+						tabBarIcon: ({ focused }) => (
+							<TabIcon
+								icon={page.icon}
+								focused={focused}
+							/>
+						),
+						title: page.title,
+						headerStyle: {
+							backgroundColor: "rgba(49, 46, 129, 0.85)",
+						},
 
-							headerTintColor: "#e5e7eb",
-							headerTitleStyle: {
-								fontWeight: "900",
-							},
+						headerTintColor: "#e5e7eb",
+						headerTitleStyle: {
+							fontWeight: "900",
+						},
 
-							headerRightContainerStyle: {
-								display: "flex",
-								alignItems: "center",
-							},
-						}}
-					/>
-				))}
-			</Tabs>
-		</SafeAreaProvider>
+						headerRightContainerStyle: {
+							display: "flex",
+							alignItems: "center",
+						},
+					}}
+				/>
+			))}
+		</Tabs>
 	);
 };
 

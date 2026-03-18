@@ -24,7 +24,8 @@ const UserTwoDListHeaderRight = ({
 				}}
 				onPress={() =>
 					router.push({
-						pathname: "/com-user-two-d-list/list-numbers",
+						pathname:
+							"/bussiness-user-details/bussiness-user-two-d-list/list-numbers",
 						params: {
 							id: id,
 							user_name: user_name,

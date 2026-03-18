@@ -6,6 +6,8 @@ import {
 	TwoDListType,
 } from "@/types/two-d-list-types";
 import { useState } from "react";
+import { useBussinessUserDetailsContext } from "../bussiness-user-details/use-context";
+import { useManageContext } from "../manage/use-manage-context";
 
 export type TwoDListHookType = {
 	loading: boolean;
@@ -30,6 +32,7 @@ export type TwoDListHookType = {
 		section_summary: string,
 		commission_user: string,
 		section: SectionName,
+		userId: string,
 	) => Promise<void>;
 };
 
@@ -39,6 +42,8 @@ const useTwoDListHook = (): TwoDListHookType => {
 	const [twoDListGroup, setTwoDListGroup] = useState<TwoDListGroup | null>(
 		null,
 	);
+	const { fetchBussinessUserDetails } = useBussinessUserDetailsContext();
+	const { fetchSection } = useManageContext();
 
 	const [twoDList, setTwoDList] = useState<TwoDListType[] | null>(null);
 
@@ -124,6 +129,7 @@ const useTwoDListHook = (): TwoDListHookType => {
 		section_summary: string,
 		commission_user: string,
 		section: SectionName,
+		userId: string,
 	) => {
 		try {
 			const { data } = await api.post<TwoDListType>(
@@ -151,6 +157,16 @@ const useTwoDListHook = (): TwoDListHookType => {
 					},
 				};
 			});
+			const abortController = new AbortController();
+			await fetchSection(
+				abortController.signal,
+				{
+					type: "day",
+					date: new Date(),
+				},
+				false,
+			);
+			await fetchBussinessUserDetails(abortController.signal, userId, false);
 		} catch {
 			setError("Failed to create two d list");
 		}

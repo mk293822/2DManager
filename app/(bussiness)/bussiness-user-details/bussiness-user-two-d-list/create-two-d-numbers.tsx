@@ -3,7 +3,6 @@ import CreateTwoDNumbersHeaderRight from "@/components/header-rights/create-two-
 import { Loading } from "@/components/loading";
 import { EVENT_NAMES } from "@/event-names";
 import { useBussinessUserDetailsContext } from "@/hooks/bussiness-user-details/use-context";
-import { useManageContext } from "@/hooks/manage/use-manage-context";
 import { useTwoDListsContext } from "@/hooks/two-d-list/use-two-d-list-context";
 import {
 	ENGLISH_TO_BURMESE_MAP,
@@ -36,18 +35,15 @@ const CreateTwoDNumbersPage = () => {
 		error,
 		loading,
 		reset,
-		fetchBussinessUserDetails,
 	} = useBussinessUserDetailsContext();
 	const { section } = useLocalSearchParams<{
 		section: SectionName;
 	}>();
-	const abordController = new AbortController();
 
 	const section_sale = user?.section_sales?.[section];
 
 	const [list, setList] = useState<NumberItem[] | null>(null);
 	const { handleCreateTwoDList } = useTwoDListsContext();
-	const { fetchSection } = useManageContext();
 
 	const [twoDValue, setTwoDValue] = useState<string>("");
 	const [amount1Value, setAmount1Value] = useState<string>("");
@@ -131,12 +127,8 @@ const CreateTwoDNumbersPage = () => {
 			section_sale?.section_summary.id,
 			user.id,
 			section,
+			user.id,
 		);
-		await fetchSection(abordController.signal, {
-			type: "day",
-			date: new Date(),
-		});
-		await fetchBussinessUserDetails(abordController.signal, user.id);
 		setList(null);
 	};
 

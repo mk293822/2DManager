@@ -20,16 +20,15 @@ import { useBussinessUserDetailsContext } from "@/hooks/bussiness-user-details/u
 import { useBussinessUserContext } from "@/hooks/bussiness-users/use-context";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { usePhoneActions } from "@/hooks/use-phone-actions";
-import { BussinessUserType } from "@/types/bussiness-user-types";
 
 const BussinessUserPage = () => {
-	const { id, userType } = useLocalSearchParams<{
+	const { id } = useLocalSearchParams<{
 		id?: string;
-		userType?: BussinessUserType;
 	}>();
 	const router = useRouter();
 	const { call, message } = usePhoneActions();
 	const { deleteBussinessUser } = useBussinessUserContext();
+	const [refreshing, setRefreshing] = useState(false);
 	const [open, setOpen] = useState(false);
 
 	const {
@@ -40,18 +39,13 @@ const BussinessUserPage = () => {
 		createBussinessUserSection,
 		editBussinessUserDetails,
 		deleteBussinessUserSection,
+		bussinessUserType,
 	} = useBussinessUserDetailsContext();
-
-	const [refreshing, setRefreshing] = useState(false);
 
 	useAbortableEffect(
 		(signal) => {
 			if (!id) {
-				router.replace(
-					userType === "commission_user"
-						? "/commission-users"
-						: "/resold-users",
-				);
+				router.back();
 				return;
 			}
 			fetchBussinessUserDetails(signal, id);
@@ -69,19 +63,15 @@ const BussinessUserPage = () => {
 	};
 
 	const handleDeleteUser = async () => {
-		if (!id || !userType) return;
-		await deleteBussinessUser(id, userType);
+		if (!id || !bussinessUserType) return;
+		await deleteBussinessUser(id, bussinessUserType);
 		setOpen(false);
-		router.replace(
-			userType === "commission_user" ? "/commission-users" : "/resold-users",
-		);
+		router.back();
 	};
 
 	if (!id) {
-		router.replace(
-			userType === "commission_user" ? "/commission-users" : "/resold-users",
-		);
-		return null;
+		router.back();
+		return;
 	}
 
 	if (loading) return <Loading />;
@@ -102,7 +92,7 @@ const BussinessUserPage = () => {
 		);
 	}
 
-	if (!bussinessUserDetails || !userType) return null;
+	if (!bussinessUserDetails || !bussinessUserType) return null;
 
 	// Flatten all sections into a list
 	const flatListData = [
@@ -171,7 +161,7 @@ const BussinessUserPage = () => {
 			case "sectionSales":
 				return (
 					<SectionSaleList
-						userType={userType}
+						bussinessUserType={bussinessUserType}
 						deleteBussinessUserSection={deleteBussinessUserSection}
 						sales={bussinessUserDetails.section_sales}
 						createBussinessUserSection={createBussinessUserSection}
@@ -214,12 +204,50 @@ const BussinessUserPage = () => {
 							default_commission_percent={
 								bussinessUserDetails.default_commission_percent
 							}
-							userType={userType}
+							bussinessUserType={bussinessUserType}
 							id={id}
 							editBussinessUserDetails={editBussinessUserDetails}
 							name={bussinessUserDetails.name}
 							phone_number={bussinessUserDetails.phone_number}
 						/>
+					),
+					headerLeft: ({ canGoBack, tintColor }) =>
+						canGoBack ? (
+							<TouchableOpacity
+								onPress={() => router.back()}
+								style={{
+									marginLeft: 5,
+									marginRight: 15,
+									marginBottom: 5,
+								}}
+							>
+								<AntDesign
+									name="arrow-left"
+									size={20}
+									color={tintColor}
+								/>
+							</TouchableOpacity>
+						) : null,
+					headerTitle: () => (
+						<View
+							style={{
+								minHeight: 64,
+								justifyContent: "center",
+								paddingBottom: 6,
+							}}
+						>
+							<Text
+								style={{
+									color: "#e5e7eb",
+									fontWeight: "600",
+									fontSize: 20,
+								}}
+							>
+								{bussinessUserType === "commission_user"
+									? "Commission User"
+									: "Resold User"}
+							</Text>
+						</View>
 					),
 				}}
 			/>

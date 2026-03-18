@@ -3,7 +3,7 @@ import BussinessUserPageHeaderRight from "@/components/header-rights/bussiness-u
 import { useBussinessUserContext } from "@/hooks/bussiness-users/use-context";
 import { BussinessUser } from "@/types/bussiness-user-types";
 import { Tabs, useFocusEffect, useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
 	FlatList,
 	RefreshControl,
@@ -20,12 +20,14 @@ const ResoldUsers = () => {
 		error,
 		fetchBussinessUsers,
 		handleCreateBussinessUser,
-		setUserType,
+		setBussinessUserType,
 	} = useBussinessUserContext();
 
-	useFocusEffect(() => {
-		setUserType("resold_user");
-	});
+	useFocusEffect(
+		useCallback(() => {
+			setBussinessUserType("resold_user");
+		}, []),
+	);
 
 	const [refreshing, setRefreshing] = useState(false);
 
@@ -45,7 +47,7 @@ const ResoldUsers = () => {
 				onPress={() =>
 					router.push({
 						pathname: "/bussiness-user-details/[id]",
-						params: { id: String(item.id), userType: "resold_user" },
+						params: { id: String(item.id) },
 					})
 				}
 				activeOpacity={0.8}
@@ -65,7 +67,7 @@ const ResoldUsers = () => {
 				options={{
 					headerRight: () => (
 						<BussinessUserPageHeaderRight
-							userType="resold_user"
+							bussinessUserType="resold_user"
 							handleCreateBussinessUser={handleCreateBussinessUser}
 						/>
 					),

@@ -16,18 +16,18 @@ type Props = {
 	date: Date;
 	section: SectionName;
 	user_name: string;
-	userType: BussinessUserType;
+	bussinessUserType: BussinessUserType;
 	createBussinessUserSection: (
 		id: string,
 		section: SectionName,
-		userType: BussinessUserType,
+		bussinessUserType: BussinessUserType,
 		date?: Date,
 	) => Promise<void>;
 	deleteBussinessUserSection: (
 		id: string,
 		bussinessUserId: string,
 		section: SectionName,
-		userType: BussinessUserType,
+		bussinessUserType: BussinessUserType,
 	) => Promise<void>;
 };
 
@@ -38,7 +38,7 @@ const SectionSaleCard = ({
 	date,
 	section,
 	user_name,
-	userType,
+	bussinessUserType,
 	deleteBussinessUserSection,
 }: Props) => {
 	const section_summary = sale?.section_summary;
@@ -52,7 +52,12 @@ const SectionSaleCard = ({
 
 	if (!sale || !section_summary) {
 		const handleCreate = async () => {
-			await createBussinessUserSection(userId, section, userType, date);
+			await createBussinessUserSection(
+				userId,
+				section,
+				bussinessUserType,
+				date,
+			);
 			if (!sections?.[0][section])
 				fetchSection(abortController.signal, {
 					type: "day",
@@ -120,7 +125,12 @@ const SectionSaleCard = ({
 	const handleDelete = async () => {
 		try {
 			setLoading(true);
-			await deleteBussinessUserSection(sale.id, userId, section, userType);
+			await deleteBussinessUserSection(
+				sale.id,
+				userId,
+				section,
+				bussinessUserType,
+			);
 			fetchSection(abortController.signal, {
 				type: "day",
 				date: date,
@@ -205,7 +215,8 @@ const SectionSaleCard = ({
 								className="bg-indigo-600 w-1/2 py-3 rounded-xl shadow mt-4 flex-row gap-2 items-center justify-center"
 								onPress={() =>
 									router.push({
-										pathname: "/com-user-two-d-list/[id]",
+										pathname:
+											"/bussiness-user-details/bussiness-user-two-d-list/[id]",
 										params: {
 											id: String(sale.id),
 											user_name: user_name,
@@ -228,7 +239,8 @@ const SectionSaleCard = ({
 								className="bg-green-600 w-1/2 py-3 rounded-xl shadow mt-4 flex-row gap-2 items-center justify-center"
 								onPress={() =>
 									router.push({
-										pathname: "/com-user-two-d-list/create-two-d-numbers",
+										pathname:
+											"/bussiness-user-details/bussiness-user-two-d-list/create-two-d-numbers",
 										params: {
 											section: section,
 										},

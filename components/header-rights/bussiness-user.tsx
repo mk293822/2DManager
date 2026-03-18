@@ -8,7 +8,7 @@ import CreateBussinessUserModal from "../bussiness-user-details/create-bussiness
 
 const BussinessUserPageHeaderRight = ({
 	handleCreateBussinessUser,
-	userType,
+	bussinessUserType,
 }: {
 	handleCreateBussinessUser: (
 		payload: {
@@ -16,12 +16,12 @@ const BussinessUserPageHeaderRight = ({
 			phone_number: string;
 			default_commission_percent: number;
 		},
-		userType: BussinessUserType,
+		bussinessUserType: BussinessUserType,
 	) => Promise<{
 		success: boolean;
 		errors: ParsedErrors<BussinessUserEditFields>;
 	}>;
-	userType: BussinessUserType;
+	bussinessUserType: BussinessUserType;
 }) => {
 	const [open, setOpen] = useState(false);
 
@@ -48,7 +48,7 @@ const BussinessUserPageHeaderRight = ({
 				/>
 			</TouchableOpacity>
 			<CreateBussinessUserModal
-				userType={userType}
+				bussinessUserType={bussinessUserType}
 				open={open}
 				handleCreateBussinessUser={handleCreateBussinessUser}
 				onClose={() => setOpen(false)}

@@ -10,6 +10,7 @@ import {
 } from "@/types/bussiness-user-types";
 import { SectionName } from "@/types/manage-types";
 import { useRef, useState } from "react";
+import { useBussinessUserContext } from "../bussiness-users/use-context";
 
 // Fields that can be edited for a bussiness user
 export type BussinessUserEditFields =
@@ -33,13 +34,13 @@ export type BussinessUserDetailsHookType = {
 	createBussinessUserSection: (
 		id: string,
 		section: SectionName,
-		userType: BussinessUserType,
+		bussinessUserType: BussinessUserType,
 		date?: Date,
 	) => Promise<void>;
 	editBussinessUserDetails: (
 		id: string,
 		form: Partial<BussinessUser>,
-		userType: BussinessUserType,
+		bussinessUserType: BussinessUserType,
 	) => Promise<{
 		success: boolean;
 		errors: ParsedErrors<BussinessUserEditFields>;
@@ -48,17 +49,19 @@ export type BussinessUserDetailsHookType = {
 		id: string,
 		bussinessUserId: string,
 		section: SectionName,
-		userType: BussinessUserType,
+		bussinessUserType: BussinessUserType,
 	) => Promise<void>;
 	setError: React.Dispatch<React.SetStateAction<string | null>>;
+	bussinessUserType: BussinessUserType;
 };
 
 // Custom hook to manage bussiness user details
-const useBussinessUserDetailsHook = (bussinessUserType: BussinessUserType) => {
+const useBussinessUserDetailsHook = () => {
 	const [loading, setLoading] = useState(false); // Loading state
 	const [error, setError] = useState<string | null>(null); // Error state
 	const [bussinessUserDetails, setBussinessUserDetails] =
 		useState<BussinessUser | null>(null); // User details state
+	const { bussinessUserType } = useBussinessUserContext();
 
 	// Cache to store user details per id to avoid unnecessary API calls
 	const cacheRef = useRef<Record<string, BussinessUser | null>>({});
@@ -77,7 +80,7 @@ const useBussinessUserDetailsHook = (bussinessUserType: BussinessUserType) => {
 			setError(null);
 
 			// Return cached data if available
-			if (cacheRef.current[id]) {
+			if (cacheRef.current[id] && showLoading) {
 				setBussinessUserDetails(cacheRef.current[id]);
 				return;
 			}
@@ -115,13 +118,13 @@ const useBussinessUserDetailsHook = (bussinessUserType: BussinessUserType) => {
 	const editBussinessUserDetails = async (
 		id: string,
 		form: Partial<BussinessUser>,
-		userType: BussinessUserType,
+		bussinessUserType: BussinessUserType,
 	) => {
 		try {
 			setError(null);
 
 			const endpoint =
-				userType === "commission_user"
+				bussinessUserType === "commission_user"
 					? `/commission-users/${id}/`
 					: `/resold-users/${id}/`;
 
@@ -134,7 +137,7 @@ const useBussinessUserDetailsHook = (bussinessUserType: BussinessUserType) => {
 			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
 				type: "success",
 				title: "Success",
-				description: `${userType.replace("_", " ")} edited successfully`,
+				description: `${bussinessUserType.replace("_", " ")} edited successfully`,
 			});
 
 			return { success: true, errors: { fields: {} } };
@@ -168,14 +171,14 @@ const useBussinessUserDetailsHook = (bussinessUserType: BussinessUserType) => {
 	const createBussinessUserSection = async (
 		id: string,
 		section: SectionName,
-		userType: BussinessUserType,
+		bussinessUserType: BussinessUserType,
 		date: Date = new Date(),
 	) => {
 		try {
 			setError(null);
 
 			const endpoint =
-				userType === "commission_user"
+				bussinessUserType === "commission_user"
 					? `/commission-users/${id}/section-sales/`
 					: `/resold-users/${id}/section-sales/`;
 
@@ -187,9 +190,10 @@ const useBussinessUserDetailsHook = (bussinessUserType: BussinessUserType) => {
 			// Update state and cache
 			setBussinessUserDetails((prev) => {
 				if (!prev) return prev;
-				return { ...prev, section_sales: data };
+				const updated = { ...prev, section_sales: data };
+				cacheRef.current[id] = updated;
+				return updated;
 			});
-			cacheRef.current[id] = bussinessUserDetails;
 		} catch (err: any) {
 			if (err.name === "CanceledError" || err.name === "AbortError") return;
 
@@ -205,30 +209,45 @@ const useBussinessUserDetailsHook = (bussinessUserType: BussinessUserType) => {
 		id: string,
 		bussinessUserId: string,
 		section: SectionName,
-		userType: BussinessUserType,
+		bussinessUserType: BussinessUserType,
 	) => {
 		try {
 			setError(null);
 
 			const endpoint =
-				userType === "commission_user"
+				bussinessUserType === "commission_user"
 					? `/commission-users/${bussinessUserId}/section-sales/${id}/`
 					: `/resold-users/${bussinessUserId}/section-sales/${id}/`;
 
 			await api.delete(endpoint);
 
-			// Update state and recalculate summary
 			setBussinessUserDetails((prev) => {
 				if (!prev) return prev;
+
 				const day = prev.section_sales;
+
 				const morning =
 					day.morning_section?.id === id ? null : day.morning_section;
+
 				const evening =
 					day.evening_section?.id === id ? null : day.evening_section;
+
 				const summary = calculateSectionSaleSummary(morning, evening);
-				return { ...prev, section_sales: { ...day, [section]: null, summary } };
+
+				const updated = {
+					...prev,
+					section_sales: {
+						...day,
+						[section]: null,
+						summary,
+					},
+				};
+
+				// ✅ update cache with fresh value
+				cacheRef.current[bussinessUserId] = updated;
+
+				return updated;
 			});
-			cacheRef.current[bussinessUserId] = bussinessUserDetails;
 		} catch (err: any) {
 			if (err.name === "CanceledError" || err.name === "AbortError") return;
 
@@ -247,6 +266,7 @@ const useBussinessUserDetailsHook = (bussinessUserType: BussinessUserType) => {
 		editBussinessUserDetails,
 		deleteBussinessUserSection,
 		setError,
+		bussinessUserType,
 	};
 };
 

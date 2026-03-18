@@ -5,16 +5,16 @@ import { BussinessUserContext } from "./contexts";
 
 const BussinessUserProvider = ({ children }: { children: React.ReactNode }) => {
 	// Track current type of business user
-	const [userType, setUserType] =
+	const [bussinessUserType, setBussinessUserType] =
 		useState<BussinessUserType>("commission_user");
 
 	// Hook manages fetching, creation, deletion, caching per type
-	const data = useBussinessUserHook(userType);
+	const data = useBussinessUserHook(bussinessUserType);
 
 	// Memoize context to prevent unnecessary re-renders
 	const contextValue = useMemo(
-		() => ({ ...data, userType, setUserType }),
-		[data, userType],
+		() => ({ ...data, bussinessUserType, setBussinessUserType }),
+		[data, bussinessUserType],
 	);
 
 	return (

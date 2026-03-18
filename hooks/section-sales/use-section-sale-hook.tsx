@@ -15,7 +15,7 @@ export type SectionSalesHookTypes = {
 		signal: AbortSignal,
 		id: string,
 		sectionRange: SectionRange,
-		userType: BussinessUserType,
+		bussinessUserType: BussinessUserType,
 		showLoading?: boolean,
 	) => Promise<void>;
 	sectionSales: SectionSaleGroup[] | null;
@@ -31,7 +31,7 @@ const useSectionSalesHook = (): SectionSalesHookTypes => {
 		signal: AbortSignal,
 		id: string,
 		sectionRange: SectionRange,
-		userType: BussinessUserType,
+		bussinessUserType: BussinessUserType,
 		showLoading: boolean = false,
 	) => {
 		try {
@@ -39,7 +39,9 @@ const useSectionSalesHook = (): SectionSalesHookTypes => {
 			setError(null);
 
 			const endpoint =
-				userType === "commission_user" ? "commission-users" : "resold-users";
+				bussinessUserType === "commission_user"
+					? "commission-users"
+					: "resold-users";
 
 			const { data } = await api.get(`/${endpoint}/${id}/section-sales/`, {
 				signal,

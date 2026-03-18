@@ -17,9 +17,9 @@ import { Provider as PaperProvider } from "react-native-paper";
 import { enGB, registerTranslation } from "react-native-paper-dates";
 
 const SectionSales = () => {
-	const { id, userType } = useLocalSearchParams<{
+	const { id, bussinessUserType } = useLocalSearchParams<{
 		id?: string;
-		userType: BussinessUserType;
+		bussinessUserType: BussinessUserType;
 	}>();
 	const router = useRouter();
 	const [rangeMode, setRangeMode] = useState<RangeMode>("day");
@@ -62,14 +62,10 @@ const SectionSales = () => {
 	useAbortableEffect(
 		(signal) => {
 			if (!id) {
-				router.replace(
-					userType === "commission_user"
-						? "/commission-users"
-						: "/resold-users",
-				);
+				router.back();
 				return;
 			}
-			fetchSectionSales(signal, id, selectedSectionRange, userType);
+			fetchSectionSales(signal, id, selectedSectionRange, bussinessUserType);
 		},
 		[id, selectedSectionRange],
 	);
@@ -84,16 +80,14 @@ const SectionSales = () => {
 			controller.signal,
 			id,
 			selectedSectionRange,
-			userType,
+			bussinessUserType,
 			false,
 		);
 		setRefreshing(false);
 	};
 
 	if (!id) {
-		router.replace(
-			userType === "commission_user" ? "/commission-users" : "/resold-users",
-		);
+		router.back();
 		return;
 	}
 
@@ -117,7 +111,7 @@ const SectionSales = () => {
 						<SectionSaleList
 							deleteBussinessUserSection={deleteBussinessUserSection}
 							sales={sectionSales[0]}
-							userType={userType}
+							bussinessUserType={bussinessUserType}
 							createBussinessUserSection={createBussinessUserSection}
 							userId={id}
 							user_name={bussinessUserDetails.name}
@@ -145,6 +139,25 @@ const SectionSales = () => {
 							rangeMode={rangeMode}
 							setRangeMode={setRangeMode}
 						/>
+					),
+					headerTitle: () => (
+						<View
+							style={{
+								minHeight: 64,
+								justifyContent: "center",
+								paddingBottom: 6,
+							}}
+						>
+							<Text
+								style={{
+									color: "#e5e7eb",
+									fontWeight: "600",
+									fontSize: 20,
+								}}
+							>
+								Section Sales
+							</Text>
+						</View>
 					),
 				}}
 			/>

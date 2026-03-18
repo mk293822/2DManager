@@ -6,7 +6,6 @@ export default function RootLayout() {
 		<SafeAreaProvider>
 			<Stack
 				screenOptions={{
-					headerShown: true,
 					headerStyle: {
 						backgroundColor: "rgba(49, 46, 129, 0.85)",
 					},

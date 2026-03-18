@@ -13,12 +13,12 @@ const BussinessUserDetailsHeaderRight = ({
 	name,
 	phone_number,
 	default_commission_percent,
-	userType,
+	bussinessUserType,
 }: {
 	editBussinessUserDetails: (
 		id: string,
 		form: Partial<BussinessUser>,
-		userType: BussinessUserType,
+		bussinessUserType: BussinessUserType,
 	) => Promise<{
 		success: boolean;
 		errors: ParsedErrors<BussinessUserEditFields>;
@@ -28,7 +28,7 @@ const BussinessUserDetailsHeaderRight = ({
 	name: string;
 	phone_number: string;
 	default_commission_percent: number;
-	userType: BussinessUserType;
+	bussinessUserType: BussinessUserType;
 }) => {
 	const [open, setOpen] = useState(false);
 
@@ -65,7 +65,7 @@ const BussinessUserDetailsHeaderRight = ({
 					onPress={() =>
 						router.push({
 							pathname: "/bussiness-user-details/section-sales",
-							params: { id: userId, userType: userType },
+							params: { id: userId, bussinessUserType: bussinessUserType },
 						})
 					}
 					style={{
@@ -81,7 +81,7 @@ const BussinessUserDetailsHeaderRight = ({
 				</TouchableOpacity>
 			</View>
 			<EditBussinessUserModal
-				userType={userType}
+				bussinessUserType={bussinessUserType}
 				open={open}
 				onClose={() => setOpen(false)}
 				id={id}

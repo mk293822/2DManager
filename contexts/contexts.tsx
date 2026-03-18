@@ -16,8 +16,10 @@ export const TwoDListContext = createContext<TwoDListHookType | undefined>(
 
 export const BussinessUserContext = createContext<
 	| (BussinessUserHookType & {
-			userType: BussinessUserType;
-			setUserType: React.Dispatch<React.SetStateAction<BussinessUserType>>;
+			bussinessUserType: BussinessUserType;
+			setBussinessUserType: React.Dispatch<
+				React.SetStateAction<BussinessUserType>
+			>;
 	  })
 	| undefined
 >(undefined);

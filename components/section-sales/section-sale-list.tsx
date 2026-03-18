@@ -15,16 +15,16 @@ type Props = {
 	createBussinessUserSection: (
 		id: string,
 		section: SectionName,
-		userType: BussinessUserType,
+		bussinessUserType: BussinessUserType,
 		date?: Date,
 	) => Promise<void>;
 	deleteBussinessUserSection: (
 		id: string,
 		bussinessUserId: string,
 		section: SectionName,
-		userType: BussinessUserType,
+		bussinessUserType: BussinessUserType,
 	) => Promise<void>;
-	userType: BussinessUserType;
+	bussinessUserType: BussinessUserType;
 };
 
 const SectionSaleList = ({
@@ -33,7 +33,7 @@ const SectionSaleList = ({
 	userId,
 	user_name,
 	deleteBussinessUserSection,
-	userType,
+	bussinessUserType,
 }: Props) => {
 	const date = new Date(sales.date);
 	const sectionList: SectionName[] = ["morning_section", "evening_section"];
@@ -48,7 +48,7 @@ const SectionSaleList = ({
 			</View>
 			{sectionList.map((sec) => (
 				<SectionSaleCard
-					userType={userType}
+					bussinessUserType={bussinessUserType}
 					deleteBussinessUserSection={deleteBussinessUserSection}
 					key={sec}
 					sale={sales[sec]}

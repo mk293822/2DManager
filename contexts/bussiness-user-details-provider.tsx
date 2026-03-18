@@ -1,6 +1,5 @@
 import useBussinessUserDetailsHook from "@/hooks/bussiness-user-details/use-user-details-hook";
-import { BussinessUserType } from "@/types/bussiness-user-types";
-import React, { useMemo, useState } from "react";
+import React from "react";
 import { BussinessUserDetailsContext } from "./contexts";
 
 const BussinessUserDetailsProvider = ({
@@ -9,20 +8,10 @@ const BussinessUserDetailsProvider = ({
 	children: React.ReactNode;
 }) => {
 	// Track current type of business user
-	const [bussinessUserType, setBussinessUserType] =
-		useState<BussinessUserType>("commission_user");
-
-	// Hook manages fetching, creation, deletion, caching per type
-	const data = useBussinessUserDetailsHook(bussinessUserType);
-
-	// Memoize context value to prevent unnecessary re-renders
-	const contextValue = useMemo(
-		() => ({ ...data, bussinessUserType, setBussinessUserType }),
-		[data, bussinessUserType],
-	);
+	const data = useBussinessUserDetailsHook();
 
 	return (
-		<BussinessUserDetailsContext.Provider value={contextValue}>
+		<BussinessUserDetailsContext.Provider value={data}>
 			{children}
 		</BussinessUserDetailsContext.Provider>
 	);

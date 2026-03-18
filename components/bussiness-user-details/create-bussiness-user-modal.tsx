@@ -23,19 +23,19 @@ type Props = {
 			phone_number: string;
 			default_commission_percent: number;
 		},
-		userType: BussinessUserType,
+		bussinessUserType: BussinessUserType,
 	) => Promise<{
 		success: boolean;
 		errors: ParsedErrors<BussinessUserEditFields>;
 	}>;
-	userType: BussinessUserType;
+	bussinessUserType: BussinessUserType;
 };
 
 const CreateBussinessUserModal = ({
 	open,
 	onClose,
 	handleCreateBussinessUser,
-	userType,
+	bussinessUserType,
 }: Props) => {
 	const [form, setForm] = useState<{
 		name: string;
@@ -71,7 +71,7 @@ const CreateBussinessUserModal = ({
 	const handleSave = async () => {
 		try {
 			setLoading(true);
-			const res = await handleCreateBussinessUser(form, userType);
+			const res = await handleCreateBussinessUser(form, bussinessUserType);
 			if (res.success) {
 				onCloseModal();
 				setErrors({});

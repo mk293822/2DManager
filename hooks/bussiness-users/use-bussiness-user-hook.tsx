@@ -19,14 +19,14 @@ export type BussinessUserHookType = {
 			phone_number: string;
 			default_commission_percent: number;
 		},
-		userType: BussinessUserType,
+		bussinessUserType: BussinessUserType,
 	) => Promise<{
 		success: boolean;
 		errors: ParsedErrors<BussinessUserEditFields>;
 	}>;
 	deleteBussinessUser: (
 		id: string,
-		userType: BussinessUserType,
+		bussinessUserType: BussinessUserType,
 	) => Promise<void>; // delete a user
 	fetchBussinessUsers: (
 		signal: AbortSignal,
@@ -58,7 +58,7 @@ const useBussinessUserHook = (
 
 				// Use cache if available
 				const cached = cacheRef.current[bussinessUserType];
-				if (cached) {
+				if (cached && showLoading) {
 					setBussinessUsers(cached);
 					return;
 				}
@@ -91,7 +91,7 @@ const useBussinessUserHook = (
 		[bussinessUserType],
 	);
 
-	// Automatically fetch data on mount or when userType changes
+	// Automatically fetch data on mount or when bussinessUserType changes
 	useAbortableEffect(
 		(signal) => {
 			fetchBussinessUsers(signal);
@@ -106,11 +106,11 @@ const useBussinessUserHook = (
 			phone_number: string;
 			default_commission_percent: number;
 		},
-		userType: BussinessUserType,
+		bussinessUserType: BussinessUserType,
 	) => {
 		try {
 			const endpoint =
-				userType === "commission_user"
+				bussinessUserType === "commission_user"
 					? "/commission-users/"
 					: "/resold-users/";
 
@@ -119,7 +119,7 @@ const useBussinessUserHook = (
 			// Update state & cache
 			setBussinessUsers((prev) => {
 				const updated = prev ? [...prev, data] : [data];
-				cacheRef.current[userType] = updated;
+				cacheRef.current[bussinessUserType] = updated;
 				return updated;
 			});
 
@@ -145,14 +145,14 @@ const useBussinessUserHook = (
 	// Delete a user
 	const deleteBussinessUser = async (
 		id: string,
-		userType: BussinessUserType,
+		bussinessUserType: BussinessUserType,
 	) => {
 		try {
 			setLoading(true);
 			setError(null);
 
 			const endpoint =
-				userType === "commission_user"
+				bussinessUserType === "commission_user"
 					? "/commission-users/"
 					: "/resold-users/";
 
@@ -160,12 +160,12 @@ const useBussinessUserHook = (
 
 			setBussinessUsers((prev) => {
 				const updated = prev?.filter((u) => u.id !== id) || [];
-				cacheRef.current[userType] = updated; // update cache
+				cacheRef.current[bussinessUserType] = updated; // update cache
 				return updated;
 			});
 		} catch (err: any) {
 			if (err.name === "CanceledError" || err.name === "AbortError") return;
-			setError(`Failed to delete ${userType}. Please try again.`);
+			setError(`Failed to delete ${bussinessUserType}. Please try again.`);
 		} finally {
 			setLoading(false);
 		}
