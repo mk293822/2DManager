@@ -214,14 +214,29 @@ const DaySectionCard = ({
 						className="bg-green-600 w-1/2 py-3 rounded-xl shadow mt-4 flex-row gap-2 items-center justify-center"
 						onPress={() => setOpenDrawNumberModal(true)}
 					>
-						<AntDesign
-							name="edit"
-							color={"#fff"}
-							size={15}
-						/>
-						<Text className="text-white font-semibold text-center">
-							Edit Number
-						</Text>
+						{data.total_draw_value > 0 ? (
+							<>
+								<AntDesign
+									name="edit"
+									color={"#fff"}
+									size={15}
+								/>
+								<Text className="text-white font-semibold text-center">
+									Edit Number
+								</Text>
+							</>
+						) : (
+							<>
+								<AntDesign
+									name="plus"
+									color={"#fff"}
+									size={15}
+								/>
+								<Text className="text-white font-semibold text-center">
+									Add Number
+								</Text>
+							</>
+						)}
 					</TouchableOpacity>
 				</View>
 			)}

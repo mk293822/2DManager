@@ -65,7 +65,7 @@ const BussinessUserDetailsHeaderRight = ({
 					onPress={() =>
 						router.push({
 							pathname: "/bussiness-user-details/section-sales",
-							params: { id: userId, bussinessUserType: bussinessUserType },
+							params: { id: userId },
 						})
 					}
 					style={{

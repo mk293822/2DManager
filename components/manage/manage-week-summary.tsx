@@ -7,8 +7,7 @@ import {
 } from "@/types/manage-types";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
-import WeekSectionCard from "./week-section-card";
-import WeekSummaryCard from "./week-summary-card";
+import DaySummaryCard from "./day-summary-card";
 
 /* ===== Week Summary ===== */
 const ManageWeekSummary = ({
@@ -78,27 +77,13 @@ const ManageWeekSummary = ({
 				}
 
 				return (
-					<View
+					<DaySummaryCard
 						key={idx}
-						className="bg-white rounded-3xl p-4 mb-6 shadow-md"
-					>
-						<WeekSummaryCard
-							date={date}
-							summary={summary}
-							handleToggle={handleToggle}
-						/>
-
-						<WeekSectionCard
-							name="Morning"
-							data={morning_section}
-							date={date}
-						/>
-						<WeekSectionCard
-							name="Evening"
-							data={evening_section}
-							date={date}
-						/>
-					</View>
+						summary={summary}
+						date={section.date}
+						handleToggle={handleToggle}
+						showDetailsBtn
+					/>
 				);
 			})}
 		</>

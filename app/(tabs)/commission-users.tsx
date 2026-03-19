@@ -1,5 +1,5 @@
-import BussinessPage from "@/components/bussiness-user-details/bussiness-page";
 import BussinessUserPageHeaderRight from "@/components/header-rights/bussiness-user";
+import PageWrapper from "@/components/page-wrapper";
 import { useBussinessUserContext } from "@/hooks/bussiness-users/use-context";
 import { BussinessUser } from "@/types/bussiness-user-types";
 import { Tabs, useFocusEffect, useRouter } from "expo-router";
@@ -76,7 +76,7 @@ const CommissionUsers = () => {
 					),
 				}}
 			/>
-			<BussinessPage
+			<PageWrapper
 				loading={loading || bussinessUserType !== "commission_user"}
 				error={error}
 				onReload={onRefresh}
@@ -96,7 +96,7 @@ const CommissionUsers = () => {
 					}
 					contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
 				/>
-			</BussinessPage>
+			</PageWrapper>
 		</>
 	);
 };

@@ -32,7 +32,7 @@ const useSectionSalesHook = (): SectionSalesHookTypes => {
 		id: string,
 		sectionRange: SectionRange,
 		bussinessUserType: BussinessUserType,
-		showLoading: boolean = false,
+		showLoading: boolean = true,
 	) => {
 		try {
 			if (showLoading) setLoading(true);

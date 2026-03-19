@@ -2,6 +2,7 @@
 import DeleteBussinessUserModal from "@/components/bussiness-user-details/delete-bussiness-user-modal";
 import BussinessUserDetailsHeaderRight from "@/components/header-rights/bussiness-user-details";
 import { Loading } from "@/components/loading";
+import PageWrapper from "@/components/page-wrapper";
 import SectionSaleList from "@/components/section-sales/section-sale-list";
 import { useBussinessUserDetailsContext } from "@/hooks/bussiness-user-details/use-context";
 import { useBussinessUserContext } from "@/hooks/bussiness-users/use-context";
@@ -18,7 +19,6 @@ import {
 import React, { useCallback, useState } from "react";
 import {
 	FlatList,
-	Pressable,
 	RefreshControl,
 	Text,
 	TouchableOpacity,
@@ -26,9 +26,7 @@ import {
 } from "react-native";
 
 const BussinessUserPage = () => {
-	const { id } = useLocalSearchParams<{
-		id?: string;
-	}>();
+	const { id } = useLocalSearchParams<{ id?: string }>();
 	const router = useRouter();
 	const { call, message } = usePhoneActions();
 	const { deleteBussinessUser } = useBussinessUserContext();
@@ -59,55 +57,35 @@ const BussinessUserPage = () => {
 
 	useAbortableEffect(
 		(signal) => {
-			if (!id) {
-				router.back();
-				return;
-			}
-			fetchBussinessUserDetails(signal, id);
+			if (id) fetchBussinessUserDetails(signal, id);
 		},
 		[id],
 	);
 
-	const onRefresh = async () => {
-		if (!id) return;
-		const controller = new AbortController();
+	if (loading) return <Loading />;
 
+	if (!id || !bussinessUserDetails || !bussinessUserType) {
+		return (
+			<View className="flex-1 items-center justify-center bg-white p-4">
+				<Text className="text-red-600 font-semibold text-center mb-4">
+					User not found or invalid ID.
+				</Text>
+			</View>
+		);
+	}
+
+	const onRefresh = async () => {
+		const controller = new AbortController();
 		setRefreshing(true);
 		await fetchBussinessUserDetails(controller.signal, id, false);
 		setRefreshing(false);
 	};
 
 	const handleDeleteUser = async () => {
-		if (!id || !bussinessUserType) return;
 		await deleteBussinessUser(id, bussinessUserType);
 		setOpen(false);
 		router.back();
 	};
-
-	if (!id) {
-		router.back();
-		return;
-	}
-
-	if (loading) return <Loading />;
-
-	if (error) {
-		return (
-			<View className="flex-1 items-center justify-center bg-white p-4">
-				<Text className="text-red-600 font-semibold text-center mb-4">
-					{error}
-				</Text>
-				<Pressable
-					onPress={onRefresh}
-					className="bg-indigo-600 px-6 py-3 rounded-lg"
-				>
-					<Text className="text-white font-semibold">Reload</Text>
-				</Pressable>
-			</View>
-		);
-	}
-
-	if (!bussinessUserDetails || !bussinessUserType) return null;
 
 	// Flatten all sections into a list
 	const flatListData = [
@@ -151,11 +129,6 @@ const BussinessUserPage = () => {
 								onPress={() => call(bussinessUserDetails.phone_number)}
 								className="flex-1 bg-blue-600 rounded-2xl py-3 flex-row items-center justify-center gap-2 shadow"
 							>
-								<AntDesign
-									name="phone"
-									size={18}
-									color="white"
-								/>
 								<Text className="text-white font-bold text-base">Call</Text>
 							</TouchableOpacity>
 							<TouchableOpacity
@@ -163,11 +136,6 @@ const BussinessUserPage = () => {
 								onPress={() => message(bussinessUserDetails.phone_number)}
 								className="flex-1 bg-green-600 rounded-2xl py-3 flex-row items-center justify-center gap-2 shadow"
 							>
-								<AntDesign
-									name="message"
-									size={18}
-									color="white"
-								/>
 								<Text className="text-white font-bold text-base">Message</Text>
 							</TouchableOpacity>
 						</View>
@@ -214,27 +182,24 @@ const BussinessUserPage = () => {
 		<>
 			<Stack.Screen
 				options={{
-					headerRight: () => (
-						<BussinessUserDetailsHeaderRight
-							default_commission_percent={
-								bussinessUserDetails.default_commission_percent
-							}
-							bussinessUserType={bussinessUserType}
-							id={id}
-							editBussinessUserDetails={editBussinessUserDetails}
-							name={bussinessUserDetails.name}
-							phone_number={bussinessUserDetails.phone_number}
-						/>
-					),
+					headerRight: () =>
+						bussinessUserDetails && (
+							<BussinessUserDetailsHeaderRight
+								default_commission_percent={
+									bussinessUserDetails.default_commission_percent
+								}
+								bussinessUserType={bussinessUserType!}
+								id={id}
+								editBussinessUserDetails={editBussinessUserDetails}
+								name={bussinessUserDetails.name}
+								phone_number={bussinessUserDetails.phone_number}
+							/>
+						),
 					headerLeft: ({ canGoBack, tintColor }) =>
 						canGoBack ? (
 							<TouchableOpacity
 								onPress={() => router.back()}
-								style={{
-									marginLeft: 5,
-									marginRight: 15,
-									marginBottom: 5,
-								}}
+								style={{ marginLeft: 5, marginRight: 15, marginBottom: 5 }}
 							>
 								<AntDesign
 									name="arrow-left"
@@ -252,11 +217,7 @@ const BussinessUserPage = () => {
 							}}
 						>
 							<Text
-								style={{
-									color: "#e5e7eb",
-									fontWeight: "600",
-									fontSize: 20,
-								}}
+								style={{ color: "#e5e7eb", fontWeight: "600", fontSize: 20 }}
 							>
 								{bussinessUserType === "commission_user"
 									? "Commission User"
@@ -266,30 +227,39 @@ const BussinessUserPage = () => {
 					),
 				}}
 			/>
-			<FlatList
-				data={flatListData}
-				renderItem={renderItem}
-				keyExtractor={(item, index) => item.type + index}
-				refreshControl={
-					<RefreshControl
-						colors={["#0000ff"]}
-						refreshing={refreshing}
-						onRefresh={onRefresh}
-					/>
-				}
-				contentContainerStyle={{
-					paddingTop: 16,
-					paddingBottom: 40,
-					paddingHorizontal: 16,
-					gap: 16,
-				}}
-			/>
+
+			<PageWrapper
+				loading={loading}
+				error={error}
+				onReload={onRefresh}
+				empty={!bussinessUserDetails || !bussinessUserType}
+				emptyMessage="No details found for this user."
+			>
+				<FlatList
+					data={flatListData}
+					renderItem={renderItem}
+					keyExtractor={(item, index) => item.type + index}
+					refreshControl={
+						<RefreshControl
+							colors={["#0000ff"]}
+							refreshing={refreshing}
+							onRefresh={onRefresh}
+						/>
+					}
+					contentContainerStyle={{
+						paddingTop: 16,
+						paddingBottom: 40,
+						paddingHorizontal: 16,
+						gap: 16,
+					}}
+				/>
+			</PageWrapper>
 
 			<DeleteBussinessUserModal
 				handleDelete={handleDeleteUser}
 				open={open}
 				onClose={() => setOpen(false)}
-				user_name={bussinessUserDetails.name}
+				user_name={bussinessUserDetails?.name}
 			/>
 		</>
 	);

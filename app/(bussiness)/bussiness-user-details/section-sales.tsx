@@ -2,22 +2,21 @@
 import SectionSalesPageHeaderRight from "@/components/header-rights/section-sales";
 import { Loading } from "@/components/loading";
 import ManageDatePickerHeader from "@/components/manage/manage-date-picker-header";
+import PageWrapper from "@/components/page-wrapper";
 import SectionSaleList from "@/components/section-sales/section-sale-list";
 import WeekSectionSaleList from "@/components/section-sales/week-section-sale-list";
 import { useBussinessUserDetailsContext } from "@/hooks/bussiness-user-details/use-context";
 import useSectionSalesHook from "@/hooks/section-sales/use-section-sale-hook";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { getWeekOfMonth } from "@/lib/helpers";
-import { BussinessUserType } from "@/types/bussiness-user-types";
 import { RangeMode, SectionRange } from "@/types/manage-types";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
+import { FlatList, RefreshControl, Text, View } from "react-native";
 
 const SectionSales = () => {
-	const { id, bussinessUserType } = useLocalSearchParams<{
+	const { id } = useLocalSearchParams<{
 		id?: string;
-		bussinessUserType: BussinessUserType;
 	}>();
 	const router = useRouter();
 	const [rangeMode, setRangeMode] = useState<RangeMode>("day");
@@ -28,6 +27,7 @@ const SectionSales = () => {
 		deleteBussinessUserSection,
 		createBussinessUserSection,
 		bussinessUserDetails,
+		bussinessUserType,
 	} = useBussinessUserDetailsContext();
 
 	const date = new Date();
@@ -58,14 +58,23 @@ const SectionSales = () => {
 
 	useAbortableEffect(
 		(signal) => {
-			if (!id) {
-				router.back();
-				return;
-			}
-			fetchSectionSales(signal, id, selectedSectionRange, bussinessUserType);
+			if (id)
+				fetchSectionSales(signal, id, selectedSectionRange, bussinessUserType);
 		},
 		[id, selectedSectionRange],
 	);
+
+	if (loading) return <Loading />;
+
+	if (!id || !bussinessUserDetails || !bussinessUserType || !sectionSales) {
+		return (
+			<View className="flex-1 items-center justify-center bg-white p-4">
+				<Text className="text-red-600 font-semibold text-center mb-4">
+					Section not found or invalid ID.
+				</Text>
+			</View>
+		);
+	}
 
 	const onRefresh = async () => {
 		if (!id) return;
@@ -83,15 +92,8 @@ const SectionSales = () => {
 		setRefreshing(false);
 	};
 
-	if (!id) {
-		router.back();
-		return;
-	}
-
 	// Flatten the content into an array for FlatList
 	const flatListData = [{ type: "datePicker" }, { type: "sectionSales" }];
-
-	if (!sectionSales) return;
 
 	const renderItem = ({ item }: { item: (typeof flatListData)[0] }) => {
 		switch (item.type) {
@@ -158,21 +160,13 @@ const SectionSales = () => {
 					),
 				}}
 			/>
-			{loading ? (
-				<Loading />
-			) : error || !bussinessUserDetails || !sectionSales ? (
-				<View className="flex-1 items-center justify-center bg-white p-4">
-					<Text className="text-red-600 font-semibold text-center mb-4">
-						{error}
-					</Text>
-					<Pressable
-						onPress={onRefresh}
-						className="bg-indigo-600 px-6 py-3 rounded-lg"
-					>
-						<Text className="text-white font-semibold">Reload</Text>
-					</Pressable>
-				</View>
-			) : (
+			<PageWrapper
+				loading={loading}
+				error={error}
+				onReload={onRefresh}
+				empty={!bussinessUserDetails || !sectionSales}
+				emptyMessage="No section sales found for this user."
+			>
 				<FlatList
 					data={flatListData}
 					renderItem={renderItem}
@@ -186,7 +180,7 @@ const SectionSales = () => {
 					}
 					contentContainerStyle={{ padding: 16, paddingBottom: 20, gap: 4 }}
 				/>
-			)}
+			</PageWrapper>
 		</>
 	);
 };

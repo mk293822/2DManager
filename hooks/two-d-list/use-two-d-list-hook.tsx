@@ -43,8 +43,7 @@ const useTwoDListHook = (numberType: NumberType): TwoDListHookType => {
 	const [twoDListGroup, setTwoDListGroup] = useState<TwoDListGroup | null>(
 		null,
 	);
-	const { fetchBussinessUserDetails, bussinessUserType } =
-		useBussinessUserDetailsContext();
+	const { fetchBussinessUserDetails } = useBussinessUserDetailsContext();
 	const { fetchSection } = useManageContext();
 
 	const [twoDList, setTwoDList] = useState<TwoDListType[] | null>(null);
@@ -52,7 +51,7 @@ const useTwoDListHook = (numberType: NumberType): TwoDListHookType => {
 	const fetchTwoDList = async (
 		signal: AbortSignal,
 		section_summary_id: string | undefined,
-		showLoading: boolean = false,
+		showLoading: boolean = true,
 	) => {
 		if (!section_summary_id) {
 			setTwoDListGroup(null);
@@ -92,7 +91,7 @@ const useTwoDListHook = (numberType: NumberType): TwoDListHookType => {
 	const fetchTwoDListBySectionSale = async (
 		signal: AbortSignal,
 		section_sale: string | undefined,
-		showLoading: boolean = false,
+		showLoading: boolean = true,
 	) => {
 		if (!section_sale) {
 			setTwoDList(null);

@@ -1,5 +1,6 @@
 // UserTwoDListNumbers.tsx
 import { Loading } from "@/components/loading";
+import PageWrapper from "@/components/page-wrapper";
 import TwoDListsRow from "@/components/two-d-lists/two-d-lists-row";
 import { useManageContext } from "@/hooks/manage/use-manage-context";
 import { useTwoDListsContext } from "@/hooks/two-d-list/use-two-d-list-context";
@@ -8,10 +9,10 @@ import { chunkIntoPairs } from "@/lib/two-d-list-helper";
 import { SectionName } from "@/types/manage-types";
 import { Stack, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
-import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
+import { FlatList, RefreshControl, Text, View } from "react-native";
 
 const UserTwoDListNumbers = () => {
-	const { twoDList, fetchTwoDListBySectionSale, loading } =
+	const { twoDList, fetchTwoDListBySectionSale, loading, error } =
 		useTwoDListsContext();
 	const { sections } = useManageContext();
 	const { id, user_name, section } = useLocalSearchParams<{
@@ -20,8 +21,26 @@ const UserTwoDListNumbers = () => {
 		section: SectionName;
 	}>();
 	const [refreshing, setRefreshing] = useState(false);
+	const numbers = useCalculatedNumbersData(
+		twoDList?.flatMap((value) => value.numbers_data) || [],
+		"all",
+		0,
+		false,
+	);
 
-	const reset = async () => {
+	if (loading) return <Loading />;
+
+	if (!id || !user_name || !section || !twoDList) {
+		return (
+			<View className="flex-1 items-center justify-center bg-white p-4">
+				<Text className="text-red-600 font-semibold text-center mb-4">
+					User not found or invalid ID.
+				</Text>
+			</View>
+		);
+	}
+
+	const onRefresh = async () => {
 		if (!id) return;
 		const controller = new AbortController();
 
@@ -30,12 +49,6 @@ const UserTwoDListNumbers = () => {
 		setRefreshing(false);
 	};
 
-	const numbers = useCalculatedNumbersData(
-		twoDList?.flatMap((value) => value.numbers_data) || [],
-		"all",
-		0,
-		false,
-	);
 	const chunkedData = chunkIntoPairs(numbers);
 
 	const renderItem = ({ item }: { item: (typeof chunkedData)[0] }) => (
@@ -54,21 +67,13 @@ const UserTwoDListNumbers = () => {
 				}}
 			/>
 
-			{loading ? (
-				<Loading />
-			) : !twoDList || twoDList.length === 0 ? (
-				<View className="flex-1 items-center justify-center bg-white p-4">
-					<Text className="text-gray-500 font-semibold text-center mb-4">
-						No data found.
-					</Text>
-					<Pressable
-						onPress={reset}
-						className="bg-indigo-600 px-6 py-3 rounded-xl"
-					>
-						<Text className="text-white font-semibold">Reload</Text>
-					</Pressable>
-				</View>
-			) : (
+			<PageWrapper
+				loading={loading}
+				error={error}
+				onReload={onRefresh}
+				empty={!chunkedData || chunkedData.length === 0}
+				emptyMessage="No 2D numbers found."
+			>
 				<FlatList
 					data={chunkedData}
 					renderItem={renderItem}
@@ -77,19 +82,12 @@ const UserTwoDListNumbers = () => {
 						<RefreshControl
 							colors={["#0000ff"]}
 							refreshing={refreshing}
-							onRefresh={reset}
+							onRefresh={onRefresh}
 						/>
 					}
 					contentContainerStyle={{ paddingVertical: 20 }}
-					ListEmptyComponent={
-						<View className="flex-col items-center justify-center h-40">
-							<Text className="text-3xl font-bold text-gray-400">
-								No Item Exists
-							</Text>
-						</View>
-					}
 				/>
-			)}
+			</PageWrapper>
 		</>
 	);
 };

@@ -1,9 +1,9 @@
 // Manage.tsx
 import ManagePageHeaderRight from "@/components/header-rights/manage-page";
-import { Loading } from "@/components/loading";
 import ManageDatePickerHeader from "@/components/manage/manage-date-picker-header";
 import ManageDaySummary from "@/components/manage/manage-day-summary";
 import ManageWeekSummary from "@/components/manage/manage-week-summary";
+import PageWrapper from "@/components/page-wrapper";
 import { useManageContext } from "@/hooks/manage/use-manage-context";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -11,7 +11,7 @@ import { getWeekOfMonth } from "@/lib/helpers";
 import { RangeMode, SectionRange } from "@/types/manage-types";
 import { Tabs } from "expo-router";
 import { useEffect, useState } from "react";
-import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
+import { FlatList, RefreshControl } from "react-native";
 
 const Manage = () => {
 	const {
@@ -104,33 +104,13 @@ const Manage = () => {
 					),
 				}}
 			/>
-			{error ? (
-				<View className="flex-1 items-center justify-center bg-white p-4">
-					<Text className="text-red-600 font-semibold text-center mb-4">
-						{error}
-					</Text>
-					<Pressable
-						onPress={refreshData}
-						className="bg-indigo-600 px-6 py-3 rounded-lg"
-					>
-						<Text className="text-white font-semibold">Reload</Text>
-					</Pressable>
-				</View>
-			) : loading ? (
-				<Loading />
-			) : !sections || sections.length === 0 ? (
-				<View className="flex-1 items-center justify-center bg-gray-100 p-4">
-					<Text className="text-gray-500 font-semibold text-center mb-4">
-						No sections found for this date/week.
-					</Text>
-					<Pressable
-						onPress={refreshData}
-						className="bg-indigo-600 px-6 py-3 rounded-lg"
-					>
-						<Text className="text-white font-semibold">Reload</Text>
-					</Pressable>
-				</View>
-			) : (
+			<PageWrapper
+				loading={loading}
+				error={error}
+				onReload={refreshData}
+				empty={!sections || sections.length === 0}
+				emptyMessage="No sections found for this date/week."
+			>
 				<FlatList
 					data={debounceRangeMode === "day" ? sections : [sections]}
 					keyExtractor={(_, index) => index.toString()}
@@ -153,7 +133,7 @@ const Manage = () => {
 						padding: 15,
 					}}
 				/>
-			)}
+			</PageWrapper>
 		</>
 	);
 };

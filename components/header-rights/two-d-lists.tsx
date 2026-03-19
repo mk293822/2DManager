@@ -43,7 +43,7 @@ const TwoDListsPageHeaderRight = ({
 				borderRadius: 24,
 				padding: 2.5,
 				width: toggleWidth * 2,
-				marginRight: 5,
+				marginRight: 0,
 			}}
 		>
 			{/* Sliding pill */}
@@ -53,7 +53,7 @@ const TwoDListsPageHeaderRight = ({
 					top: 2,
 					left: 2,
 					width: toggleWidth - 4,
-					height: 32,
+					height: 28,
 					borderRadius: 20,
 					backgroundColor: "#4f46e5",
 					...translateStyle,
@@ -72,7 +72,7 @@ const TwoDListsPageHeaderRight = ({
 							width: toggleWidth,
 							justifyContent: "center",
 							alignItems: "center",
-							paddingVertical: 6,
+							paddingVertical: 4,
 							paddingRight: 2,
 						}}
 					>

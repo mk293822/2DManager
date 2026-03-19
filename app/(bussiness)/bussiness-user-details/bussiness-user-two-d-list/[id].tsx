@@ -1,6 +1,7 @@
 // UserTwoDList.tsx
 import UserTwoDListHeaderRight from "@/components/header-rights/user-two-d-list";
 import { Loading } from "@/components/loading";
+import PageWrapper from "@/components/page-wrapper";
 import { useTwoDListsContext } from "@/hooks/two-d-list/use-two-d-list-context";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { ENGLISH_TO_BURMESE_MAP } from "@/lib/custom-keyboard-helper";
@@ -8,10 +9,10 @@ import { SectionName } from "@/types/manage-types";
 import { NumberItem, TwoDListType } from "@/types/two-d-list-types";
 import { Stack, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
-import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
+import { FlatList, RefreshControl, Text, View } from "react-native";
 
 const UserTwoDList = () => {
-	const { twoDList, fetchTwoDListBySectionSale, loading } =
+	const { twoDList, fetchTwoDListBySectionSale, loading, error } =
 		useTwoDListsContext();
 	const { id, user_name, section } = useLocalSearchParams<{
 		id: string;
@@ -27,7 +28,19 @@ const UserTwoDList = () => {
 		[id],
 	);
 
-	const reset = async () => {
+	if (loading) return <Loading />;
+
+	if (!id || !user_name || !section || !twoDList) {
+		return (
+			<View className="flex-1 items-center justify-center bg-white p-4">
+				<Text className="text-red-600 font-semibold text-center mb-4">
+					User not found or invalid ID.
+				</Text>
+			</View>
+		);
+	}
+
+	const onRefresh = async () => {
 		const controller = new AbortController();
 
 		if (!id) return;
@@ -134,21 +147,13 @@ const UserTwoDList = () => {
 				}}
 			/>
 
-			{loading ? (
-				<Loading />
-			) : !twoDList || twoDList.length === 0 ? (
-				<View className="flex-1 items-center justify-center bg-white p-4">
-					<Text className="text-gray-500 font-semibold text-center mb-4">
-						No data found.
-					</Text>
-					<Pressable
-						onPress={reset}
-						className="bg-indigo-600 px-6 py-3 rounded-xl"
-					>
-						<Text className="text-white font-semibold">Reload</Text>
-					</Pressable>
-				</View>
-			) : (
+			<PageWrapper
+				loading={loading}
+				error={error}
+				onReload={onRefresh}
+				empty={!twoDList || twoDList.length === 0}
+				emptyMessage="No 2D list data found."
+			>
 				<FlatList
 					data={twoDList}
 					renderItem={renderTwoDItem}
@@ -157,7 +162,7 @@ const UserTwoDList = () => {
 						<RefreshControl
 							colors={["#0000ff"]}
 							refreshing={refreshing}
-							onRefresh={reset}
+							onRefresh={onRefresh}
 						/>
 					}
 					contentContainerStyle={{
@@ -166,7 +171,7 @@ const UserTwoDList = () => {
 						paddingBottom: 20,
 					}}
 				/>
-			)}
+			</PageWrapper>
 		</>
 	);
 };

@@ -1,7 +1,6 @@
 // TwoDLists.tsx
 import TwoDListsPageHeaderRight from "@/components/header-rights/two-d-lists";
-import HolidayInfo from "@/components/holiday-info";
-import { Loading } from "@/components/loading";
+import PageWrapper from "@/components/page-wrapper";
 import TwoDListToolBar from "@/components/two-d-lists/toolbar";
 import TwoDListsRow from "@/components/two-d-lists/two-d-lists-row";
 import { useBussinessUserContext } from "@/hooks/bussiness-users/use-context";
@@ -19,7 +18,6 @@ import { router, Stack, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
 	FlatList,
-	Pressable,
 	RefreshControl,
 	Text,
 	TouchableOpacity,
@@ -47,7 +45,6 @@ const TwoDLists = () => {
 	const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
 	const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 	const [refreshing, setRefreshing] = useState(false); // ⬅️ for pull-to-refresh
-	const isHoliday = false;
 	const debouncedQuery = useDebounce(inputValue, 500);
 	const {
 		sections,
@@ -115,15 +112,13 @@ const TwoDLists = () => {
 		<>
 			<Stack.Screen
 				options={{
-					headerTitle: `${changeSectionName(section)} Section`,
+					headerTitle: `${changeSectionName(section)}`,
 					headerLeft: ({ canGoBack, tintColor }) =>
 						canGoBack ? (
 							<TouchableOpacity
 								onPress={() => router.back()}
 								style={{
-									marginLeft: 5,
 									marginRight: 15,
-									marginBottom: 5,
 								}}
 							>
 								<AntDesign
@@ -142,75 +137,51 @@ const TwoDLists = () => {
 				}}
 			/>
 
-			{error ? (
-				<View className="flex-1 items-center justify-center bg-white p-4">
-					<Text className="text-red-600 font-semibold text-center mb-4">
-						{error}
-					</Text>
-					<Pressable
-						onPress={reset}
-						className="bg-indigo-600 px-6 py-3 rounded-lg"
-					>
-						<Text className="text-white font-semibold">Reload</Text>
-					</Pressable>
-				</View>
-			) : loading || sectionLoading ? (
-				<Loading />
-			) : !twoDListGroup ? (
-				<View className="flex-1 items-center justify-center bg-gray-100 p-4">
-					<Text className="text-gray-500 font-semibold text-center mb-4">
-						No sections found for {changeSectionName(section)} section.
-					</Text>
-					<Pressable
-						onPress={reset}
-						className="bg-indigo-600 px-6 py-3 rounded-lg"
-					>
-						<Text className="text-white font-semibold">Reload</Text>
-					</Pressable>
-				</View>
-			) : (
-				<View className="flex-col flex-1 bg-gray-100">
-					{isHoliday && <HolidayInfo />}
+			<PageWrapper
+				loading={loading || sectionLoading}
+				error={error}
+				onReload={reset}
+				empty={!twoDListGroup}
+				emptyMessage={`No sections found for ${changeSectionName(section)} section.`}
+			>
+				{/* Toolbar */}
+				<TwoDListToolBar
+					filterMode={filterMode}
+					setFilterMode={setFilterMode}
+					users={users}
+					selectedUserId={selectedUserId}
+					setSelectedUserId={setSelectedUserId}
+					userDropdownOpen={userDropdownOpen}
+					setUserDropdownOpen={setUserDropdownOpen}
+					filterDropdownOpen={filterDropdownOpen}
+					setFilterDropdownOpen={setFilterDropdownOpen}
+					inputValue={inputValue}
+					setInputValue={setInputValue}
+				/>
 
-					{/* Toolbar */}
-					<TwoDListToolBar
-						filterMode={filterMode}
-						setFilterMode={setFilterMode}
-						users={users}
-						selectedUserId={selectedUserId}
-						setSelectedUserId={setSelectedUserId}
-						userDropdownOpen={userDropdownOpen}
-						setUserDropdownOpen={setUserDropdownOpen}
-						filterDropdownOpen={filterDropdownOpen}
-						setFilterDropdownOpen={setFilterDropdownOpen}
-						inputValue={inputValue}
-						setInputValue={setInputValue}
+				{/* Data list */}
+				{chunkedData.length > 0 ? (
+					<FlatList
+						data={chunkedData}
+						keyExtractor={(_, index) => index.toString()}
+						renderItem={renderItem}
+						refreshControl={
+							<RefreshControl
+								colors={["#0000ff"]}
+								refreshing={refreshing}
+								onRefresh={onRefresh}
+							/>
+						}
+						contentContainerStyle={{ paddingBottom: 120 }}
 					/>
-
-					{/* Data list using FlatList with pull-to-refresh */}
-					{chunkedData.length > 0 ? (
-						<FlatList
-							data={chunkedData}
-							keyExtractor={(_, index) => index.toString()}
-							renderItem={renderItem}
-							refreshControl={
-								<RefreshControl
-									colors={["#0000ff"]}
-									refreshing={refreshing}
-									onRefresh={onRefresh}
-								/>
-							}
-							contentContainerStyle={{ paddingBottom: 120 }}
-						/>
-					) : (
-						<View className="flex-col items-center justify-center h-40">
-							<Text className="text-3xl font-bold text-gray-400">
-								No Item Exists
-							</Text>
-						</View>
-					)}
-				</View>
-			)}
+				) : (
+					<View className="flex-col items-center justify-center h-40">
+						<Text className="text-3xl font-bold text-gray-400">
+							No Item Exists
+						</Text>
+					</View>
+				)}
+			</PageWrapper>
 		</>
 	);
 };

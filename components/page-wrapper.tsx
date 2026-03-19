@@ -1,6 +1,6 @@
 import React from "react";
 import { Pressable, Text, View } from "react-native";
-import { Loading } from "../loading";
+import { Loading } from "./loading";
 
 type BussinessPageType = {
 	loading?: boolean;
@@ -11,7 +11,7 @@ type BussinessPageType = {
 	children: React.ReactNode;
 };
 
-export default function BussinessPage({
+export default function PageWrapper({
 	loading,
 	error,
 	onReload,
