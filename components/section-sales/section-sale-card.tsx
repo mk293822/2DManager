@@ -1,6 +1,8 @@
+import { useBussinessUserDetailsContext } from "@/hooks/bussiness-user-details/use-context";
 import { useManageContext } from "@/hooks/manage/use-manage-context";
+import { calculateSectionSaleSummary } from "@/lib/calculate-summary";
 import { changeSectionName, formatKs, formatSmartNumber } from "@/lib/helpers";
-import { BussinessUserType, SectionSale } from "@/types/bussiness-user-types";
+import { SectionSale, SectionSaleGroup } from "@/types/bussiness-user-types";
 import { SectionName } from "@/types/manage-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
@@ -11,48 +13,40 @@ import { Loading } from "../loading";
 import DeleteSectionSaleModal from "./delete-section-sale-modal";
 
 type Props = {
-	sale: SectionSale;
+	sale: SectionSale | null;
 	userId: string;
 	date: Date;
 	section: SectionName;
-	user_name: string;
-	bussinessUserType: BussinessUserType;
-	createBussinessUserSection: (
-		id: string,
-		section: SectionName,
-		bussinessUserType: BussinessUserType,
-		date?: Date,
-	) => Promise<void>;
-	deleteBussinessUserSection: (
-		id: string,
-		bussinessUserId: string,
-		section: SectionName,
-		bussinessUserType: BussinessUserType,
-	) => Promise<void>;
+	setSectionSales: React.Dispatch<
+		React.SetStateAction<SectionSaleGroup[] | null>
+	>;
 };
 
 const SectionSaleCard = ({
 	sale,
-	createBussinessUserSection,
 	userId,
 	date,
 	section,
-	user_name,
-	bussinessUserType,
-	deleteBussinessUserSection,
+	setSectionSales,
 }: Props) => {
 	const section_summary = sale?.section_summary;
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
 	const { fetchSection, sections } = useManageContext();
+	const {
+		bussinessUserDetails,
+		createBussinessUserSection,
+		deleteBussinessUserSection,
+		bussinessUserType,
+	} = useBussinessUserDetailsContext();
 	const [open, setOpen] = useState(false);
-	const abortController = new AbortController();
 
-	const isProfit = sale?.profit_or_loss >= 0;
+	if (!bussinessUserDetails) return;
 
 	if (!sale || !section_summary) {
 		const handleCreate = async () => {
-			await createBussinessUserSection(
+			const abortController = new AbortController();
+			const data = await createBussinessUserSection(
 				userId,
 				section,
 				bussinessUserType,
@@ -62,6 +56,36 @@ const SectionSaleCard = ({
 				fetchSection(abortController.signal, {
 					type: "day",
 					date: date,
+				});
+
+			if (data)
+				setSectionSales((prev) => {
+					if (!prev) return [data]; // initial state
+					return prev.map((group) => {
+						if (new Date(group.date).toDateString() === date.toDateString()) {
+							return {
+								...group,
+								morning_section:
+									section === "morning_section"
+										? data.morning_section
+										: group.morning_section,
+								evening_section:
+									section === "evening_section"
+										? data.evening_section
+										: group.evening_section,
+								summary: calculateSectionSaleSummary(
+									section === "morning_section"
+										? data.morning_section
+										: group.morning_section,
+									section === "evening_section"
+										? data.evening_section
+										: group.evening_section,
+								),
+							};
+						}
+
+						return group; // leave others untouched
+					});
 				});
 		};
 		return (
@@ -82,6 +106,8 @@ const SectionSaleCard = ({
 			</View>
 		);
 	}
+
+	const isProfit = sale?.profit_or_loss >= 0;
 
 	const sectionDetails: { label: string; value: string }[] = [
 		{
@@ -131,9 +157,34 @@ const SectionSaleCard = ({
 				section,
 				bussinessUserType,
 			);
+			const abortController = new AbortController();
 			fetchSection(abortController.signal, {
 				type: "day",
 				date: date,
+			});
+			setSectionSales((pre) => {
+				if (!pre) return pre;
+
+				return pre.map((s) => {
+					const morning =
+						s.morning_section && s.morning_section.id === sale.id
+							? null
+							: s.morning_section;
+
+					const evening =
+						s.evening_section && s.evening_section.id === sale.id
+							? null
+							: s.evening_section;
+
+					const summary = calculateSectionSaleSummary(morning, evening);
+
+					return {
+						...s,
+						morning_section: morning,
+						evening_section: evening,
+						summary,
+					};
+				});
 			});
 		} finally {
 			setOpen(false);
@@ -219,7 +270,7 @@ const SectionSaleCard = ({
 											"/bussiness-user-details/bussiness-user-two-d-list/[id]",
 										params: {
 											id: String(sale.id),
-											user_name: user_name,
+											user_name: bussinessUserDetails?.name ?? "",
 											section: section,
 										},
 									})

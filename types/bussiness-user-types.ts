@@ -13,8 +13,8 @@ export type BussinessUser = {
 
 export type SectionSaleGroup = {
 	date: string;
-	morning_section: SectionSale;
-	evening_section: SectionSale;
+	morning_section: SectionSale | null;
+	evening_section: SectionSale | null;
 	summary: SectionSaleSummary;
 };
 

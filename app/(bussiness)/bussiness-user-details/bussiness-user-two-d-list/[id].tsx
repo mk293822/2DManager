@@ -30,7 +30,7 @@ const UserTwoDList = () => {
 
 	if (loading) return <Loading />;
 
-	if (!id || !user_name || !section || !twoDList) {
+	if (!id || !section || !twoDList) {
 		return (
 			<View className="flex-1 items-center justify-center bg-white p-4">
 				<Text className="text-red-600 font-semibold text-center mb-4">

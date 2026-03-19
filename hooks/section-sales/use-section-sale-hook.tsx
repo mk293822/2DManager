@@ -19,6 +19,9 @@ export type SectionSalesHookTypes = {
 		showLoading?: boolean,
 	) => Promise<void>;
 	sectionSales: SectionSaleGroup[] | null;
+	setSectionSales: React.Dispatch<
+		React.SetStateAction<SectionSaleGroup[] | null>
+	>;
 };
 const useSectionSalesHook = (): SectionSalesHookTypes => {
 	const [loading, setLoading] = useState(false);
@@ -77,6 +80,7 @@ const useSectionSalesHook = (): SectionSalesHookTypes => {
 		sectionSales,
 		fetchSectionSales,
 		setError,
+		setSectionSales,
 	};
 };
 

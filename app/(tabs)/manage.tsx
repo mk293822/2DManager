@@ -36,7 +36,6 @@ const Manage = () => {
 		});
 
 	const [refreshing, setRefreshing] = useState(false);
-	const abortController = new AbortController();
 
 	useEffect(() => {
 		setSelectedSectionRange((prev) => {
@@ -57,12 +56,16 @@ const Manage = () => {
 	}, [debounceRangeMode]);
 
 	useAbortableEffect(() => {
+		const abortController = new AbortController();
+
 		fetchSection(abortController.signal, selectedSectionRange);
 	}, [selectedSectionRange]);
 
 	const refreshData = async () => {
 		setRefreshing(true);
 		setError(null);
+		const abortController = new AbortController();
+
 		await fetchSection(abortController.signal, selectedSectionRange, false);
 		setRefreshing(false);
 	};

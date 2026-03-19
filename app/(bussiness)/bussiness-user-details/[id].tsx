@@ -38,9 +38,7 @@ const BussinessUserPage = () => {
 		bussinessUserDetails,
 		loading,
 		error,
-		createBussinessUserSection,
 		editBussinessUserDetails,
-		deleteBussinessUserSection,
 		bussinessUserType,
 	} = useBussinessUserDetailsContext();
 	const { setNumberType } = useTwoDListsContext();
@@ -144,12 +142,9 @@ const BussinessUserPage = () => {
 			case "sectionSales":
 				return (
 					<SectionSaleList
-						bussinessUserType={bussinessUserType}
-						deleteBussinessUserSection={deleteBussinessUserSection}
 						sales={bussinessUserDetails.section_sales}
-						createBussinessUserSection={createBussinessUserSection}
 						userId={id}
-						user_name={bussinessUserDetails.name}
+						setSectionSales={() => {}}
 					/>
 				);
 			case "dangerZone":

@@ -1,5 +1,5 @@
 import { formatDateDisplay, formatKs } from "@/lib/helpers";
-import { ComUserSectionSaleType } from "@/types/bussiness-user-types";
+import { SectionSale } from "@/types/bussiness-user-types";
 import React from "react";
 import { Text, View } from "react-native";
 
@@ -9,7 +9,7 @@ const WeekSectionSaleCard = ({
 	date,
 }: {
 	name: string;
-	data: ComUserSectionSaleType | null;
+	data: SectionSale | null;
 	date: string;
 }) => {
 	if (!data) {

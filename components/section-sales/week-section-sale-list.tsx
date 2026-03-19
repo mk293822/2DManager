@@ -3,8 +3,7 @@ import { SectionSaleGroup } from "@/types/bussiness-user-types";
 import { RangeMode, SectionRange } from "@/types/manage-types";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
-import WeekSectionSaleCard from "./week-section-sale-card";
-import WeekSectionSaleSummaryCard from "./week-section-sale-summary-card";
+import SectionSummaryCard from "./section-summary-card";
 
 type Props = {
 	sectionSales: SectionSaleGroup[] | null;
@@ -74,26 +73,13 @@ const WeekSectionSaleList = ({
 				}
 
 				return (
-					<View
+					<SectionSummaryCard
 						key={idx}
-						className="bg-white rounded-3xl p-4 mb-6 shadow-md"
-					>
-						<WeekSectionSaleSummaryCard
-							summary={summary}
-							date={date}
-							handleToggle={handleToggle}
-						/>
-						<WeekSectionSaleCard
-							data={morning_section}
-							name="Morning"
-							date={section.date}
-						/>
-						<WeekSectionSaleCard
-							data={evening_section}
-							name="Evening"
-							date={section.date}
-						/>
-					</View>
+						summary={summary}
+						date={section.date}
+						handleToggle={handleToggle}
+						showDetailsBtn
+					/>
 				);
 			})}
 		</>

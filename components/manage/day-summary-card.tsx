@@ -1,6 +1,5 @@
-import { formatKs, getTotalArray } from "@/lib/helpers";
-import { SectionSummaries } from "@/types/manage-types";
-import AntDesign from "@expo/vector-icons/AntDesign";
+import { formatDateDisplay, formatKs, getTotalArray } from "@/lib/helpers";
+import { SectionSummary } from "@/types/manage-types";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
@@ -8,39 +7,42 @@ const DaySummaryCard = ({
 	summary,
 	date,
 	handleToggle,
-	showDetailsBtn,
+	showDetailsBtn = false,
 }: {
-	summary: SectionSummaries["summary"];
+	summary: SectionSummary;
 	date: string;
 	handleToggle?: () => void;
 	showDetailsBtn?: boolean;
 }) => (
 	<View className="bg-white rounded-2xl shadow p-6 mb-6">
-		<View className="flex-row justify-between items-center mb-1">
-			<View>
-				<Text className="text-indigo-700 font-extrabold text-2xl">Summary</Text>
-				<Text className="text-gray-500">{date}</Text>
-			</View>
+		<View className="flex-row justify-between items-center mb-2">
+			{showDetailsBtn ? (
+				<View className="flex-row">
+					<Text className="text-gray-700 font-semibold text-lg">
+						{formatDateDisplay(new Date(date))}
+					</Text>
+				</View>
+			) : (
+				<View>
+					<Text className="text-indigo-700 font-extrabold text-2xl">
+						Summary
+					</Text>
+					<Text className="text-gray-500">{date}</Text>
+				</View>
+			)}
 			{showDetailsBtn && (
 				<TouchableOpacity
 					onPress={handleToggle}
 					activeOpacity={0.85}
-					className="mb-3 pl-5 pr-3 py-2 rounded-full flex-row items-center justify-center"
+					className="px-4 py-2 rounded-full flex-row items-center justify-center"
 					style={{
-						backgroundColor: "#4f46e5", // Indigo-600
-						shadowColor: "#000",
-						shadowOffset: { width: 0, height: 4 },
-						shadowOpacity: 0.3,
-						shadowRadius: 5,
-						elevation: 6,
+						backgroundColor: "transparent",
+						borderColor: "#4f46e5", // Indigo-600
+						borderWidth: 1,
+						marginRight: -2,
 					}}
 				>
-					<Text className="text-white font-semibold text-sm mr-1">Details</Text>
-					<AntDesign
-						name="right"
-						size={14}
-						color="white"
-					/>
+					<Text className="text-indigo-600 font-semibold text-sm">Details</Text>
 				</TouchableOpacity>
 			)}
 		</View>

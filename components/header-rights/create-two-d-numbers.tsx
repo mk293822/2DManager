@@ -1,3 +1,4 @@
+import { SectionName } from "@/types/manage-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -6,9 +7,11 @@ import { TouchableOpacity, View } from "react-native";
 const CreateTwoDNumbersHeaderRight = ({
 	id,
 	user_name,
+	section,
 }: {
 	id: string;
 	user_name: string;
+	section: SectionName;
 }) => {
 	const router = useRouter();
 	return (
@@ -25,6 +28,7 @@ const CreateTwoDNumbersHeaderRight = ({
 						params: {
 							id: id,
 							user_name: user_name,
+							section: section,
 						},
 					})
 				}

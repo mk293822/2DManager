@@ -36,7 +36,7 @@ export type BussinessUserDetailsHookType = {
 		section: SectionName,
 		bussinessUserType: BussinessUserType,
 		date?: Date,
-	) => Promise<void>;
+	) => Promise<SectionSaleGroup | null | undefined>;
 	editBussinessUserDetails: (
 		id: string,
 		form: Partial<BussinessUser>,
@@ -194,11 +194,14 @@ const useBussinessUserDetailsHook = () => {
 				cacheRef.current[id] = updated;
 				return updated;
 			});
+
+			return data;
 		} catch (err: any) {
 			if (err.name === "CanceledError" || err.name === "AbortError") return;
 
 			setError("Failed to create section sale. Please try again.");
 			setBussinessUserDetails(null);
+			return null;
 		}
 	};
 

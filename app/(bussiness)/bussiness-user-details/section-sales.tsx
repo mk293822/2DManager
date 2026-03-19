@@ -10,7 +10,7 @@ import useSectionSalesHook from "@/hooks/section-sales/use-section-sale-hook";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { getWeekOfMonth } from "@/lib/helpers";
 import { RangeMode, SectionRange } from "@/types/manage-types";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { FlatList, RefreshControl, Text, View } from "react-native";
 
@@ -18,17 +18,18 @@ const SectionSales = () => {
 	const { id } = useLocalSearchParams<{
 		id?: string;
 	}>();
-	const router = useRouter();
 	const [rangeMode, setRangeMode] = useState<RangeMode>("day");
 
-	const { fetchSectionSales, sectionSales, loading, error, setError } =
-		useSectionSalesHook();
 	const {
-		deleteBussinessUserSection,
-		createBussinessUserSection,
-		bussinessUserDetails,
-		bussinessUserType,
-	} = useBussinessUserDetailsContext();
+		fetchSectionSales,
+		sectionSales,
+		loading,
+		error,
+		setError,
+		setSectionSales,
+	} = useSectionSalesHook();
+	const { bussinessUserDetails, bussinessUserType } =
+		useBussinessUserDetailsContext();
 
 	const date = new Date();
 	const [selectedSectionRange, setSelectedSectionRange] =
@@ -108,12 +109,9 @@ const SectionSales = () => {
 				if (rangeMode === "day" && bussinessUserDetails) {
 					return (
 						<SectionSaleList
-							deleteBussinessUserSection={deleteBussinessUserSection}
 							sales={sectionSales[0]}
-							bussinessUserType={bussinessUserType}
-							createBussinessUserSection={createBussinessUserSection}
+							setSectionSales={setSectionSales}
 							userId={id}
-							user_name={bussinessUserDetails.name}
 						/>
 					);
 				}

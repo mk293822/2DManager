@@ -192,6 +192,7 @@ const CreateTwoDNumbersPage = () => {
 							<CreateTwoDNumbersHeaderRight
 								id={section_sale.id}
 								user_name={user?.name || ""}
+								section={section}
 							/>
 						),
 				}}

@@ -52,7 +52,6 @@ const TwoDLists = () => {
 		loading: sectionLoading,
 		reset,
 	} = useManageContext();
-	const abortController = new AbortController();
 
 	useAbortableEffect(
 		(signal) => {
@@ -73,6 +72,7 @@ const TwoDLists = () => {
 	const onRefresh = async () => {
 		setError(null);
 		setRefreshing(true);
+		const abortController = new AbortController();
 		await fetchSection(
 			abortController.signal,
 			{
