@@ -21,6 +21,7 @@ const ResoldUsers = () => {
 		fetchBussinessUsers,
 		handleCreateBussinessUser,
 		setBussinessUserType,
+		bussinessUserType,
 	} = useBussinessUserContext();
 
 	useFocusEffect(
@@ -74,7 +75,7 @@ const ResoldUsers = () => {
 				}}
 			/>
 			<BussinessPage
-				loading={loading}
+				loading={loading || bussinessUserType !== "resold_user"}
 				error={error}
 				onReload={onRefresh}
 				empty={!bussinessUsers || bussinessUsers.length === 0}

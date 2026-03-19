@@ -21,6 +21,7 @@ const CommissionUsers = () => {
 		fetchBussinessUsers,
 		handleCreateBussinessUser,
 		setBussinessUserType,
+		bussinessUserType,
 	} = useBussinessUserContext();
 
 	useFocusEffect(
@@ -76,7 +77,7 @@ const CommissionUsers = () => {
 				}}
 			/>
 			<BussinessPage
-				loading={loading}
+				loading={loading || bussinessUserType !== "commission_user"}
 				error={error}
 				onReload={onRefresh}
 				empty={!bussinessUsers || bussinessUsers.length === 0}

@@ -13,8 +13,6 @@ import { RangeMode, SectionRange } from "@/types/manage-types";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
-import { Provider as PaperProvider } from "react-native-paper";
-import { enGB, registerTranslation } from "react-native-paper-dates";
 
 const SectionSales = () => {
 	const { id, bussinessUserType } = useLocalSearchParams<{
@@ -23,7 +21,6 @@ const SectionSales = () => {
 	}>();
 	const router = useRouter();
 	const [rangeMode, setRangeMode] = useState<RangeMode>("day");
-	registerTranslation("en-GB", enGB);
 
 	const { fetchSectionSales, sectionSales, loading, error, setError } =
 		useSectionSalesHook();
@@ -176,21 +173,19 @@ const SectionSales = () => {
 					</Pressable>
 				</View>
 			) : (
-				<PaperProvider>
-					<FlatList
-						data={flatListData}
-						renderItem={renderItem}
-						keyExtractor={(item, index) => item.type + index}
-						refreshControl={
-							<RefreshControl
-								colors={["#0000ff"]}
-								refreshing={refreshing}
-								onRefresh={onRefresh}
-							/>
-						}
-						contentContainerStyle={{ padding: 16, paddingBottom: 20, gap: 4 }}
-					/>
-				</PaperProvider>
+				<FlatList
+					data={flatListData}
+					renderItem={renderItem}
+					keyExtractor={(item, index) => item.type + index}
+					refreshControl={
+						<RefreshControl
+							colors={["#0000ff"]}
+							refreshing={refreshing}
+							onRefresh={onRefresh}
+						/>
+					}
+					contentContainerStyle={{ padding: 16, paddingBottom: 20, gap: 4 }}
+				/>
 			)}
 		</>
 	);

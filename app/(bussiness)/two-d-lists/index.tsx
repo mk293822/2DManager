@@ -1,4 +1,5 @@
 // TwoDLists.tsx
+import TwoDListsPageHeaderRight from "@/components/header-rights/two-d-lists";
 import HolidayInfo from "@/components/holiday-info";
 import { Loading } from "@/components/loading";
 import TwoDListToolBar from "@/components/two-d-lists/toolbar";
@@ -13,17 +14,32 @@ import { changeSectionName } from "@/lib/helpers";
 import { chunkIntoPairs } from "@/lib/two-d-list-helper";
 import { SectionName } from "@/types/manage-types";
 import { FilterModeType, NumberItem } from "@/types/two-d-list-types";
-import { Stack, useLocalSearchParams } from "expo-router";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
+import {
+	FlatList,
+	Pressable,
+	RefreshControl,
+	Text,
+	TouchableOpacity,
+	View,
+} from "react-native";
 
 const TwoDLists = () => {
 	const { section: sec } = useLocalSearchParams<{ section?: SectionName }>();
 	const section = sec ?? "morning_section";
 	const date = new Date();
-	const { twoDListGroup, loading, error, setError, fetchTwoDList } =
-		useTwoDListsContext();
-	const { bussinessUsers } = useBussinessUserContext();
+	const {
+		twoDListGroup,
+		loading,
+		error,
+		setError,
+		fetchTwoDList,
+		numberType,
+		setNumberType,
+	} = useTwoDListsContext();
+	const { bussinessUsers, setBussinessUserType } = useBussinessUserContext();
 	const [filterMode, setFilterMode] = useState<FilterModeType>("all");
 	const [limit, setLimit] = useState<number>(1000);
 	const [inputValue, setInputValue] = useState(limit);
@@ -43,9 +59,12 @@ const TwoDLists = () => {
 
 	useAbortableEffect(
 		(signal) => {
+			setBussinessUserType(
+				numberType === "sold_number" ? "commission_user" : "resold_user",
+			);
 			fetchTwoDList(signal, sections?.[0][section]?.id);
 		},
-		[sections],
+		[sections, numberType],
 	);
 
 	useEffect(() => {
@@ -97,6 +116,29 @@ const TwoDLists = () => {
 			<Stack.Screen
 				options={{
 					headerTitle: `${changeSectionName(section)} Section`,
+					headerLeft: ({ canGoBack, tintColor }) =>
+						canGoBack ? (
+							<TouchableOpacity
+								onPress={() => router.back()}
+								style={{
+									marginLeft: 5,
+									marginRight: 15,
+									marginBottom: 5,
+								}}
+							>
+								<AntDesign
+									name="arrow-left"
+									size={20}
+									color={tintColor}
+								/>
+							</TouchableOpacity>
+						) : null,
+					headerRight: () => (
+						<TwoDListsPageHeaderRight
+							numberType={numberType}
+							setNumberType={setNumberType}
+						/>
+					),
 				}}
 			/>
 

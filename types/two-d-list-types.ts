@@ -1,5 +1,6 @@
 import { SectionName } from "./manage-types";
 
+export type NumberType = "sold_number" | "resold_number";
 export type FilterModeType = "all" | "greater" | "less";
 export type SoldNumberItemType = "normal" | "digit_related" | "special_group";
 

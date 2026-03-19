@@ -2,6 +2,7 @@ import { api } from "@/lib/api";
 import { SectionName } from "@/types/manage-types";
 import {
 	NumberItem,
+	NumberType,
 	TwoDListGroup,
 	TwoDListType,
 } from "@/types/two-d-list-types";
@@ -36,13 +37,14 @@ export type TwoDListHookType = {
 	) => Promise<void>;
 };
 
-const useTwoDListHook = (): TwoDListHookType => {
+const useTwoDListHook = (numberType: NumberType): TwoDListHookType => {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [twoDListGroup, setTwoDListGroup] = useState<TwoDListGroup | null>(
 		null,
 	);
-	const { fetchBussinessUserDetails } = useBussinessUserDetailsContext();
+	const { fetchBussinessUserDetails, bussinessUserType } =
+		useBussinessUserDetailsContext();
 	const { fetchSection } = useManageContext();
 
 	const [twoDList, setTwoDList] = useState<TwoDListType[] | null>(null);
@@ -60,8 +62,10 @@ const useTwoDListHook = (): TwoDListHookType => {
 			if (showLoading) setLoading(true);
 			setError(null);
 
+			const endpoint =
+				numberType === "sold_number" ? "sold-numbers" : "resold-numbers";
 			const { data } = await api.get<TwoDListGroup>(
-				`/sold-numbers/section-summary/${section_summary_id}/`,
+				`/${endpoint}/section-summary/${section_summary_id}/`,
 				{
 					signal,
 				},
@@ -98,8 +102,10 @@ const useTwoDListHook = (): TwoDListHookType => {
 			if (showLoading) setLoading(true);
 			setError(null);
 
+			const endpoint =
+				numberType === "sold_number" ? "sold-numbers" : "resold-numbers";
 			const { data } = await api.get<TwoDListType[]>(
-				`/sold-numbers/${section_sale}/`,
+				`/${endpoint}/${section_sale}/`,
 				{
 					signal,
 				},
@@ -132,8 +138,10 @@ const useTwoDListHook = (): TwoDListHookType => {
 		userId: string,
 	) => {
 		try {
+			const endpoint =
+				numberType === "sold_number" ? "sold-numbers" : "resold-numbers";
 			const { data } = await api.post<TwoDListType>(
-				`/sold-numbers/${section_sale_id}/`,
+				`/${endpoint}/${section_sale_id}/`,
 				{ numbers_data },
 			);
 			setTwoDListGroup((prev) => {

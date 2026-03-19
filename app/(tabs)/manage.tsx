@@ -12,8 +12,6 @@ import { RangeMode, SectionRange } from "@/types/manage-types";
 import { Tabs } from "expo-router";
 import { useEffect, useState } from "react";
 import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
-import { Provider as PaperProvider } from "react-native-paper";
-import { enGB, registerTranslation } from "react-native-paper-dates";
 
 const Manage = () => {
 	const {
@@ -29,7 +27,6 @@ const Manage = () => {
 
 	const [rangeMode, setRangeMode] = useState<RangeMode>("day");
 	const debounceRangeMode = useDebounce(rangeMode, 400);
-	registerTranslation("en-GB", enGB);
 
 	const date = new Date();
 	const [selectedSectionRange, setSelectedSectionRange] =
@@ -134,30 +131,28 @@ const Manage = () => {
 					</Pressable>
 				</View>
 			) : (
-				<PaperProvider>
-					<FlatList
-						data={debounceRangeMode === "day" ? sections : [sections]}
-						keyExtractor={(_, index) => index.toString()}
-						renderItem={renderSectionItem}
-						refreshControl={
-							<RefreshControl
-								colors={["#0000ff"]}
-								refreshing={refreshing}
-								onRefresh={refreshData}
-							/>
-						}
-						ListHeaderComponent={
-							<ManageDatePickerHeader
-								selectedSectionRange={selectedSectionRange}
-								setSelectedSectionRange={setSelectedSectionRange}
-							/>
-						}
-						contentContainerStyle={{
-							paddingBottom: 100,
-							padding: 15,
-						}}
-					/>
-				</PaperProvider>
+				<FlatList
+					data={debounceRangeMode === "day" ? sections : [sections]}
+					keyExtractor={(_, index) => index.toString()}
+					renderItem={renderSectionItem}
+					refreshControl={
+						<RefreshControl
+							colors={["#0000ff"]}
+							refreshing={refreshing}
+							onRefresh={refreshData}
+						/>
+					}
+					ListHeaderComponent={
+						<ManageDatePickerHeader
+							selectedSectionRange={selectedSectionRange}
+							setSelectedSectionRange={setSelectedSectionRange}
+						/>
+					}
+					contentContainerStyle={{
+						paddingBottom: 100,
+						padding: 15,
+					}}
+				/>
 			)}
 		</>
 	);

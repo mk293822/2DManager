@@ -3,8 +3,7 @@ import { SectionRange, WeekRange } from "@/types/manage-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import React, { useState } from "react";
 import { Pressable, Text, View } from "react-native";
-import { DatePickerModal } from "react-native-paper-dates";
-import WeekPickerModal from "../week-picker-modal";
+import DateWeekPickerModal from "../date-week-picker-modal";
 
 type Props = {
 	selectedSectionRange: SectionRange;
@@ -54,38 +53,48 @@ const ManageDatePickerHeader = ({
 				<Text className="text-indigo-600 text-sm font-semibold">Change</Text>
 			</Pressable>
 
-			{selectedSectionRange.type === "day" ? (
-				<DatePickerModal
-					locale="en-GB"
-					mode="single"
-					visible={showPicker}
-					date={selectedSectionRange.date}
-					onDismiss={() => setShowPicker(false)}
-					onConfirm={({ date }) => {
-						setShowPicker(false);
-						if (date)
-							setSelectedSectionRange({
-								type: "day",
-								date: date,
-							});
-					}}
-				/>
-			) : (
-				<WeekPickerModal
-					visible={showPicker}
-					initialData={selectedSectionRange}
-					onDismiss={() => setShowPicker(false)}
-					onConfirm={(date) => {
+			<DateWeekPickerModal
+				visible={showPicker}
+				mode={selectedSectionRange.type === "day" ? "date" : "week"}
+				initialDate={
+					selectedSectionRange.type === "day"
+						? {
+								type: "date",
+								year: selectedSectionRange.date.getFullYear(),
+								month: selectedSectionRange.date.getMonth(),
+								day: selectedSectionRange.date.getDate(),
+							}
+						: undefined
+				}
+				initialWeek={
+					selectedSectionRange.type === "week"
+						? {
+								type: "week",
+								year: selectedSectionRange.year,
+								month: selectedSectionRange.month,
+								week: selectedSectionRange.week,
+							}
+						: undefined
+				}
+				onDismiss={() => setShowPicker(false)}
+				onConfirm={(data) => {
+					setShowPicker(false);
+
+					if (data.type === "date") {
+						setSelectedSectionRange({
+							type: "day",
+							date: new Date(data.year, data.month, data.day),
+						});
+					} else {
 						setSelectedSectionRange({
 							type: "week",
-							year: date.year,
-							month: date.month,
-							week: date.week,
+							year: data.year,
+							month: data.month,
+							week: data.week,
 						});
-						setShowPicker(false);
-					}}
-				/>
-			)}
+					}
+				}}
+			/>
 		</>
 	);
 };

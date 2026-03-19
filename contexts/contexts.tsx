@@ -4,15 +4,20 @@ import { ManageHookType } from "@/hooks/manage/use-manage-hook";
 import { TwoDListHookType } from "@/hooks/two-d-list/use-two-d-list-hook";
 import { UseAuthInterface } from "@/hooks/use-auth";
 import { BussinessUserType } from "@/types/bussiness-user-types";
+import { NumberType } from "@/types/two-d-list-types";
 import { createContext } from "react";
 
 export const AuthContext = createContext<UseAuthInterface | undefined>(
 	undefined,
 );
 
-export const TwoDListContext = createContext<TwoDListHookType | undefined>(
-	undefined,
-);
+export const TwoDListContext = createContext<
+	| (TwoDListHookType & {
+			numberType: NumberType;
+			setNumberType: React.Dispatch<React.SetStateAction<NumberType>>;
+	  })
+	| undefined
+>(undefined);
 
 export const BussinessUserContext = createContext<
 	| (BussinessUserHookType & {

@@ -1,5 +1,6 @@
 import React from "react";
 import { Pressable, Text, View } from "react-native";
+import { Loading } from "../loading";
 
 type BussinessPageType = {
 	loading?: boolean;
@@ -18,8 +19,6 @@ export default function BussinessPage({
 	emptyMessage,
 	children,
 }: BussinessPageType) {
-	// For headerRight you may need to set via navigation.setOptions in useLayoutEffect
-
 	if (error) {
 		return (
 			<View className="flex-1 items-center justify-center bg-white p-4">
@@ -38,12 +37,7 @@ export default function BussinessPage({
 		);
 	}
 	if (loading) {
-		return (
-			<View className="flex-1 items-center justify-center bg-white p-4">
-				{/* or your actual <Loading /> component */}
-				<Text>Loading...</Text>
-			</View>
-		);
+		return <Loading />;
 	}
 	if (empty) {
 		return (

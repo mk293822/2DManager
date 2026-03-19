@@ -1,7 +1,21 @@
 // BussinessUserPage.tsx
+import DeleteBussinessUserModal from "@/components/bussiness-user-details/delete-bussiness-user-modal";
+import BussinessUserDetailsHeaderRight from "@/components/header-rights/bussiness-user-details";
+import { Loading } from "@/components/loading";
+import SectionSaleList from "@/components/section-sales/section-sale-list";
+import { useBussinessUserDetailsContext } from "@/hooks/bussiness-user-details/use-context";
+import { useBussinessUserContext } from "@/hooks/bussiness-users/use-context";
+import { useTwoDListsContext } from "@/hooks/two-d-list/use-two-d-list-context";
+import { useAbortableEffect } from "@/hooks/use-abortable-effect";
+import { usePhoneActions } from "@/hooks/use-phone-actions";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
+import {
+	Stack,
+	useFocusEffect,
+	useLocalSearchParams,
+	useRouter,
+} from "expo-router";
+import React, { useCallback, useState } from "react";
 import {
 	FlatList,
 	Pressable,
@@ -10,16 +24,6 @@ import {
 	TouchableOpacity,
 	View,
 } from "react-native";
-import { Provider as PaperProvider } from "react-native-paper";
-
-import DeleteBussinessUserModal from "@/components/bussiness-user-details/delete-bussiness-user-modal";
-import BussinessUserDetailsHeaderRight from "@/components/header-rights/bussiness-user-details";
-import { Loading } from "@/components/loading";
-import SectionSaleList from "@/components/section-sales/section-sale-list";
-import { useBussinessUserDetailsContext } from "@/hooks/bussiness-user-details/use-context";
-import { useBussinessUserContext } from "@/hooks/bussiness-users/use-context";
-import { useAbortableEffect } from "@/hooks/use-abortable-effect";
-import { usePhoneActions } from "@/hooks/use-phone-actions";
 
 const BussinessUserPage = () => {
 	const { id } = useLocalSearchParams<{
@@ -41,6 +45,17 @@ const BussinessUserPage = () => {
 		deleteBussinessUserSection,
 		bussinessUserType,
 	} = useBussinessUserDetailsContext();
+	const { setNumberType } = useTwoDListsContext();
+
+	useFocusEffect(
+		useCallback(() => {
+			setNumberType(
+				bussinessUserType === "commission_user"
+					? "sold_number"
+					: "resold_number",
+			);
+		}, [bussinessUserType]),
+	);
 
 	useAbortableEffect(
 		(signal) => {
@@ -251,26 +266,24 @@ const BussinessUserPage = () => {
 					),
 				}}
 			/>
-			<PaperProvider>
-				<FlatList
-					data={flatListData}
-					renderItem={renderItem}
-					keyExtractor={(item, index) => item.type + index}
-					refreshControl={
-						<RefreshControl
-							colors={["#0000ff"]}
-							refreshing={refreshing}
-							onRefresh={onRefresh}
-						/>
-					}
-					contentContainerStyle={{
-						paddingTop: 16,
-						paddingBottom: 40,
-						paddingHorizontal: 16,
-						gap: 16,
-					}}
-				/>
-			</PaperProvider>
+			<FlatList
+				data={flatListData}
+				renderItem={renderItem}
+				keyExtractor={(item, index) => item.type + index}
+				refreshControl={
+					<RefreshControl
+						colors={["#0000ff"]}
+						refreshing={refreshing}
+						onRefresh={onRefresh}
+					/>
+				}
+				contentContainerStyle={{
+					paddingTop: 16,
+					paddingBottom: 40,
+					paddingHorizontal: 16,
+					gap: 16,
+				}}
+			/>
 
 			<DeleteBussinessUserModal
 				handleDelete={handleDeleteUser}
