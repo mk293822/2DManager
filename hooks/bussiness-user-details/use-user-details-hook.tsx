@@ -52,6 +52,7 @@ export type BussinessUserDetailsHookType = {
 		bussinessUserType: BussinessUserType,
 	) => Promise<void>;
 	setError: React.Dispatch<React.SetStateAction<string | null>>;
+
 	bussinessUserType: BussinessUserType;
 };
 

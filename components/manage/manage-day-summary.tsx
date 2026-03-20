@@ -16,12 +16,14 @@ const ManageDaySummary = ({
 	onEditSave: (
 		form:
 			| {
+					draw_number: string | null;
+					draw_times: number;
 					total_amount: number;
 					total_commission: number;
 					total_resold: number;
+					total_resold_commission: number;
+					total_resold_draw_value: number;
 					total_draw_value: number;
-					draw_number: string;
-					draw_times: number;
 			  }
 			| {
 					draw_number: string;

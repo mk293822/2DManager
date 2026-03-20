@@ -1,4 +1,10 @@
-import { Section, SectionName, SectionSummary } from "@/types/manage-types";
+import { SectionSaleGroup } from "@/types/bussiness-user-types";
+import {
+	Section,
+	SectionName,
+	SectionSummaries,
+	SectionSummary,
+} from "@/types/manage-types";
 
 export const DAYS: string[] = [
 	"Sunday",
@@ -122,4 +128,22 @@ export function parseErrors<T extends string>(
 		fields: fieldErrors,
 		form: formError,
 	};
+}
+
+export function upsertByDate<T extends SectionSummaries | SectionSaleGroup>(
+	prev: T[] | null,
+	newDay: T,
+) {
+	if (!prev) return [newDay];
+	const idx = prev.findIndex((d) => d.date === newDay.date);
+	if (idx !== -1) {
+		const newSections = [...prev];
+		newSections[idx] = newDay;
+		return newSections.sort(
+			(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+		);
+	}
+	return [...prev, newDay].sort(
+		(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+	);
 }

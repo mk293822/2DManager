@@ -27,6 +27,7 @@ const SectionSales = () => {
 		error,
 		setError,
 		setSectionSales,
+		editBussinessUserSection,
 	} = useSectionSalesHook();
 	const { bussinessUserDetails, bussinessUserType } =
 		useBussinessUserDetailsContext();
@@ -109,6 +110,7 @@ const SectionSales = () => {
 				if (rangeMode === "day" && bussinessUserDetails) {
 					return (
 						<SectionSaleList
+							editBussinessUserSection={editBussinessUserSection}
 							showBtns={false}
 							sales={sectionSales[0]}
 							setSectionSales={setSectionSales}

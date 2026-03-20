@@ -21,12 +21,14 @@ type Props = {
 	onEditSave: (
 		form:
 			| {
+					draw_number: string | null;
+					draw_times: number;
 					total_amount: number;
 					total_commission: number;
 					total_resold: number;
+					total_resold_commission: number;
+					total_resold_draw_value: number;
 					total_draw_value: number;
-					draw_number: string;
-					draw_times: number;
 			  }
 			| {
 					draw_number: string;
@@ -81,39 +83,41 @@ const DaySectionCard = ({
 					{changeSectionName(data.section)}
 				</Text>
 				<View className="flex-row items-center justify-end gap-3">
-					<View
-						style={{
-							position: "relative",
-						}}
-					>
-						<TouchableOpacity
-							onPress={() => setOpenModal(true)}
-							activeOpacity={0.85}
-							hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-							className="p-2.5"
+					{!data.numbers_exists && (
+						<View
+							style={{
+								position: "relative",
+							}}
 						>
-							<AntDesign
-								name="edit"
-								color={"#4f46e5"}
-								size={18}
-							/>
+							<TouchableOpacity
+								onPress={() => setOpenModal(true)}
+								activeOpacity={0.85}
+								hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+								className="p-2.5"
+							>
+								<AntDesign
+									name="edit"
+									color={"#4f46e5"}
+									size={18}
+								/>
 
-							<View
-								style={{
-									position: "absolute",
-									top: -0,
-									bottom: -0,
-									left: -0,
-									right: -0,
-									borderWidth: 1,
-									borderColor: "#4f46e5",
-									borderStyle: "dashed",
-									borderRadius: 4,
-								}}
-								pointerEvents="none"
-							/>
-						</TouchableOpacity>
-					</View>
+								<View
+									style={{
+										position: "absolute",
+										top: -0,
+										bottom: -0,
+										left: -0,
+										right: -0,
+										borderWidth: 1,
+										borderColor: "#4f46e5",
+										borderStyle: "dashed",
+										borderRadius: 4,
+									}}
+									pointerEvents="none"
+								/>
+							</TouchableOpacity>
+						</View>
+					)}
 					<View
 						style={{
 							position: "relative",

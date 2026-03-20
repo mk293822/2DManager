@@ -1,7 +1,15 @@
+import { EVENT_NAMES } from "@/event-names";
 import { api } from "@/lib/api";
-import { formatDateRequest } from "@/lib/helpers";
+import { eventBus } from "@/lib/event-bus";
+import {
+	formatDateRequest,
+	ParsedErrors,
+	parseErrors,
+	upsertByDate,
+} from "@/lib/helpers";
 import {
 	BussinessUserType,
+	SectionSale,
 	SectionSaleGroup,
 } from "@/types/bussiness-user-types";
 import { SectionRange } from "@/types/manage-types";
@@ -22,13 +30,67 @@ export type SectionSalesHookTypes = {
 	setSectionSales: React.Dispatch<
 		React.SetStateAction<SectionSaleGroup[] | null>
 	>;
+	editBussinessUserSection: (
+		id: string,
+		userId: string,
+		form: Partial<SectionSale>,
+		bussinessUserType: BussinessUserType,
+	) => Promise<{
+		success: boolean;
+		errors: ParsedErrors<BussinessUserSectionEditFields>;
+	}>;
 };
+
+export type BussinessUserSectionEditFields =
+	| "commission_percent"
+	| "total_amount"
+	| "total_draw_value";
+
 const useSectionSalesHook = (): SectionSalesHookTypes => {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [sectionSales, setSectionSales] = useState<SectionSaleGroup[] | null>(
 		null,
 	);
+
+	/**
+	 * Edit section for the bussiness user
+	 */
+	const editBussinessUserSection = async (
+		id: string,
+		userId: string,
+		form: Partial<SectionSale>,
+		bussinessUserType: BussinessUserType,
+	) => {
+		try {
+			setError(null);
+
+			const endpoint =
+				bussinessUserType === "commission_user"
+					? `/commission-users/${userId}/section-sales/${id}/`
+					: `/resold-users/${userId}/section-sales/${id}/`;
+
+			const { data } = await api.put<SectionSaleGroup>(endpoint, form);
+
+			setSectionSales((prev) => upsertByDate<SectionSaleGroup>(prev, data));
+			// Notify success
+			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+				type: "success",
+				title: "Success",
+				description: `Section edited successfully`,
+			});
+
+			return { success: true, errors: { fields: {} } };
+		} catch (err: any) {
+			const data = err?.response?.data || {};
+			const errors = parseErrors<BussinessUserSectionEditFields>(data, [
+				"total_amount",
+				"commission_percent",
+				"total_draw_value",
+			]);
+			return { success: false, errors };
+		}
+	};
 
 	const fetchSectionSales = async (
 		signal: AbortSignal,
@@ -81,6 +143,7 @@ const useSectionSalesHook = (): SectionSalesHookTypes => {
 		fetchSectionSales,
 		setError,
 		setSectionSales,
+		editBussinessUserSection,
 	};
 };
 

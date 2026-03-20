@@ -196,6 +196,7 @@ const BussinessUserPage = () => {
 							<TouchableOpacity
 								onPress={() => router.back()}
 								style={{ marginLeft: 5, marginRight: 15, marginBottom: 5 }}
+								hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
 							>
 								<AntDesign
 									name="arrow-left"

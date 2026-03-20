@@ -1,4 +1,10 @@
-import { SectionSaleGroup } from "@/types/bussiness-user-types";
+import { BussinessUserSectionEditFields } from "@/hooks/section-sales/use-section-sale-hook";
+import { ParsedErrors } from "@/lib/helpers";
+import {
+	BussinessUserType,
+	SectionSale,
+	SectionSaleGroup,
+} from "@/types/bussiness-user-types";
 import { SectionName } from "@/types/manage-types";
 import React from "react";
 import { View } from "react-native";
@@ -12,12 +18,22 @@ type Props = {
 		React.SetStateAction<SectionSaleGroup[] | null>
 	>;
 	showBtns?: boolean;
+	editBussinessUserSection?: (
+		id: string,
+		userId: string,
+		form: Partial<SectionSale>,
+		bussinessUserType: BussinessUserType,
+	) => Promise<{
+		success: boolean;
+		errors: ParsedErrors<BussinessUserSectionEditFields>;
+	}>;
 };
 
 const SectionSaleList = ({
 	sales,
 	userId,
 	setSectionSales,
+	editBussinessUserSection,
 	showBtns = true,
 }: Props) => {
 	const date = new Date(sales.date);
@@ -34,6 +50,7 @@ const SectionSaleList = ({
 			</View>
 			{sectionList.map((sec) => (
 				<SectionSaleCard
+					editBussinessUserSection={editBussinessUserSection}
 					showBtns={showBtns}
 					setSectionSales={setSectionSales}
 					key={sec}

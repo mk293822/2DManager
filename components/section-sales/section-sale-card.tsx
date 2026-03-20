@@ -1,8 +1,18 @@
 import { useBussinessUserDetailsContext } from "@/hooks/bussiness-user-details/use-context";
 import { useManageContext } from "@/hooks/manage/use-manage-context";
+import { BussinessUserSectionEditFields } from "@/hooks/section-sales/use-section-sale-hook";
 import { calculateSectionSaleSummary } from "@/lib/calculate-summary";
-import { changeSectionName, formatKs, formatSmartNumber } from "@/lib/helpers";
-import { SectionSale, SectionSaleGroup } from "@/types/bussiness-user-types";
+import {
+	changeSectionName,
+	formatKs,
+	formatSmartNumber,
+	ParsedErrors,
+} from "@/lib/helpers";
+import {
+	BussinessUserType,
+	SectionSale,
+	SectionSaleGroup,
+} from "@/types/bussiness-user-types";
 import { SectionName } from "@/types/manage-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
@@ -11,6 +21,7 @@ import { Text, TouchableOpacity, View } from "react-native";
 import { SectinDetailRow } from "../info-components";
 import { Loading } from "../loading";
 import DeleteSectionSaleModal from "./delete-section-sale-modal";
+import EditSectionSaleModal from "./edit-section-sale-modal";
 
 type Props = {
 	sale: SectionSale | null;
@@ -21,6 +32,15 @@ type Props = {
 		React.SetStateAction<SectionSaleGroup[] | null>
 	>;
 	showBtns?: boolean;
+	editBussinessUserSection?: (
+		id: string,
+		userId: string,
+		form: Partial<SectionSale>,
+		bussinessUserType: BussinessUserType,
+	) => Promise<{
+		success: boolean;
+		errors: ParsedErrors<BussinessUserSectionEditFields>;
+	}>;
 };
 
 const SectionSaleCard = ({
@@ -29,6 +49,7 @@ const SectionSaleCard = ({
 	date,
 	section,
 	setSectionSales,
+	editBussinessUserSection,
 	showBtns = true,
 }: Props) => {
 	const section_summary = sale?.section_summary;
@@ -42,6 +63,7 @@ const SectionSaleCard = ({
 		bussinessUserType,
 	} = useBussinessUserDetailsContext();
 	const [open, setOpen] = useState(false);
+	const [openEditModal, setOpenEditModal] = useState(false);
 
 	if (!bussinessUserDetails) return;
 
@@ -206,6 +228,43 @@ const SectionSaleCard = ({
 							{changeSectionName(section_summary.section)}
 						</Text>
 						<View className="flex-row items-center justify-end gap-3">
+							{editBussinessUserSection &&
+								new Date(section_summary.date).toDateString() !==
+									new Date().toDateString() && (
+									<View
+										style={{
+											position: "relative",
+										}}
+									>
+										<TouchableOpacity
+											activeOpacity={0.85}
+											hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+											className="p-2.5"
+											onPress={() => setOpenEditModal(true)}
+										>
+											<AntDesign
+												name="edit"
+												color={"#4338ca"}
+												size={18}
+											/>
+
+											<View
+												style={{
+													position: "absolute",
+													top: -0,
+													bottom: -0,
+													left: -0,
+													right: -0,
+													borderWidth: 1,
+													borderColor: "#4338ca",
+													borderStyle: "dashed",
+													borderRadius: 4,
+												}}
+												pointerEvents="none"
+											/>
+										</TouchableOpacity>
+									</View>
+								)}
 							<View
 								style={{
 									position: "relative",
@@ -318,6 +377,16 @@ const SectionSaleCard = ({
 				handleDelete={handleDelete}
 				sectionName={sale.section_summary.section}
 			/>
+			{editBussinessUserSection && (
+				<EditSectionSaleModal
+					userId={userId}
+					onClose={() => setOpenEditModal(false)}
+					open={openEditModal}
+					sectionObj={sale}
+					bussinessUserType={bussinessUserType}
+					editBussinessUserSection={editBussinessUserSection}
+				/>
+			)}
 		</>
 	);
 };

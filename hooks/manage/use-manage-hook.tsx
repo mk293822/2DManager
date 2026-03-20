@@ -2,7 +2,12 @@ import { EVENT_NAMES } from "@/event-names";
 import { api } from "@/lib/api";
 import { calculateSectionSummary } from "@/lib/calculate-summary";
 import { eventBus } from "@/lib/event-bus";
-import { formatDateRequest, ParsedErrors, parseErrors } from "@/lib/helpers";
+import {
+	formatDateRequest,
+	ParsedErrors,
+	parseErrors,
+	upsertByDate,
+} from "@/lib/helpers";
 import {
 	SectionName,
 	SectionRange,
@@ -22,12 +27,14 @@ export type ManageHookType = {
 	onEditSave: (
 		form:
 			| {
+					draw_number: string | null;
+					draw_times: number;
 					total_amount: number;
 					total_commission: number;
 					total_resold: number;
+					total_resold_commission: number;
+					total_resold_draw_value: number;
 					total_draw_value: number;
-					draw_number: string;
-					draw_times: number;
 			  }
 			| {
 					draw_number: string;
@@ -53,25 +60,9 @@ export type SectionSummaryEditFields =
 	| "total_amount"
 	| "total_draw_value"
 	| "total_commission"
-	| "total_resold";
-
-function upsertByDate(
-	prev: SectionSummaries[] | null,
-	newDay: SectionSummaries,
-) {
-	if (!prev) return [newDay];
-	const idx = prev.findIndex((d) => d.date === newDay.date);
-	if (idx !== -1) {
-		const newSections = [...prev];
-		newSections[idx] = newDay;
-		return newSections.sort(
-			(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-		);
-	}
-	return [...prev, newDay].sort(
-		(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-	);
-}
+	| "total_resold"
+	| "total_resold_commission"
+	| "total_resold_draw_value";
 
 const useManageHook = (): ManageHookType => {
 	const [sections, setSections] = useState<SectionSummaries[] | null>(null);
@@ -144,7 +135,7 @@ const useManageHook = (): ManageHookType => {
 				section: section,
 				date: formatDateRequest(date),
 			});
-			setSections((prev) => upsertByDate(prev, data));
+			setSections((prev) => upsertByDate<SectionSummaries>(prev, data));
 		} catch {
 			setError("Failed to create section");
 		}
@@ -153,12 +144,14 @@ const useManageHook = (): ManageHookType => {
 	const onEditSave = async (
 		form:
 			| {
+					draw_number: string | null;
+					draw_times: number;
 					total_amount: number;
 					total_commission: number;
 					total_resold: number;
+					total_resold_commission: number;
+					total_resold_draw_value: number;
 					total_draw_value: number;
-					draw_number: string;
-					draw_times: number;
 			  }
 			| {
 					draw_number: string;
