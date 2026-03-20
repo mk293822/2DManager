@@ -6,6 +6,7 @@ import TwoDResultCard from "@/components/two-d-lists/two-d-result-card";
 import { useBlink } from "@/hooks/use-blink";
 import useFetchLiveTwoD from "@/hooks/use-fetch-live-two-d";
 import { getTwoDResultTime, toSeconds } from "@/lib/get-twod-result-time";
+import { formatTimeIntl } from "@/lib/helpers";
 import { TwoDHistoryItem } from "@/types/two-d-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Tabs, useRouter } from "expo-router";
@@ -87,11 +88,24 @@ export default function Index() {
 								<Text className="ml-2 text-gray-600 font-semibold">
 									Updated:
 								</Text>
-								<Text className="ml-1 text-green-600 font-semibold">
-									{isBlinking
-										? liveData.live?.time
-										: mainResult?.stock_datetime}
-								</Text>
+								<View className="flex-row items-center justify-center">
+									<Text className="ml-1 text-green-600 font-semibold">
+										{isBlinking
+											? liveData.live?.time.split(" ")[0]
+											: mainResult?.stock_datetime.split(" ")[0]}
+									</Text>
+									<Text
+										className="ml-1 text-green-600 font-semibold"
+										style={style}
+									>
+										{formatTimeIntl(
+											isBlinking
+												? liveData.live?.time.split(" ")[1]
+												: mainResult?.stock_datetime.split(" ")[1],
+											true,
+										)}
+									</Text>
+								</View>
 							</View>
 						</View>
 

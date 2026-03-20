@@ -1,6 +1,6 @@
 import { Loading } from "@/components/loading";
 import useFetchLiveTwoD from "@/hooks/use-fetch-live-two-d";
-import { formatTimeIntl } from "@/lib/helpers";
+import { formatDateDisplay, formatTimeIntl } from "@/lib/helpers";
 import { TwoDData } from "@/types/two-d-types";
 import React, { useState } from "react";
 import { FlatList, RefreshControl, Text, View } from "react-native";
@@ -56,10 +56,12 @@ const ResultsHistory = () => {
 
 	// render each date section
 	const renderSection = ({ item }: { item: TwoDData }) => (
-		<View className="mb-6 w-full">
+		<View className="mb-4 w-full">
 			{/* Date Header */}
 			<View className="bg-indigo-900/70 px-4 py-2 rounded-t-xl">
-				<Text className="text-white font-semibold text-sm">📅 {item.date}</Text>
+				<Text className="text-white font-semibold text-sm">
+					📅 {formatDateDisplay(new Date(item.date))}
+				</Text>
 			</View>
 
 			{/* Result Card */}

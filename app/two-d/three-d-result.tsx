@@ -3,6 +3,7 @@ import { EVENT_NAMES } from "@/event-names";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { three_d_api } from "@/lib/api";
 import { eventBus } from "@/lib/event-bus";
+import { formatDateDisplay } from "@/lib/helpers";
 import type {
 	ThreeDResultItem,
 	ThreeDResultResponse,
@@ -63,7 +64,7 @@ const ThreeDResult = () => {
 
 			<View className="mt-4 pt-3 border-t border-gray-200">
 				<Text className="text-sm text-center text-gray-500">
-					{item.datetime}
+					{formatDateDisplay(new Date(item.datetime))}
 				</Text>
 			</View>
 		</View>

@@ -75,8 +75,16 @@ const History = () => {
 						color={isBlinking ? "#6b7280" : "#16a34a"}
 					/>
 					<Text className="text-sm text-gray-600">
-						Updated{" "}
-						{isBlinking ? data.liveData.live?.time : mainResult?.stock_datetime}
+						Updated:{" "}
+						{isBlinking
+							? data.liveData.live?.time.split(" ")[0]
+							: mainResult?.stock_datetime.split(" ")[0]}{" "}
+						{formatTimeIntl(
+							isBlinking
+								? data.liveData.live?.time.split(" ")[1]
+								: mainResult?.stock_datetime.split(" ")[1],
+							true,
+						)}
 					</Text>
 				</View>
 			</View>

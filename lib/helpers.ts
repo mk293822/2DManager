@@ -21,7 +21,10 @@ export const formatSmartNumber = (num: number | string) => {
 
 export const formatKs = (num: number) => `${num.toLocaleString()} Ks`;
 
-export function formatTimeIntl(time: string = "00:00:00"): string {
+export function formatTimeIntl(
+	time: string = "00:00:00",
+	showSecond: boolean = false,
+): string {
 	// Split time into parts
 	const [hh, mm, ss] = time.split(":").map(Number);
 
@@ -30,7 +33,7 @@ export function formatTimeIntl(time: string = "00:00:00"): string {
 	const ampm = hh < 12 || hh === 24 ? "AM" : "PM";
 	const minute = String(mm).padStart(2, "0");
 
-	return `${hour12}:${minute} ${ampm}`;
+	return `${hour12}:${minute}${showSecond ? ":" + ss.toString() : ""} ${ampm}`;
 }
 
 export const formatDateDisplay = (date: Date) => {
