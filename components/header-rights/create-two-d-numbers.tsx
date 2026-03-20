@@ -24,10 +24,9 @@ const CreateTwoDNumbersHeaderRight = ({
 				}}
 				onPress={() =>
 					router.push({
-						pathname: "/bussiness-user-details/bussiness-user-two-d-list/[id]",
+						pathname:
+							"/bussiness-user-details/bussiness-user-two-d-list/[section]",
 						params: {
-							id: id,
-							user_name: user_name,
 							section: section,
 						},
 					})

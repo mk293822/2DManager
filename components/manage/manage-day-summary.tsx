@@ -3,7 +3,7 @@ import { ParsedErrors } from "@/lib/helpers";
 import { SectionName, SectionSummaries } from "@/types/manage-types";
 import React from "react";
 import DaySectionCard from "./day-section-card";
-import DaySummaryCard from "./day-summary-card";
+import SummaryCard from "./summary-card";
 
 const ManageDaySummary = ({
 	sections,
@@ -39,7 +39,8 @@ const ManageDaySummary = ({
 	if (!sections) return null;
 	return (
 		<>
-			<DaySummaryCard
+			<SummaryCard
+				type="day"
 				summary={sections.summary}
 				date={sections.date}
 			/>

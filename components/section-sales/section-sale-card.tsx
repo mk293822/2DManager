@@ -20,6 +20,7 @@ type Props = {
 	setSectionSales: React.Dispatch<
 		React.SetStateAction<SectionSaleGroup[] | null>
 	>;
+	showBtns?: boolean;
 };
 
 const SectionSaleCard = ({
@@ -28,6 +29,7 @@ const SectionSaleCard = ({
 	date,
 	section,
 	setSectionSales,
+	showBtns = true,
 }: Props) => {
 	const section_summary = sale?.section_summary;
 	const [loading, setLoading] = useState(false);
@@ -259,7 +261,7 @@ const SectionSaleCard = ({
 						</Text>
 					</View>
 
-					{date.toDateString() === new Date().toDateString() && (
+					{showBtns && date.toDateString() === new Date().toDateString() && (
 						<View className="flex-row items-center gap-2 w-full">
 							<TouchableOpacity
 								activeOpacity={0.85}
@@ -267,10 +269,8 @@ const SectionSaleCard = ({
 								onPress={() =>
 									router.push({
 										pathname:
-											"/bussiness-user-details/bussiness-user-two-d-list/[id]",
+											"/bussiness-user-details/bussiness-user-two-d-list/[section]",
 										params: {
-											id: String(sale.id),
-											user_name: bussinessUserDetails?.name ?? "",
 											section: section,
 										},
 									})

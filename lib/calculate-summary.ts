@@ -13,7 +13,7 @@ function sum(a?: number, b?: number): number {
 // Section Summary
 /////////////////////////
 
-const SectionNumericFields: (keyof SectionSummary)[] = [
+export const SectionNumericFields: (keyof SectionSummary)[] = [
 	"total_amount",
 	"total_commission",
 	"total_draw_amount",
@@ -45,7 +45,7 @@ export function calculateSectionSummary(
 // SectionSale Summary
 /////////////////////////
 
-const SectionSaleNumericFields: (keyof SectionSaleSummary)[] = [
+export const SectionSaleNumericFields: (keyof SectionSaleSummary)[] = [
 	"total_amount",
 	"total_commission",
 	"profit_or_loss",

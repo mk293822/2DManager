@@ -2,6 +2,7 @@
 import UserTwoDListHeaderRight from "@/components/header-rights/user-two-d-list";
 import { Loading } from "@/components/loading";
 import PageWrapper from "@/components/page-wrapper";
+import { useBussinessUserDetailsContext } from "@/hooks/bussiness-user-details/use-context";
 import { useTwoDListsContext } from "@/hooks/two-d-list/use-two-d-list-context";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { ENGLISH_TO_BURMESE_MAP } from "@/lib/custom-keyboard-helper";
@@ -14,27 +15,27 @@ import { FlatList, RefreshControl, Text, View } from "react-native";
 const UserTwoDList = () => {
 	const { twoDList, fetchTwoDListBySectionSale, loading, error } =
 		useTwoDListsContext();
-	const { id, user_name, section } = useLocalSearchParams<{
-		id: string;
-		user_name: string;
+	const { bussinessUserDetails } = useBussinessUserDetailsContext();
+	const { section } = useLocalSearchParams<{
 		section: SectionName;
 	}>();
+	const sectionSale = bussinessUserDetails?.section_sales[section];
 	const [refreshing, setRefreshing] = useState(false);
 
 	useAbortableEffect(
 		(signal) => {
-			if (id) fetchTwoDListBySectionSale(signal, id);
+			if (sectionSale?.id) fetchTwoDListBySectionSale(signal, sectionSale.id);
 		},
-		[id],
+		[sectionSale],
 	);
 
 	if (loading) return <Loading />;
 
-	if (!id || !section || !twoDList) {
+	if (!sectionSale?.id || !section || !twoDList) {
 		return (
 			<View className="flex-1 items-center justify-center bg-white p-4">
 				<Text className="text-red-600 font-semibold text-center mb-4">
-					User not found or invalid ID.
+					Section not found or invalid Section.
 				</Text>
 			</View>
 		);
@@ -43,9 +44,9 @@ const UserTwoDList = () => {
 	const onRefresh = async () => {
 		const controller = new AbortController();
 
-		if (!id) return;
+		if (!sectionSale?.id) return;
 		setRefreshing(true);
-		await fetchTwoDListBySectionSale(controller.signal, id);
+		await fetchTwoDListBySectionSale(controller.signal, sectionSale.id);
 		setRefreshing(false);
 	};
 
@@ -90,57 +91,96 @@ const UserTwoDList = () => {
 		);
 	};
 
-	const renderTwoDItem = ({ item }: { item: TwoDListType }) => (
-		<View
-			key={item.id}
-			className="mb-6 bg-white rounded-2xl px-4 py-4 shadow"
-			style={{
-				shadowColor: "#000",
-				shadowOffset: { width: 0, height: 3 },
-				shadowOpacity: 0.1,
-				shadowRadius: 6,
-				elevation: 3,
-			}}
-		>
-			<Text className="text-gray-500 text-md mb-4 text-center">
-				Created: {new Date(item.created_at).toLocaleTimeString()}
-			</Text>
+	const renderTwoDItem = ({ item }: { item: TwoDListType }) => {
+		const drawTimes = sectionSale.section_summary.draw_times;
+		const totalDrawAmount = item.total_draw_value * drawTimes;
+		const balance = item.total_amount - totalDrawAmount;
 
-			{item.numbers_data.map((val, ind) => (
-				<View
-					key={ind}
-					className="mb-3 rounded-2xl bg-gray-200 p-3 shadow-sm"
-				>
-					<View className="flex-row items-center justify-between">
-						{renderNumberBox(val)}
-						<View className="flex-row items-center gap-3">
-							{renderAmountBox(val.amount1)}
+		return (
+			<View
+				key={item.id}
+				className="mb-6 bg-white rounded-2xl px-4 py-4 shadow"
+				style={{
+					shadowColor: "#000",
+					shadowOffset: { width: 0, height: 3 },
+					shadowOpacity: 0.1,
+					shadowRadius: 6,
+					elevation: 3,
+				}}
+			>
+				<Text className="text-gray-500 text-md mb-4 text-center">
+					Created: {new Date(item.created_at).toLocaleTimeString()}
+				</Text>
 
-							{val.amount1 != null &&
-								val.amount2 != null &&
-								val.amount2 !== 0 && (
-									<View className="h-6 w-[1px] border-r border-gray-400" />
-								)}
+				{item.numbers_data.map((val, ind) => (
+					<View
+						key={ind}
+						className="mb-3 rounded-2xl bg-gray-200 p-3 shadow-sm"
+					>
+						<View className="flex-row items-center justify-between">
+							{renderNumberBox(val)}
+							<View className="flex-row items-center gap-3">
+								{renderAmountBox(val.amount1)}
 
-							{val.amount2 != null &&
-								val.amount2 !== 0 &&
-								renderAmountBox(val.amount2)}
+								{val.amount1 != null &&
+									val.amount2 != null &&
+									val.amount2 !== 0 && (
+										<View className="h-6 w-[1px] border-r border-gray-400" />
+									)}
+
+								{val.amount2 != null &&
+									val.amount2 !== 0 &&
+									renderAmountBox(val.amount2)}
+							</View>
 						</View>
 					</View>
-				</View>
-			))}
-		</View>
-	);
+				))}
 
+				{/* Voucher-style summary */}
+				<View className="mt-4 bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-sm">
+					{/* Total Amount */}
+					<View className="flex-row justify-between mb-1">
+						<Text className="text-gray-600 font-semibold">Total Amount:</Text>
+						<Text className="text-gray-800 font-bold">
+							{item.total_amount.toLocaleString()}
+						</Text>
+					</View>
+
+					{/* Total Draw Amount with multiplication */}
+					<View className="flex-row justify-between mb-1">
+						<Text className="text-gray-600 font-semibold">
+							Total Draw Amount:
+						</Text>
+						<Text className="text-red-600 font-bold">
+							{item.total_draw_value.toLocaleString()} × {drawTimes} ={" "}
+							{totalDrawAmount.toLocaleString()}
+						</Text>
+					</View>
+
+					<View className="border-t border-dashed border-gray-400 my-2" />
+
+					{/* Balance */}
+					<View className="flex-row justify-between">
+						<Text className="text-gray-600 font-semibold">Balance:</Text>
+						<Text
+							className={`${balance > 0 ? "text-green-600" : "text-red-600"} font-bold`}
+						>
+							{balance.toLocaleString()}
+						</Text>
+					</View>
+				</View>
+			</View>
+		);
+	};
 	return (
 		<>
 			<Stack.Screen
 				options={{
-					headerTitle: user_name || "User",
+					headerTitle: bussinessUserDetails?.name || "User",
 					headerRight: () => (
 						<UserTwoDListHeaderRight
-							id={id}
-							user_name={user_name}
+							id={sectionSale?.id}
+							user_name={bussinessUserDetails?.name ?? "User"}
 							section={section}
 						/>
 					),

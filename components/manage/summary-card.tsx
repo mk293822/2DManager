@@ -1,5 +1,5 @@
-import { formatDateDisplay, formatKs } from "@/lib/helpers";
-import { SectionSaleSummary } from "@/types/bussiness-user-types";
+import { formatDateDisplay, formatKs, getTotalArray } from "@/lib/helpers";
+import { SectionSummary } from "@/types/manage-types";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
@@ -8,7 +8,7 @@ import { Text, TouchableOpacity, View } from "react-native";
 /////////////////////////
 
 type BaseProps = {
-	summary: SectionSaleSummary;
+	summary: SectionSummary;
 };
 
 type DayProps = BaseProps & {
@@ -28,7 +28,7 @@ type Props = DayProps | WeekProps;
 // Component
 /////////////////////////
 
-const SectionSummaryCard = (props: Props) => {
+const SummaryCard = (props: Props) => {
 	const { summary } = props;
 
 	const isWeek = props.type === "week";
@@ -67,33 +67,15 @@ const SectionSummaryCard = (props: Props) => {
 			)}
 
 			{/* Summary List */}
-			<View className="flex-row justify-between py-2 border-b border-gray-100">
-				<Text className="text-gray-600">Total Sold</Text>
-				<Text className="font-semibold">
-					{formatKs(summary.total_amount ?? 0)}
-				</Text>
-			</View>
-
-			<View className="flex-row justify-between py-2 border-b border-gray-100">
-				<Text className="text-gray-600">Total Commission</Text>
-				<Text className="font-semibold">
-					{formatKs(summary.total_commission ?? 0)}
-				</Text>
-			</View>
-
-			<View className="flex-row justify-between py-2 border-b border-gray-100">
-				<Text className="text-gray-600">Total Draw Value</Text>
-				<Text className="font-semibold">
-					{formatKs(summary.total_draw_value ?? 0)}
-				</Text>
-			</View>
-
-			<View className="flex-row justify-between py-2 border-b border-gray-100">
-				<Text className="text-gray-600">Total Draw Amount</Text>
-				<Text className="font-semibold">
-					{formatKs(summary.total_draw_amount ?? 0)}
-				</Text>
-			</View>
+			{getTotalArray(summary).map(([label, value]) => (
+				<View
+					key={label}
+					className="flex-row justify-between py-2 border-b border-gray-100"
+				>
+					<Text className="text-gray-600">{label}</Text>
+					<Text className="font-semibold">{formatKs(value ?? 0)}</Text>
+				</View>
+			))}
 
 			{/* Profit / Loss */}
 			<View className="flex-row justify-between pt-3">
@@ -110,4 +92,4 @@ const SectionSummaryCard = (props: Props) => {
 	);
 };
 
-export default SectionSummaryCard;
+export default SummaryCard;

@@ -142,6 +142,7 @@ const BussinessUserPage = () => {
 			case "sectionSales":
 				return (
 					<SectionSaleList
+						showBtns
 						sales={bussinessUserDetails.section_sales}
 						userId={id}
 						setSectionSales={() => {}}

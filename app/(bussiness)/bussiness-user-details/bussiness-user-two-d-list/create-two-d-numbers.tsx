@@ -21,7 +21,13 @@ import {
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Stack, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
-import { FlatList, Text, TouchableOpacity, View } from "react-native";
+import {
+	ActivityIndicator,
+	FlatList,
+	Text,
+	TouchableOpacity,
+	View,
+} from "react-native";
 
 const CreateTwoDNumbersPage = () => {
 	const {
@@ -34,7 +40,8 @@ const CreateTwoDNumbersPage = () => {
 	const section_sale = user?.section_sales?.[section];
 
 	const [list, setList] = useState<NumberItem[] | null>(null);
-	const { handleCreateTwoDList } = useTwoDListsContext();
+	const { handleCreateTwoDList, loading: createLoading } =
+		useTwoDListsContext();
 
 	const [twoDValue, setTwoDValue] = useState<string>("");
 	const [amount1Value, setAmount1Value] = useState<string>("");
@@ -226,17 +233,29 @@ const CreateTwoDNumbersPage = () => {
 							{list && list.length > 0 && (
 								<TouchableOpacity
 									onPress={handleAdd}
+									disabled={createLoading}
 									activeOpacity={0.85}
-									className="bg-indigo-600 py-3 rounded-xl shadow flex-row gap-2 items-center justify-center"
+									className="bg-indigo-600 py-3 rounded-xl shadow flex-row items-center justify-center"
 								>
-									<AntDesign
-										name="plus"
-										color="#fff"
-										size={15}
-									/>
-									<Text className="text-white font-semibold text-center">
-										Add
-									</Text>
+									{createLoading ? (
+										<View className="items-center justify-center">
+											<ActivityIndicator
+												size={20}
+												color="#fff"
+											/>
+										</View>
+									) : (
+										<View className="flex-row items-center justify-center gap-2">
+											<AntDesign
+												name="plus"
+												color="#fff"
+												size={15}
+											/>
+											<Text className="text-white font-semibold text-center">
+												Add
+											</Text>
+										</View>
+									)}
 								</TouchableOpacity>
 							)}
 						</View>

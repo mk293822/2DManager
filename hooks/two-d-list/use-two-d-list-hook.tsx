@@ -137,6 +137,7 @@ const useTwoDListHook = (numberType: NumberType): TwoDListHookType => {
 		userId: string,
 	) => {
 		try {
+			setLoading(true);
 			const endpoint =
 				numberType === "sold_number" ? "sold-numbers" : "resold-numbers";
 			const { data } = await api.post<TwoDListType>(
@@ -176,6 +177,8 @@ const useTwoDListHook = (numberType: NumberType): TwoDListHookType => {
 			await fetchBussinessUserDetails(abortController.signal, userId, false);
 		} catch {
 			setError("Failed to create two d list");
+		} finally {
+			setLoading(false);
 		}
 	};
 

@@ -45,6 +45,8 @@ export type TwoDListType = {
 	numbers_data: NumberItem[];
 	created_at: string;
 	updated_at: string;
+	total_amount: number;
+	total_draw_value: number;
 };
 
 export type TwoDListGroup = {

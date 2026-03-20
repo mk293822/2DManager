@@ -11,9 +11,15 @@ type Props = {
 	setSectionSales: React.Dispatch<
 		React.SetStateAction<SectionSaleGroup[] | null>
 	>;
+	showBtns?: boolean;
 };
 
-const SectionSaleList = ({ sales, userId, setSectionSales }: Props) => {
+const SectionSaleList = ({
+	sales,
+	userId,
+	setSectionSales,
+	showBtns = true,
+}: Props) => {
 	const date = new Date(sales.date);
 	const sectionList: SectionName[] = ["morning_section", "evening_section"];
 
@@ -21,12 +27,14 @@ const SectionSaleList = ({ sales, userId, setSectionSales }: Props) => {
 		<View>
 			<View>
 				<SectionSummaryCard
+					type="day"
 					summary={sales.summary}
 					date={sales.date}
 				/>
 			</View>
 			{sectionList.map((sec) => (
 				<SectionSaleCard
+					showBtns={showBtns}
 					setSectionSales={setSectionSales}
 					key={sec}
 					sale={sales[sec]}

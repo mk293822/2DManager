@@ -1,3 +1,4 @@
+import { calculateWeekSectionSummary } from "@/lib/calculate-week-summary";
 import { formatDateDisplay } from "@/lib/helpers";
 import {
 	RangeMode,
@@ -7,7 +8,7 @@ import {
 } from "@/types/manage-types";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
-import DaySummaryCard from "./day-summary-card";
+import SummaryCard from "./summary-card";
 
 /* ===== Week Summary ===== */
 const ManageWeekSummary = ({
@@ -36,8 +37,14 @@ const ManageWeekSummary = ({
 		);
 	}
 
+	const weekSummary = calculateWeekSectionSummary(sections);
+
 	return (
 		<>
+			<SummaryCard
+				summary={weekSummary}
+				type="week"
+			/>
 			{sections.map((section, idx) => {
 				const { summary, morning_section, evening_section } = section;
 				const date = new Date(section.date);
@@ -77,7 +84,8 @@ const ManageWeekSummary = ({
 				}
 
 				return (
-					<DaySummaryCard
+					<SummaryCard
+						type="day"
 						key={idx}
 						summary={summary}
 						date={section.date}

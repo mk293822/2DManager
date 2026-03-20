@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
 import AppModal from "./ui/app-modal";
 
@@ -69,8 +69,17 @@ export default function DateWeekPickerModal({
 	const weeks = Array.from({ length: weeksInMonth }, (_, i) => i + 1);
 
 	// Fix overflow
-	if (day > daysInMonth) setDay(daysInMonth);
-	if (week > weeksInMonth) setWeek(weeksInMonth);
+	useEffect(() => {
+		if (day > daysInMonth) {
+			setDay(daysInMonth);
+		}
+	}, [day, daysInMonth]);
+
+	useEffect(() => {
+		if (week > weeksInMonth) {
+			setWeek(weeksInMonth);
+		}
+	}, [week, weeksInMonth]);
 
 	const renderColumn = (
 		data: number[],

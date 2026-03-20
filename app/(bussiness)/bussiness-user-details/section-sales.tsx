@@ -109,6 +109,7 @@ const SectionSales = () => {
 				if (rangeMode === "day" && bussinessUserDetails) {
 					return (
 						<SectionSaleList
+							showBtns={false}
 							sales={sectionSales[0]}
 							setSectionSales={setSectionSales}
 							userId={id}

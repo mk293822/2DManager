@@ -1,3 +1,4 @@
+import { calculateWeekSectionSaleSummary } from "@/lib/calculate-week-summary";
 import { formatDateDisplay } from "@/lib/helpers";
 import { SectionSaleGroup } from "@/types/bussiness-user-types";
 import { RangeMode, SectionRange } from "@/types/manage-types";
@@ -32,8 +33,14 @@ const WeekSectionSaleList = ({
 		);
 	}
 
+	const weekSummary = calculateWeekSectionSaleSummary(sectionSales);
+
 	return (
 		<>
+			<SectionSummaryCard
+				type="week"
+				summary={weekSummary}
+			/>
 			{sectionSales.map((section, idx) => {
 				const { summary, morning_section, evening_section } = section;
 				const date = new Date(section.date);
@@ -74,6 +81,7 @@ const WeekSectionSaleList = ({
 
 				return (
 					<SectionSummaryCard
+						type="day"
 						key={idx}
 						summary={summary}
 						date={section.date}
