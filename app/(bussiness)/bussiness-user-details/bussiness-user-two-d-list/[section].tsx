@@ -92,7 +92,7 @@ const UserTwoDList = () => {
 	};
 
 	const renderTwoDItem = ({ item }: { item: TwoDListType }) => {
-		const drawTimes = sectionSale.section_summary.draw_times;
+		const drawTimes = sectionSale.draw_times;
 		const totalDrawAmount = item.total_draw_value * drawTimes;
 		const balance = totalDrawAmount - item.total_amount;
 

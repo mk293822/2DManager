@@ -6,7 +6,6 @@ import PageWrapper from "@/components/page-wrapper";
 import SectionSaleList from "@/components/section-sales/section-sale-list";
 import WeekSectionSaleList from "@/components/section-sales/week-section-sale-list";
 import { useBussinessUserDetailsContext } from "@/hooks/bussiness-user-details/use-context";
-import useSectionSalesHook from "@/hooks/section-sales/use-section-sale-hook";
 import { useAbortableEffect } from "@/hooks/use-abortable-effect";
 import { getWeekOfMonth } from "@/lib/helpers";
 import { RangeMode, SectionRange } from "@/types/manage-types";
@@ -21,16 +20,15 @@ const SectionSales = () => {
 	const [rangeMode, setRangeMode] = useState<RangeMode>("day");
 
 	const {
+		bussinessUserDetails,
+		bussinessUserType,
 		fetchSectionSales,
 		sectionSales,
 		loading,
 		error,
 		setError,
-		setSectionSales,
 		editBussinessUserSection,
-	} = useSectionSalesHook();
-	const { bussinessUserDetails, bussinessUserType } =
-		useBussinessUserDetailsContext();
+	} = useBussinessUserDetailsContext();
 
 	const date = new Date();
 	const [selectedSectionRange, setSelectedSectionRange] =
@@ -113,7 +111,6 @@ const SectionSales = () => {
 							editBussinessUserSection={editBussinessUserSection}
 							showBtns={false}
 							sales={sectionSales[0]}
-							setSectionSales={setSectionSales}
 							userId={id}
 						/>
 					);

@@ -107,7 +107,7 @@ const CreateTwoDNumbersPage = () => {
 		await handleCreateTwoDList(
 			section_sale.id,
 			list,
-			section_sale.section_summary.id,
+			section_sale.section_summary_id,
 			user.id,
 			section,
 			user.id,

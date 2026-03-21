@@ -1,18 +1,13 @@
 import { useBussinessUserDetailsContext } from "@/hooks/bussiness-user-details/use-context";
+import { BussinessUserSectionEditFields } from "@/hooks/bussiness-user-details/use-user-details-hook";
 import { useManageContext } from "@/hooks/manage/use-manage-context";
-import { BussinessUserSectionEditFields } from "@/hooks/section-sales/use-section-sale-hook";
-import { calculateSectionSaleSummary } from "@/lib/calculate-summary";
 import {
 	changeSectionName,
 	formatKs,
 	formatSmartNumber,
 	ParsedErrors,
 } from "@/lib/helpers";
-import {
-	BussinessUserType,
-	SectionSale,
-	SectionSaleGroup,
-} from "@/types/bussiness-user-types";
+import { BussinessUserType, SectionSale } from "@/types/bussiness-user-types";
 import { SectionName } from "@/types/manage-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
@@ -28,11 +23,8 @@ type Props = {
 	userId: string;
 	date: Date;
 	section: SectionName;
-	setSectionSales: React.Dispatch<
-		React.SetStateAction<SectionSaleGroup[] | null>
-	>;
 	showBtns?: boolean;
-	editBussinessUserSection?: (
+	editBussinessUserSection: (
 		id: string,
 		userId: string,
 		form: Partial<SectionSale>,
@@ -48,11 +40,9 @@ const SectionSaleCard = ({
 	userId,
 	date,
 	section,
-	setSectionSales,
 	editBussinessUserSection,
 	showBtns = true,
 }: Props) => {
-	const section_summary = sale?.section_summary;
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
 	const { fetchSection, sections } = useManageContext();
@@ -67,10 +57,10 @@ const SectionSaleCard = ({
 
 	if (!bussinessUserDetails) return;
 
-	if (!sale || !section_summary) {
+	if (!sale) {
 		const handleCreate = async () => {
 			const abortController = new AbortController();
-			const data = await createBussinessUserSection(
+			await createBussinessUserSection(
 				userId,
 				section,
 				bussinessUserType,
@@ -80,36 +70,6 @@ const SectionSaleCard = ({
 				fetchSection(abortController.signal, {
 					type: "day",
 					date: date,
-				});
-
-			if (data)
-				setSectionSales((prev) => {
-					if (!prev) return [data]; // initial state
-					return prev.map((group) => {
-						if (new Date(group.date).toDateString() === date.toDateString()) {
-							return {
-								...group,
-								morning_section:
-									section === "morning_section"
-										? data.morning_section
-										: group.morning_section,
-								evening_section:
-									section === "evening_section"
-										? data.evening_section
-										: group.evening_section,
-								summary: calculateSectionSaleSummary(
-									section === "morning_section"
-										? data.morning_section
-										: group.morning_section,
-									section === "evening_section"
-										? data.evening_section
-										: group.evening_section,
-								),
-							};
-						}
-
-						return group; // leave others untouched
-					});
 				});
 		};
 		return (
@@ -160,15 +120,15 @@ const SectionSaleCard = ({
 		},
 		{
 			label: "Draw Number",
-			value: section_summary.draw_number
-				? section_summary.draw_number !== ""
-					? section_summary.draw_number
+			value: sale.draw_number
+				? sale.draw_number !== ""
+					? sale.draw_number
 					: "--"
 				: "--",
 		},
 		{
 			label: "Draw Times",
-			value: `x ${section_summary.draw_times}`,
+			value: `x ${sale.draw_times}`,
 		},
 	];
 
@@ -180,35 +140,12 @@ const SectionSaleCard = ({
 				userId,
 				section,
 				bussinessUserType,
+				date.toDateString(),
 			);
 			const abortController = new AbortController();
 			fetchSection(abortController.signal, {
 				type: "day",
 				date: date,
-			});
-			setSectionSales((pre) => {
-				if (!pre) return pre;
-
-				return pre.map((s) => {
-					const morning =
-						s.morning_section && s.morning_section.id === sale.id
-							? null
-							: s.morning_section;
-
-					const evening =
-						s.evening_section && s.evening_section.id === sale.id
-							? null
-							: s.evening_section;
-
-					const summary = calculateSectionSaleSummary(morning, evening);
-
-					return {
-						...s,
-						morning_section: morning,
-						evening_section: evening,
-						summary,
-					};
-				});
 			});
 		} finally {
 			setOpen(false);
@@ -225,46 +162,43 @@ const SectionSaleCard = ({
 					{/* Header */}
 					<View className="flex-row justify-between items-center mb-2">
 						<Text className="text-indigo-700 font-extrabold text-xl">
-							{changeSectionName(section_summary.section)}
+							{changeSectionName(section)}
 						</Text>
 						<View className="flex-row items-center justify-end gap-3">
-							{editBussinessUserSection &&
-								new Date(section_summary.date).toDateString() !==
-									new Date().toDateString() && (
+							<View
+								style={{
+									position: "relative",
+								}}
+							>
+								<TouchableOpacity
+									activeOpacity={0.85}
+									hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+									className="p-2.5"
+									onPress={() => setOpenEditModal(true)}
+								>
+									<AntDesign
+										name="edit"
+										color={"#4338ca"}
+										size={18}
+									/>
+
 									<View
 										style={{
-											position: "relative",
+											position: "absolute",
+											top: -0,
+											bottom: -0,
+											left: -0,
+											right: -0,
+											borderWidth: 1,
+											borderColor: "#4338ca",
+											borderStyle: "dashed",
+											borderRadius: 4,
 										}}
-									>
-										<TouchableOpacity
-											activeOpacity={0.85}
-											hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-											className="p-2.5"
-											onPress={() => setOpenEditModal(true)}
-										>
-											<AntDesign
-												name="edit"
-												color={"#4338ca"}
-												size={18}
-											/>
+										pointerEvents="none"
+									/>
+								</TouchableOpacity>
+							</View>
 
-											<View
-												style={{
-													position: "absolute",
-													top: -0,
-													bottom: -0,
-													left: -0,
-													right: -0,
-													borderWidth: 1,
-													borderColor: "#4338ca",
-													borderStyle: "dashed",
-													borderRadius: 4,
-												}}
-												pointerEvents="none"
-											/>
-										</TouchableOpacity>
-									</View>
-								)}
 							<View
 								style={{
 									position: "relative",
@@ -375,18 +309,18 @@ const SectionSaleCard = ({
 				open={open}
 				onClose={() => setOpen(false)}
 				handleDelete={handleDelete}
-				sectionName={sale.section_summary.section}
+				sectionName={section}
 			/>
-			{editBussinessUserSection && (
-				<EditSectionSaleModal
-					userId={userId}
-					onClose={() => setOpenEditModal(false)}
-					open={openEditModal}
-					sectionObj={sale}
-					bussinessUserType={bussinessUserType}
-					editBussinessUserSection={editBussinessUserSection}
-				/>
-			)}
+
+			<EditSectionSaleModal
+				date={date}
+				userId={userId}
+				onClose={() => setOpenEditModal(false)}
+				open={openEditModal}
+				sectionObj={sale}
+				bussinessUserType={bussinessUserType}
+				editBussinessUserSection={editBussinessUserSection}
+			/>
 		</>
 	);
 };

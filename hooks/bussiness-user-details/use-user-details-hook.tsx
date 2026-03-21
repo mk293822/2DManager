@@ -2,13 +2,20 @@ import { EVENT_NAMES } from "@/event-names";
 import { api } from "@/lib/api";
 import { calculateSectionSaleSummary } from "@/lib/calculate-summary";
 import { eventBus } from "@/lib/event-bus";
-import { formatDateRequest, ParsedErrors, parseErrors } from "@/lib/helpers";
+import {
+	formatDateRequest,
+	isToday,
+	ParsedErrors,
+	parseErrors,
+	upsertByDate,
+} from "@/lib/helpers";
 import {
 	BussinessUser,
 	BussinessUserType,
+	SectionSale,
 	SectionSaleGroup,
 } from "@/types/bussiness-user-types";
-import { SectionName } from "@/types/manage-types";
+import { SectionName, SectionRange } from "@/types/manage-types";
 import { useRef, useState } from "react";
 import { useBussinessUserContext } from "../bussiness-users/use-context";
 
@@ -36,7 +43,7 @@ export type BussinessUserDetailsHookType = {
 		section: SectionName,
 		bussinessUserType: BussinessUserType,
 		date?: Date,
-	) => Promise<SectionSaleGroup | null | undefined>;
+	) => Promise<void>;
 	editBussinessUserDetails: (
 		id: string,
 		form: Partial<BussinessUser>,
@@ -50,11 +57,34 @@ export type BussinessUserDetailsHookType = {
 		bussinessUserId: string,
 		section: SectionName,
 		bussinessUserType: BussinessUserType,
+		date: string,
 	) => Promise<void>;
 	setError: React.Dispatch<React.SetStateAction<string | null>>;
-
 	bussinessUserType: BussinessUserType;
+	fetchSectionSales: (
+		signal: AbortSignal,
+		id: string,
+		sectionRange: SectionRange,
+		bussinessUserType: BussinessUserType,
+		showLoading?: boolean,
+	) => Promise<void>;
+	sectionSales: SectionSaleGroup[] | null;
+	editBussinessUserSection: (
+		id: string,
+		userId: string,
+		form: Partial<SectionSale>,
+		bussinessUserType: BussinessUserType,
+	) => Promise<{
+		success: boolean;
+		errors: ParsedErrors<BussinessUserSectionEditFields>;
+	}>;
 };
+
+export type BussinessUserSectionEditFields =
+	| "commission_percent"
+	| "total_amount"
+	| "total_draw_value"
+	| "draw_times";
 
 // Custom hook to manage bussiness user details
 const useBussinessUserDetailsHook = () => {
@@ -63,14 +93,111 @@ const useBussinessUserDetailsHook = () => {
 	const [bussinessUserDetails, setBussinessUserDetails] =
 		useState<BussinessUser | null>(null); // User details state
 	const { bussinessUserType } = useBussinessUserContext();
+	const [sectionSales, setSectionSales] = useState<SectionSaleGroup[] | null>(
+		null,
+	);
 
 	// Cache to store user details per id to avoid unnecessary API calls
 	const cacheRef = useRef<Record<string, BussinessUser | null>>({});
+
+	const editBussinessUserSection = async (
+		id: string,
+		userId: string,
+		form: Partial<SectionSale>,
+		bussinessUserType: BussinessUserType,
+	) => {
+		try {
+			setError(null);
+
+			const endpoint =
+				bussinessUserType === "commission_user"
+					? `/commission-users/${userId}/section-sales/${id}/`
+					: `/resold-users/${userId}/section-sales/${id}/`;
+
+			const { data } = await api.put<SectionSaleGroup>(endpoint, form);
+
+			setSectionSales((prev) => upsertByDate<SectionSaleGroup>(prev, data));
+
+			if (isToday(data.date)) {
+				setBussinessUserDetails((prev) => {
+					if (!prev) return prev;
+					const updated = {
+						...prev,
+						section_sales: data,
+					};
+					cacheRef.current[userId] = updated;
+					return updated;
+				});
+			}
+
+			// Notify success
+			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+				type: "success",
+				title: "Success",
+				description: `Section edited successfully`,
+			});
+
+			return { success: true, errors: { fields: {} } };
+		} catch (err: any) {
+			const data = err?.response?.data || {};
+			const errors = parseErrors<BussinessUserSectionEditFields>(data, [
+				"total_amount",
+				"commission_percent",
+				"total_draw_value",
+			]);
+			return { success: false, errors };
+		}
+	};
+
+	const fetchSectionSales = async (
+		signal: AbortSignal,
+		id: string,
+		sectionRange: SectionRange,
+		bussinessUserType: BussinessUserType,
+		showLoading: boolean = true,
+	) => {
+		try {
+			if (showLoading) setLoading(true);
+			setError(null);
+
+			const endpoint =
+				bussinessUserType === "commission_user"
+					? "commission-users"
+					: "resold-users";
+
+			const { data } = await api.get(`/${endpoint}/${id}/section-sales/`, {
+				signal,
+				params:
+					sectionRange.type === "day"
+						? { type: "day", date: formatDateRequest(sectionRange.date) }
+						: { ...sectionRange, month: sectionRange.month + 1 },
+			});
+
+			if (!signal.aborted) {
+				const sectionsArray: SectionSaleGroup[] =
+					sectionRange.type === "day" ? [data] : data;
+				setSectionSales(sectionsArray);
+			}
+		} catch (err: any) {
+			if (err.name === "CanceledError" || err.name === "AbortError") {
+				// Request was cancelled → do nothing
+				return;
+			}
+
+			setError("Failed to load section sales. Please try again.");
+			setSectionSales(null);
+		} finally {
+			if (!signal.aborted) {
+				setLoading(false);
+			}
+		}
+	};
 
 	/**
 	 * Fetch bussiness user details from API
 	 * Uses cache if available
 	 */
+
 	const fetchBussinessUserDetails = async (
 		signal: AbortSignal,
 		id: string,
@@ -189,20 +316,21 @@ const useBussinessUserDetailsHook = () => {
 			});
 
 			// Update state and cache
-			setBussinessUserDetails((prev) => {
-				if (!prev) return prev;
-				const updated = { ...prev, section_sales: data };
-				cacheRef.current[id] = updated;
-				return updated;
-			});
+			setSectionSales((prev) => upsertByDate(prev, data));
 
-			return data;
+			if (isToday(data.date)) {
+				setBussinessUserDetails((prev) => {
+					if (!prev) return prev;
+					const updated = { ...prev, section_sales: data };
+					cacheRef.current[id] = updated;
+					return updated;
+				});
+			}
 		} catch (err: any) {
 			if (err.name === "CanceledError" || err.name === "AbortError") return;
 
 			setError("Failed to create section sale. Please try again.");
 			setBussinessUserDetails(null);
-			return null;
 		}
 	};
 
@@ -214,6 +342,7 @@ const useBussinessUserDetailsHook = () => {
 		bussinessUserId: string,
 		section: SectionName,
 		bussinessUserType: BussinessUserType,
+		date: string,
 	) => {
 		try {
 			setError(null);
@@ -225,33 +354,59 @@ const useBussinessUserDetailsHook = () => {
 
 			await api.delete(endpoint);
 
-			setBussinessUserDetails((prev) => {
+			setSectionSales((prev) => {
 				if (!prev) return prev;
+				return prev.map((day) => {
+					const morning =
+						day.morning_section?.id === id ? null : day.morning_section;
 
-				const day = prev.section_sales;
+					const evening =
+						day.evening_section?.id === id ? null : day.evening_section;
 
-				const morning =
-					day.morning_section?.id === id ? null : day.morning_section;
+					const summary = calculateSectionSaleSummary(morning, evening);
 
-				const evening =
-					day.evening_section?.id === id ? null : day.evening_section;
-
-				const summary = calculateSectionSaleSummary(morning, evening);
-
-				const updated = {
-					...prev,
-					section_sales: {
+					const updated = {
 						...day,
-						[section]: null,
-						summary,
-					},
-				};
+						section_sales: {
+							...day,
+							[section]: null,
+							summary,
+						},
+					};
 
-				// ✅ update cache with fresh value
-				cacheRef.current[bussinessUserId] = updated;
-
-				return updated;
+					return updated;
+				});
 			});
+
+			if (isToday(date)) {
+				setBussinessUserDetails((prev) => {
+					if (!prev) return prev;
+
+					const day = prev.section_sales;
+
+					const morning =
+						day.morning_section?.id === id ? null : day.morning_section;
+
+					const evening =
+						day.evening_section?.id === id ? null : day.evening_section;
+
+					const summary = calculateSectionSaleSummary(morning, evening);
+
+					const updated = {
+						...prev,
+						section_sales: {
+							...day,
+							[section]: null,
+							summary,
+						},
+					};
+
+					// ✅ update cache with fresh value
+					cacheRef.current[bussinessUserId] = updated;
+
+					return updated;
+				});
+			}
 		} catch (err: any) {
 			if (err.name === "CanceledError" || err.name === "AbortError") return;
 
@@ -271,6 +426,9 @@ const useBussinessUserDetailsHook = () => {
 		deleteBussinessUserSection,
 		setError,
 		bussinessUserType,
+		editBussinessUserSection,
+		sectionSales,
+		fetchSectionSales,
 	};
 };
 

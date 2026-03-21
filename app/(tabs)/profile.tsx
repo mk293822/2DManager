@@ -149,7 +149,7 @@ const Profile = () => {
 				{/* ===== LOGOUT ===== */}
 				<View className="bg-white border border-red-200 rounded-2xl p-6">
 					<TouchableOpacity
-						onPress={logout}
+						onPress={() => logout()}
 						activeOpacity={0.85}
 						className="bg-red-600 rounded-xl py-3 items-center"
 					>

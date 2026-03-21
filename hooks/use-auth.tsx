@@ -5,6 +5,7 @@ import { ParsedErrors, parseErrors } from "@/lib/helpers";
 import { User } from "@/types/main";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
+import * as Updates from "expo-updates";
 import { useCallback, useState } from "react";
 import { useAbortableEffect } from "./use-abortable-effect";
 
@@ -193,6 +194,7 @@ export function useAuth(): UseAuthInterface {
 			// ALWAYS logout locally
 			setUser(null);
 			await clearTokens();
+			await Updates.reloadAsync();
 			router.replace("/login");
 		}
 	}, []);

@@ -7,13 +7,13 @@ import {
 } from "@/types/manage-types";
 
 export const DAYS: string[] = [
-	"Sunday",
 	"Monday",
 	"Tuesday",
 	"Wednesday",
 	"Thursday",
 	"Friday",
 	"Saturday",
+	"Sunday",
 ];
 
 export const formatSmartNumber = (num: number | string) => {
@@ -146,4 +146,10 @@ export function upsertByDate<T extends SectionSummaries | SectionSaleGroup>(
 	return [...prev, newDay].sort(
 		(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
 	);
+}
+
+export function isToday(date: string | Date) {
+	if (typeof date === "string")
+		return new Date(date).toDateString() === new Date().toDateString();
+	return date.toDateString() === new Date().toDateString();
 }

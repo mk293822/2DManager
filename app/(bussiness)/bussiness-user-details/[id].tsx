@@ -40,6 +40,7 @@ const BussinessUserPage = () => {
 		error,
 		editBussinessUserDetails,
 		bussinessUserType,
+		editBussinessUserSection,
 	} = useBussinessUserDetailsContext();
 	const { setNumberType } = useTwoDListsContext();
 
@@ -121,6 +122,14 @@ const BussinessUserPage = () => {
 								{bussinessUserDetails.default_commission_percent}%
 							</Text>
 						</View>
+						{bussinessUserDetails.user_type === "resold_user" && (
+							<View className="flex-row justify-between py-2">
+								<Text className="text-gray-600">Default Draw Times</Text>
+								<Text className="font-semibold">
+									{bussinessUserDetails.default_draw_times}%
+								</Text>
+							</View>
+						)}
 						<View className="mt-2 flex-row gap-3">
 							<TouchableOpacity
 								activeOpacity={0.85}
@@ -142,10 +151,9 @@ const BussinessUserPage = () => {
 			case "sectionSales":
 				return (
 					<SectionSaleList
-						showBtns
+						editBussinessUserSection={editBussinessUserSection}
 						sales={bussinessUserDetails.section_sales}
 						userId={id}
-						setSectionSales={() => {}}
 					/>
 				);
 			case "dangerZone":

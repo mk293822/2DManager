@@ -1,9 +1,9 @@
 import { EVENT_NAMES } from "@/event-names";
-import { BussinessUserSectionEditFields } from "@/hooks/section-sales/use-section-sale-hook";
+import { BussinessUserSectionEditFields } from "@/hooks/bussiness-user-details/use-user-details-hook";
 import { eventBus } from "@/lib/event-bus";
-import { ParsedErrors } from "@/lib/helpers";
+import { isToday, ParsedErrors } from "@/lib/helpers";
 import { BussinessUserType, SectionSale } from "@/types/bussiness-user-types";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	ScrollView,
 	Text,
@@ -29,6 +29,14 @@ type EditManageSectionModalProps = {
 	open: boolean;
 	bussinessUserType: BussinessUserType;
 	userId: string;
+	date: Date;
+};
+
+type FormState = {
+	commission_percent: number;
+	total_amount?: number;
+	total_draw_value?: number;
+	draw_times?: number;
 };
 
 const EditSectionSaleModal = ({
@@ -38,20 +46,32 @@ const EditSectionSaleModal = ({
 	open,
 	bussinessUserType,
 	userId,
+	date,
 }: EditManageSectionModalProps) => {
-	const [form, setForm] = useState({
+	const [form, setForm] = useState<FormState>({
 		total_amount: sectionObj.total_amount,
 		commission_percent: sectionObj.commission_percent,
 		total_draw_value: sectionObj.total_draw_value,
+		draw_times: sectionObj.draw_times ?? 0, // ✅ added
 	});
-	const [loading, setLoading] = useState(false);
 
+	const [loading, setLoading] = useState(false);
 	const [errors, setErrors] = useState<
 		Partial<Record<BussinessUserSectionEditFields, string>>
 	>({});
-	const handleChange = (key: keyof typeof form, value: string | number) => {
+
+	const handleChange = (key: keyof FormState, value: number) => {
 		setForm((prev) => ({ ...prev, [key]: value }));
 	};
+
+	useEffect(() => {
+		setForm({
+			total_amount: sectionObj.total_amount,
+			total_draw_value: sectionObj.total_draw_value,
+			commission_percent: sectionObj.commission_percent,
+			draw_times: sectionObj.draw_times,
+		});
+	}, [date, sectionObj]);
 
 	const handleClose = () => {
 		onClose();
@@ -61,12 +81,31 @@ const EditSectionSaleModal = ({
 	const handleSave = async () => {
 		try {
 			setLoading(true);
+
+			const payload: Partial<SectionSale> = {
+				commission_percent: form.commission_percent,
+			};
+
+			if (isToday(date)) {
+				if (bussinessUserType === "resold_user") {
+					payload.draw_times = form.draw_times!;
+				}
+			} else {
+				payload.total_amount = form.total_amount!;
+				payload.total_draw_value = form.total_draw_value!;
+
+				if (bussinessUserType === "resold_user") {
+					payload.draw_times = form.draw_times!;
+				}
+			}
+
 			const res = await editBussinessUserSection(
 				sectionObj.id,
 				userId,
-				form,
+				payload,
 				bussinessUserType,
 			);
+
 			if (res.success) {
 				handleClose();
 				setErrors({});
@@ -96,48 +135,54 @@ const EditSectionSaleModal = ({
 			) : (
 				<View className="bg-gray-100 w-full flex-col rounded-2xl p-6 py-8 shadow-lg">
 					<Text className="text-xl font-bold text-indigo-700 mb-4">
-						Edit Draw Number
+						Edit Section Sale
 					</Text>
 
 					<ScrollView
 						showsVerticalScrollIndicator={false}
 						contentContainerClassName="flex-col gap-2"
 					>
-						{/* Draw Number */}
-						<Text className="font-semibold text-gray-700">Total Amount</Text>
-						<TextInput
-							value={form.total_amount.toLocaleString()}
-							onChangeText={(text) => {
-								const clean = text.replace(/,/g, "");
-								handleChange("total_amount", Number(clean || 0));
-							}}
-							className="border border-gray-300 rounded-lg px-3 py-2"
-							keyboardType="numeric"
-						/>
-						{errors.total_amount && (
-							<Text className="text-red-500 text-sm">
-								{errors.total_amount}
-							</Text>
+						{!isToday(date) && (
+							<>
+								<Text className="font-semibold text-gray-700">
+									Total Amount
+								</Text>
+								<TextInput
+									value={(form.total_amount ?? 0).toLocaleString()}
+									onChangeText={(text) => {
+										const clean = text.replace(/,/g, "");
+										handleChange("total_amount", Number(clean || 0));
+									}}
+									className="border border-gray-300 rounded-lg px-3 py-2"
+									keyboardType="numeric"
+								/>
+								{errors.total_amount && (
+									<Text className="text-red-500 text-sm">
+										{errors.total_amount}
+									</Text>
+								)}
+
+								<Text className="font-semibold text-gray-700">
+									Total Draw Value
+								</Text>
+								<TextInput
+									value={(form.total_draw_value ?? 0).toLocaleString()}
+									onChangeText={(text) => {
+										const clean = text.replace(/,/g, "");
+										handleChange("total_draw_value", Number(clean || 0));
+									}}
+									className="border border-gray-300 rounded-lg px-3 py-2"
+									keyboardType="numeric"
+								/>
+								{errors.total_draw_value && (
+									<Text className="text-red-500 text-sm">
+										{errors.total_draw_value}
+									</Text>
+								)}
+							</>
 						)}
-						{/* Draw Number */}
-						<Text className="font-semibold text-gray-700">
-							Total Draw Value
-						</Text>
-						<TextInput
-							value={form.total_draw_value.toLocaleString()}
-							onChangeText={(text) => {
-								const clean = text.replace(/,/g, "");
-								handleChange("total_draw_value", Number(clean || 0));
-							}}
-							className="border border-gray-300 rounded-lg px-3 py-2"
-							keyboardType="numeric"
-						/>
-						{errors.total_draw_value && (
-							<Text className="text-red-500 text-sm">
-								{errors.total_draw_value}
-							</Text>
-						)}
-						{/* Draw Number */}
+
+						{/* ALWAYS */}
 						<Text className="font-semibold text-gray-700">Commission %</Text>
 						<TextInput
 							value={form.commission_percent.toLocaleString()}
@@ -153,9 +198,27 @@ const EditSectionSaleModal = ({
 								{errors.commission_percent}
 							</Text>
 						)}
+
+						{bussinessUserType === "resold_user" && (
+							<>
+								<Text className="font-semibold text-gray-700">Draw Times</Text>
+								<TextInput
+									value={(form.draw_times ?? 0).toString()}
+									onChangeText={(text) => {
+										handleChange("draw_times", Number(text || 0));
+									}}
+									className="border border-gray-300 rounded-lg px-3 py-2"
+									keyboardType="numeric"
+								/>
+								{errors.draw_times && (
+									<Text className="text-red-500 text-sm">
+										{errors.draw_times}
+									</Text>
+								)}
+							</>
+						)}
 					</ScrollView>
 
-					{/* Buttons */}
 					<View
 						className="w-full flex-row items-center mt-4 gap-2"
 						style={{ justifyContent: "flex-end" }}
@@ -166,6 +229,7 @@ const EditSectionSaleModal = ({
 						>
 							<Text className="font-semibold text-gray-700">Cancel</Text>
 						</TouchableOpacity>
+
 						<TouchableOpacity
 							onPress={handleSave}
 							disabled={loading}

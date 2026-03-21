@@ -56,7 +56,7 @@ const SummaryCard = (props: Props) => {
 						<TouchableOpacity
 							onPress={props.handleToggle}
 							activeOpacity={0.85}
-							className="px-4 py-2 rounded-full border border-indigo-600"
+							className="px-4 py-2 mb-4 -mr-1 rounded-full border border-indigo-600"
 						>
 							<Text className="text-indigo-600 font-semibold text-sm">
 								Details

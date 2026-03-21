@@ -1,4 +1,4 @@
-import { BussinessUserSectionEditFields } from "@/hooks/section-sales/use-section-sale-hook";
+import { BussinessUserSectionEditFields } from "@/hooks/bussiness-user-details/use-user-details-hook";
 import { ParsedErrors } from "@/lib/helpers";
 import {
 	BussinessUserType,
@@ -14,11 +14,8 @@ import SectionSummaryCard from "./section-summary-card";
 type Props = {
 	sales: SectionSaleGroup;
 	userId: string;
-	setSectionSales: React.Dispatch<
-		React.SetStateAction<SectionSaleGroup[] | null>
-	>;
 	showBtns?: boolean;
-	editBussinessUserSection?: (
+	editBussinessUserSection: (
 		id: string,
 		userId: string,
 		form: Partial<SectionSale>,
@@ -32,7 +29,6 @@ type Props = {
 const SectionSaleList = ({
 	sales,
 	userId,
-	setSectionSales,
 	editBussinessUserSection,
 	showBtns = true,
 }: Props) => {
@@ -52,7 +48,6 @@ const SectionSaleList = ({
 				<SectionSaleCard
 					editBussinessUserSection={editBussinessUserSection}
 					showBtns={showBtns}
-					setSectionSales={setSectionSales}
 					key={sec}
 					sale={sales[sec]}
 					userId={userId}
