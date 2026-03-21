@@ -12,7 +12,7 @@ import { SectionName } from "@/types/manage-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { SectinDetailRow } from "../info-components";
 import { Loading } from "../loading";
 import DeleteSectionSaleModal from "./delete-section-sale-modal";
@@ -59,18 +59,23 @@ const SectionSaleCard = ({
 
 	if (!sale) {
 		const handleCreate = async () => {
-			const abortController = new AbortController();
-			await createBussinessUserSection(
-				userId,
-				section,
-				bussinessUserType,
-				date,
-			);
-			if (!sections?.[0][section])
-				fetchSection(abortController.signal, {
-					type: "day",
-					date: date,
-				});
+			try {
+				setLoading(true);
+				const abortController = new AbortController();
+				await createBussinessUserSection(
+					userId,
+					section,
+					bussinessUserType,
+					date,
+				);
+				if (!sections?.[0][section])
+					fetchSection(abortController.signal, {
+						type: "day",
+						date: date,
+					});
+			} finally {
+				setLoading(false);
+			}
 		};
 		return (
 			<View className="bg-white rounded-2xl shadow p-6 mb-6 items-center">
@@ -81,11 +86,30 @@ const SectionSaleCard = ({
 					This session has no records yet.
 				</Text>
 				<TouchableOpacity
+					disabled={loading}
 					activeOpacity={0.85}
 					onPress={handleCreate}
 					className="bg-indigo-600 px-6 py-3 rounded-xl shadow"
 				>
-					<Text className="text-white font-bold">Create</Text>
+					{loading ? (
+						<View className="items-center justify-center">
+							<ActivityIndicator
+								size={20}
+								color="#fff"
+							/>
+						</View>
+					) : (
+						<View className="flex-row items-center justify-center gap-2">
+							<AntDesign
+								name="plus"
+								color="#fff"
+								size={15}
+							/>
+							<Text className="text-white font-semibold text-center">
+								Create
+							</Text>
+						</View>
+					)}
 				</TouchableOpacity>
 			</View>
 		);
@@ -133,24 +157,18 @@ const SectionSaleCard = ({
 	];
 
 	const handleDelete = async () => {
-		try {
-			setLoading(true);
-			await deleteBussinessUserSection(
-				sale.id,
-				userId,
-				section,
-				bussinessUserType,
-				date.toDateString(),
-			);
-			const abortController = new AbortController();
-			fetchSection(abortController.signal, {
-				type: "day",
-				date: date,
-			});
-		} finally {
-			setOpen(false);
-			setLoading(false);
-		}
+		await deleteBussinessUserSection(
+			sale.id,
+			userId,
+			section,
+			bussinessUserType,
+			date.toDateString(),
+		);
+		const abortController = new AbortController();
+		fetchSection(abortController.signal, {
+			type: "day",
+			date: date,
+		});
 	};
 
 	return (

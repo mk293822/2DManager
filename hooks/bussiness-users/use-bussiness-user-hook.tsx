@@ -14,11 +14,7 @@ export type BussinessUserHookType = {
 	error: string | null; // error messages
 	reset: () => void; // refetch the data
 	handleCreateBussinessUser: (
-		payload: {
-			name: string;
-			phone_number: string;
-			default_commission_percent: number;
-		},
+		payload: Partial<BussinessUser>,
 		bussinessUserType: BussinessUserType,
 	) => Promise<{
 		success: boolean;
@@ -101,11 +97,7 @@ const useBussinessUserHook = (
 
 	// Create a new user
 	const handleCreateBussinessUser = async (
-		payload: {
-			name: string;
-			phone_number: string;
-			default_commission_percent: number;
-		},
+		payload: Partial<BussinessUser>,
 		bussinessUserType: BussinessUserType,
 	) => {
 		try {

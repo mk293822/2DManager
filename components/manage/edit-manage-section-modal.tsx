@@ -27,6 +27,7 @@ type EditManageSectionModalProps = {
 			total_resold_commission: number;
 			total_resold_draw_value: number;
 			total_draw_value: number;
+			total_resold_draw_amount: number;
 		},
 		id: string,
 	) => Promise<{
@@ -51,6 +52,7 @@ const EditManageSectionModal = ({
 		total_resold,
 		total_resold_commission,
 		total_resold_draw_value,
+		total_resold_draw_amount,
 		total_draw_value,
 	} = sectionObj;
 
@@ -63,6 +65,7 @@ const EditManageSectionModal = ({
 		total_resold_commission,
 		total_resold_draw_value,
 		total_draw_value,
+		total_resold_draw_amount,
 	});
 
 	const [loading, setLoading] = useState(false);
@@ -234,6 +237,25 @@ const EditManageSectionModal = ({
 						{errors.total_resold_draw_value && (
 							<Text className="text-red-500 text-sm">
 								{errors.total_resold_draw_value}
+							</Text>
+						)}
+
+						{/* Total Resold Draw Value */}
+						<Text className="font-semibold text-gray-700">
+							Total Resold Draw Amount
+						</Text>
+						<TextInput
+							value={form.total_resold_draw_amount.toLocaleString()}
+							onChangeText={(text) => {
+								const clean = text.replace(/,/g, "");
+								handleChange("total_resold_draw_amount", Number(clean || 0));
+							}}
+							className="border border-gray-300 rounded-lg px-3 py-2"
+							keyboardType="numeric"
+						/>
+						{errors.total_resold_draw_amount && (
+							<Text className="text-red-500 text-sm">
+								{errors.total_resold_draw_amount}
 							</Text>
 						)}
 

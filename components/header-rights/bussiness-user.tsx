@@ -1,6 +1,6 @@
 import { BussinessUserEditFields } from "@/hooks/bussiness-user-details/use-user-details-hook";
 import { ParsedErrors } from "@/lib/helpers";
-import { BussinessUserType } from "@/types/bussiness-user-types";
+import { BussinessUser, BussinessUserType } from "@/types/bussiness-user-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import React, { useState } from "react";
 import { TouchableOpacity, View } from "react-native";
@@ -11,11 +11,7 @@ const BussinessUserPageHeaderRight = ({
 	bussinessUserType,
 }: {
 	handleCreateBussinessUser: (
-		payload: {
-			name: string;
-			phone_number: string;
-			default_commission_percent: number;
-		},
+		payload: Partial<BussinessUser>,
 		bussinessUserType: BussinessUserType,
 	) => Promise<{
 		success: boolean;

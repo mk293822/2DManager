@@ -1,3 +1,4 @@
+// CreateBussinessUserModal.tsx
 import { EVENT_NAMES } from "@/event-names";
 import { BussinessUserEditFields } from "@/hooks/bussiness-user-details/use-user-details-hook";
 import { eventBus } from "@/lib/event-bus";
@@ -22,6 +23,7 @@ type Props = {
 			name: string;
 			phone_number: string;
 			default_commission_percent: number;
+			default_draw_times?: number;
 		},
 		bussinessUserType: BussinessUserType,
 	) => Promise<{
@@ -31,29 +33,42 @@ type Props = {
 	bussinessUserType: BussinessUserType;
 };
 
+type FormState = {
+	name: string;
+	phone_number: string;
+	default_commission_percent: number;
+	default_draw_times?: number;
+};
+
+type CreatePayload =
+	| { name: string; phone_number: string; default_commission_percent: number } // commission_user
+	| {
+			name: string;
+			phone_number: string;
+			default_commission_percent: number;
+			default_draw_times: number;
+	  }; // resold_user
+
 const CreateBussinessUserModal = ({
 	open,
 	onClose,
 	handleCreateBussinessUser,
 	bussinessUserType,
 }: Props) => {
-	const [form, setForm] = useState<{
-		name: string;
-		phone_number: string;
-		default_commission_percent: number;
-	}>({
+	const [form, setForm] = useState<FormState>({
 		name: "",
 		phone_number: "",
-		default_commission_percent:
-			process.env.EXPO_PUBLIC_DEFAULT_COMMISSION_PERCENT,
+		default_commission_percent: Number(
+			process.env.EXPO_PUBLIC_DEFAULT_COMMISSION_PERCENT ?? 0,
+		),
+		default_draw_times: Number(process.env.EXPO_PUBLIC_DEFAULT_DRAW_TIMES ?? 0),
 	});
 	const [loading, setLoading] = useState(false);
-
 	const [errors, setErrors] = useState<
 		Partial<Record<BussinessUserEditFields, string>>
 	>({});
 
-	const handleChange = (key: keyof typeof form, value: string | number) => {
+	const handleChange = (key: keyof FormState, value: string | number) => {
 		setForm((prev) => ({ ...prev, [key]: value }));
 	};
 
@@ -62,31 +77,50 @@ const CreateBussinessUserModal = ({
 		setForm({
 			name: "",
 			phone_number: "",
-			default_commission_percent:
-				process.env.EXPO_PUBLIC_DEFAULT_COMMISSION_PERCENT,
+			default_commission_percent: Number(
+				process.env.EXPO_PUBLIC_DEFAULT_COMMISSION_PERCENT ?? 0,
+			),
+			default_draw_times: Number(
+				process.env.EXPO_PUBLIC_DEFAULT_DRAW_TIMES ?? 0,
+			),
 		});
 		setErrors({});
 	};
 
 	const handleSave = async () => {
+		setLoading(true);
 		try {
-			setLoading(true);
-			const res = await handleCreateBussinessUser(form, bussinessUserType);
+			const payload: CreatePayload =
+				bussinessUserType === "resold_user"
+					? {
+							name: form.name,
+							phone_number: form.phone_number,
+							default_commission_percent: form.default_commission_percent,
+							default_draw_times: form.default_draw_times!,
+						}
+					: {
+							name: form.name,
+							phone_number: form.phone_number,
+							default_commission_percent: form.default_commission_percent,
+						};
+			const res = await handleCreateBussinessUser(payload, bussinessUserType);
+
 			if (res.success) {
 				onCloseModal();
-				setErrors({});
 				return;
 			}
 
 			if (res.errors.form && Object.keys(res.errors.fields).length === 0) {
 				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
 					type: "error",
-					title: "Createtion Failed",
+					title: "Creation Failed",
 					description: res.errors.form,
 				});
 			} else {
 				setErrors(res.errors.fields);
 			}
+		} catch (err) {
+			console.error(err);
 		} finally {
 			setLoading(false);
 		}
@@ -99,14 +133,16 @@ const CreateBussinessUserModal = ({
 					<Loading />
 				</View>
 			) : (
-				<View className="bg-gray-100 w-full flex-col rounded-2xl p-6 py-8 shadow-lg">
+				<View className="bg-gray-100 w-full max-w-md mx-auto flex-col rounded-2xl p-6 py-8 shadow-lg">
 					<Text className="text-xl font-bold text-indigo-700 mb-4">
-						Create Commission User
+						Create{" "}
+						{bussinessUserType === "commission_user" ? "Commission" : "Resold"}{" "}
+						User
 					</Text>
 
 					<ScrollView
 						showsVerticalScrollIndicator={false}
-						contentContainerClassName="flex-col gap-2"
+						contentContainerStyle={{ gap: 12 }}
 					>
 						<Text className="font-semibold text-gray-700">Name</Text>
 						<TextInput
@@ -135,13 +171,15 @@ const CreateBussinessUserModal = ({
 							Default Commission %
 						</Text>
 						<TextInput
-							value={form.default_commission_percent.toLocaleString()}
+							value={String(form.default_commission_percent)}
 							keyboardType="numeric"
 							maxLength={3}
-							onChangeText={(text) => {
-								const clean = text.replace(/,/g, "");
-								handleChange("default_commission_percent", Number(clean));
-							}}
+							onChangeText={(text) =>
+								handleChange(
+									"default_commission_percent",
+									Number(text.replace(/,/g, "")),
+								)
+							}
 							className="border border-gray-300 rounded-lg px-3 py-2"
 						/>
 						{errors.default_commission_percent && (
@@ -149,9 +187,33 @@ const CreateBussinessUserModal = ({
 								{errors.default_commission_percent}
 							</Text>
 						)}
+
+						{bussinessUserType === "resold_user" && (
+							<>
+								<Text className="font-semibold text-gray-700">
+									Default Draw Times
+								</Text>
+								<TextInput
+									value={String(form.default_draw_times)}
+									keyboardType="numeric"
+									maxLength={2}
+									onChangeText={(text) =>
+										handleChange(
+											"default_draw_times",
+											Number(text.replace(/,/g, "")),
+										)
+									}
+									className="border border-gray-300 rounded-lg px-3 py-2"
+								/>
+								{errors.default_draw_times && (
+									<Text className="text-red-500 text-sm">
+										{errors.default_draw_times}
+									</Text>
+								)}
+							</>
+						)}
 					</ScrollView>
 
-					{/* Buttons */}
 					<View
 						className="w-full flex-row items-center mt-4 gap-2"
 						style={{ justifyContent: "flex-end" }}
@@ -166,7 +228,7 @@ const CreateBussinessUserModal = ({
 						<TouchableOpacity
 							onPress={handleSave}
 							disabled={loading}
-							className="px-4 py-2 disabled:bg-indigo-500 rounded-lg bg-indigo-600 border border-indigo-600"
+							className="px-4 py-2 rounded-lg bg-indigo-600 disabled:bg-indigo-400 border border-indigo-600"
 						>
 							<Text className="font-semibold text-white">Save</Text>
 						</TouchableOpacity>

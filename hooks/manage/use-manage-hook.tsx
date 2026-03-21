@@ -9,6 +9,7 @@ import {
 	upsertByDate,
 } from "@/lib/helpers";
 import {
+	Section,
 	SectionName,
 	SectionRange,
 	SectionSummaries,
@@ -25,21 +26,7 @@ export type ManageHookType = {
 
 	handleCreateSection: (section: SectionName, date?: Date) => Promise<void>;
 	onEditSave: (
-		form:
-			| {
-					draw_number: string | null;
-					draw_times: number;
-					total_amount: number;
-					total_commission: number;
-					total_resold: number;
-					total_resold_commission: number;
-					total_resold_draw_value: number;
-					total_draw_value: number;
-			  }
-			| {
-					draw_number: string;
-					draw_times: number;
-			  },
+		form: Partial<Section>,
 		id: string,
 	) => Promise<{
 		success: boolean;
@@ -62,7 +49,8 @@ export type SectionSummaryEditFields =
 	| "total_commission"
 	| "total_resold"
 	| "total_resold_commission"
-	| "total_resold_draw_value";
+	| "total_resold_draw_value"
+	| "total_resold_draw_amount";
 
 const useManageHook = (): ManageHookType => {
 	const [sections, setSections] = useState<SectionSummaries[] | null>(null);
@@ -141,24 +129,7 @@ const useManageHook = (): ManageHookType => {
 		}
 	};
 
-	const onEditSave = async (
-		form:
-			| {
-					draw_number: string | null;
-					draw_times: number;
-					total_amount: number;
-					total_commission: number;
-					total_resold: number;
-					total_resold_commission: number;
-					total_resold_draw_value: number;
-					total_draw_value: number;
-			  }
-			| {
-					draw_number: string;
-					draw_times: number;
-			  },
-		id: string,
-	) => {
+	const onEditSave = async (form: Partial<Section>, id: string) => {
 		try {
 			const { data } = await api.put<SectionSummaries>(
 				`/manager/sections/${id}/`,

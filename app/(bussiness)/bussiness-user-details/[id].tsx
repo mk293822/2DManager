@@ -82,8 +82,6 @@ const BussinessUserPage = () => {
 
 	const handleDeleteUser = async () => {
 		await deleteBussinessUser(id, bussinessUserType);
-		setOpen(false);
-		router.back();
 	};
 
 	// Flatten all sections into a list

@@ -3,13 +3,14 @@ import {
 	changeSectionName,
 	formatKs,
 	getTotalArray,
+	isToday,
 	ParsedErrors,
 } from "@/lib/helpers";
 import { Section, SectionName } from "@/types/manage-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import DeleteManageSectionModal from "./delete-manage-section-modal";
 import EditDrawNumberModal from "./edit-draw-number-modal";
 import EditManageSectionModal from "./edit-manage-section-modal";
@@ -54,9 +55,18 @@ const DaySectionCard = ({
 	const [openModal, setOpenModal] = useState(false);
 	const [openDrawNumberModal, setOpenDrawNumberModal] = useState(false);
 	const [openDeleteModal, setOpenDeleteModal] = useState(false);
+	const [loading, setLoading] = useState(false);
 	const d = new Date(date);
 
 	if (!data) {
+		const handleCreate = () => {
+			try {
+				setLoading(true);
+				handleCreateSection(section, d);
+			} finally {
+				setLoading(false);
+			}
+		};
 		return (
 			<View className="bg-white rounded-2xl shadow p-6 mb-6 items-center">
 				<Text className="text-gray-400 font-extrabold text-xl mb-2">
@@ -67,10 +77,28 @@ const DaySectionCard = ({
 				</Text>
 				<TouchableOpacity
 					activeOpacity={0.85}
-					onPress={() => handleCreateSection(section, d)}
+					onPress={handleCreate}
 					className="bg-indigo-600 px-6 py-3 rounded-xl shadow"
 				>
-					<Text className="text-white font-bold">Create</Text>
+					{loading ? (
+						<View className="items-center justify-center">
+							<ActivityIndicator
+								size={20}
+								color="#fff"
+							/>
+						</View>
+					) : (
+						<View className="flex-row items-center justify-center gap-2">
+							<AntDesign
+								name="plus"
+								color="#fff"
+								size={15}
+							/>
+							<Text className="text-white font-semibold text-center">
+								Create
+							</Text>
+						</View>
+					)}
 				</TouchableOpacity>
 			</View>
 		);
@@ -83,7 +111,7 @@ const DaySectionCard = ({
 					{changeSectionName(data.section)}
 				</Text>
 				<View className="flex-row items-center justify-end gap-3">
-					{!data.numbers_exists && (
+					{!data.numbers_exists && !isToday(data.date) && (
 						<View
 							style={{
 								position: "relative",

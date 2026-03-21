@@ -25,7 +25,8 @@ export type BussinessUserEditFields =
 	| "phone_number"
 	| "default_commission_percent"
 	| "default_draw_times_percent"
-	| "manager_name";
+	| "manager_name"
+	| "default_draw_times";
 
 // Hook return type definition
 export type BussinessUserDetailsHookType = {
