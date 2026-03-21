@@ -94,7 +94,7 @@ const UserTwoDList = () => {
 	const renderTwoDItem = ({ item }: { item: TwoDListType }) => {
 		const drawTimes = sectionSale.draw_times;
 		const totalDrawAmount = item.total_draw_value * drawTimes;
-		const balance = totalDrawAmount - item.total_amount;
+		const balance = item.total_amount - totalDrawAmount;
 
 		return (
 			<View
@@ -141,7 +141,7 @@ const UserTwoDList = () => {
 					{/* Total Amount */}
 					<View className="flex-row justify-between mb-1">
 						<Text className="text-gray-600 font-semibold">Total:</Text>
-						<Text className="text-red-600 font-bold">
+						<Text className="text-green-600 font-bold">
 							{item.total_amount.toLocaleString()}
 						</Text>
 					</View>
@@ -149,7 +149,7 @@ const UserTwoDList = () => {
 					{/* Total Draw Amount with multiplication */}
 					<View className="flex-row justify-between mb-1">
 						<Text className="text-gray-600 font-semibold">Total Draw:</Text>
-						<Text className="text-green-600 font-bold">
+						<Text className="text-red-600 font-bold">
 							{item.total_draw_value.toLocaleString()} × {drawTimes} ={" "}
 							{totalDrawAmount.toLocaleString()}
 						</Text>
