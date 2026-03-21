@@ -193,7 +193,7 @@ const UserTwoDList = () => {
 				emptyMessage="No 2D list data found."
 			>
 				<FlatList
-					data={twoDList}
+					data={twoDList.reverse()}
 					renderItem={renderTwoDItem}
 					keyExtractor={(item) => item.id}
 					refreshControl={

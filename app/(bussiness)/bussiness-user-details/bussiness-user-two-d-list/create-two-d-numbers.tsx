@@ -19,7 +19,7 @@ import {
 	SpecialGroupItem,
 } from "@/types/two-d-list-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
 	ActivityIndicator,
@@ -112,6 +112,12 @@ const CreateTwoDNumbersPage = () => {
 			section,
 			user.id,
 		);
+		router.push({
+			pathname: "/bussiness-user-details/bussiness-user-two-d-list/[section]",
+			params: {
+				section: section,
+			},
+		});
 		setList(null);
 	};
 
