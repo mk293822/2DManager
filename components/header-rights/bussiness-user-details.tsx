@@ -1,4 +1,5 @@
-import { BussinessUserEditFields } from "@/hooks/bussiness-user-details/use-user-details-hook";
+import { BussinessUserEditFields } from "@/hooks/bussiness-user-details/use-bussiness-user-details-hook";
+import { MutationResult } from "@/hooks/use-mutation";
 import { ParsedErrors } from "@/lib/helpers";
 import { BussinessUser, BussinessUserType } from "@/types/bussiness-user-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -16,14 +17,10 @@ const BussinessUserDetailsHeaderRight = ({
 	bussinessUserType,
 }: {
 	editBussinessUserDetails: (
-		id: string,
-		form: Partial<BussinessUser>,
-		bussinessUserType: BussinessUserType,
-	) => Promise<{
-		success: boolean;
-		errors: ParsedErrors<BussinessUserEditFields>;
-	}>;
-
+		variables: Partial<BussinessUser>,
+	) => Promise<
+		MutationResult<BussinessUser, ParsedErrors<BussinessUserEditFields>>
+	>;
 	id: string;
 	name: string;
 	phone_number: string;
@@ -65,7 +62,7 @@ const BussinessUserDetailsHeaderRight = ({
 					onPress={() =>
 						router.push({
 							pathname: "/bussiness-user-details/section-sales",
-							params: { id: userId },
+							params: { id: userId, bussinessUserType },
 						})
 					}
 					style={{
@@ -85,7 +82,7 @@ const BussinessUserDetailsHeaderRight = ({
 				open={open}
 				onClose={() => setOpen(false)}
 				id={id}
-				editCommissionUserDetails={editBussinessUserDetails}
+				editBussinessUserDetails={editBussinessUserDetails}
 				name={name}
 				phone_number={phone_number}
 				default_commission_percent={default_commission_percent}

@@ -3,14 +3,16 @@ import CustomKeyboard from "@/components/custom-keyboard";
 import CreateTwoDNumbersHeaderRight from "@/components/header-rights/create-two-d-numbers";
 import PageWrapper from "@/components/page-wrapper";
 import { EVENT_NAMES } from "@/event-names";
-import { useBussinessUserDetailsContext } from "@/hooks/bussiness-user-details/use-context";
-import { useTwoDListsContext } from "@/hooks/two-d-list/use-two-d-list-context";
+import useBussinessUserDetailsHook from "@/hooks/bussiness-user-details/use-bussiness-user-details-hook";
+import useBussinessUserSectionsHook from "@/hooks/bussiness-user-details/use-bussiness-user-sections-hook";
+import useSectionTwoDListHook from "@/hooks/two-d-list/use-section-two-d-list-hook";
 import {
 	ENGLISH_TO_BURMESE_MAP,
 	SPECIAL_KEYS1,
 	SPECIAL_KEYS2,
 } from "@/lib/custom-keyboard-helper";
 import { eventBus } from "@/lib/event-bus";
+import { BussinessUserType } from "@/types/bussiness-user-types";
 import { SectionName } from "@/types/manage-types";
 import {
 	DigitRelatedItem,
@@ -30,18 +32,32 @@ import {
 } from "react-native";
 
 const CreateTwoDNumbersPage = () => {
+	const { section, id, bussinessUserType } = useLocalSearchParams<{
+		section: SectionName;
+		id: string;
+		bussinessUserType: BussinessUserType;
+	}>();
 	const {
 		bussinessUserDetails: user,
-		error,
-		loading,
-		reset,
-	} = useBussinessUserDetailsContext();
-	const { section } = useLocalSearchParams<{ section: SectionName }>();
-	const section_sale = user?.section_sales?.[section];
+		bussinessDetailsError,
+		bussinessUserDetailsLoading,
+		refetchBussinessUserDetails,
+	} = useBussinessUserDetailsHook(id, bussinessUserType);
+	const { todaySectionSales } = useBussinessUserSectionsHook(
+		id,
+		{
+			type: "day",
+			date: new Date(),
+		},
+		bussinessUserType,
+	);
+	const section_sale = todaySectionSales[section];
+	const { createTwoDList, creatingTwoDList } = useSectionTwoDListHook(
+		bussinessUserType === "commission_user" ? "sold_number" : "sold_number",
+		section_sale?.id ?? "",
+	);
 
 	const [list, setList] = useState<NumberItem[] | null>(null);
-	const { handleCreateTwoDList, loading: createLoading } =
-		useTwoDListsContext();
 
 	const [twoDValue, setTwoDValue] = useState<string>("");
 	const [amount1Value, setAmount1Value] = useState<string>("");
@@ -104,25 +120,26 @@ const CreateTwoDNumbersPage = () => {
 
 	const handleAdd = async () => {
 		if (!list || !section_sale || !user) return;
-		await handleCreateTwoDList(
-			section_sale.id,
-			list,
-			section_sale.section_summary_id,
-			user.id,
-			section,
-			user.id,
-		);
-		router.push({
-			pathname: "/bussiness-user-details/bussiness-user-two-d-list/[section]",
-			params: {
-				section: section,
-			},
-		});
-		setList(null);
-	};
-
-	const onReload = () => {
-		if (user) reset(user.id);
+		const res = await createTwoDList({ numbers_data: list, section: section });
+		if (res.error) {
+			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+				type: "error",
+				title: "Error",
+				description: res.error,
+			});
+		} else {
+			setList(null);
+			router.push({
+				pathname: "/bussiness-user-details/bussiness-user-two-d-list/[id]",
+				params: {
+					id: section_sale.id,
+					section: section,
+					userName: user.name,
+					draw_times: section_sale.draw_times,
+					bussinessUserType,
+				},
+			});
+		}
 	};
 
 	const renderItem = ({ item, index }: { item: NumberItem; index: number }) => (
@@ -206,15 +223,17 @@ const CreateTwoDNumbersPage = () => {
 								id={section_sale.id}
 								user_name={user?.name || ""}
 								section={section}
+								bussinessUserType={bussinessUserType}
+								draw_times={section_sale.draw_times}
 							/>
 						),
 				}}
 			/>
 
 			<PageWrapper
-				loading={loading}
-				error={error}
-				onReload={onReload}
+				loading={bussinessUserDetailsLoading}
+				error={bussinessDetailsError}
+				onReload={refetchBussinessUserDetails}
 				empty={!user || !section_sale}
 				emptyMessage="Something went wrong!"
 			>
@@ -239,11 +258,11 @@ const CreateTwoDNumbersPage = () => {
 							{list && list.length > 0 && (
 								<TouchableOpacity
 									onPress={handleAdd}
-									disabled={createLoading}
+									disabled={creatingTwoDList}
 									activeOpacity={0.85}
 									className="bg-indigo-600 py-3 rounded-xl shadow flex-row items-center justify-center"
 								>
-									{createLoading ? (
+									{creatingTwoDList ? (
 										<View className="items-center justify-center">
 											<ActivityIndicator
 												size={20}

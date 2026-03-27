@@ -4,7 +4,6 @@ export type BaseUser = {
 	id: string;
 	name: string;
 	phone_number: string;
-	section_sales: SectionSaleGroup;
 	manager_name: string;
 	default_commission_percent: number;
 };
@@ -47,4 +46,5 @@ export type SectionSale = {
 	draw_times: number;
 	draw_number: string;
 	section_summary_id: string;
+	numbers_exists: boolean;
 };

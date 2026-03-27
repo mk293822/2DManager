@@ -1,9 +1,10 @@
 // CreateBussinessUserModal.tsx
 import { EVENT_NAMES } from "@/event-names";
-import { BussinessUserEditFields } from "@/hooks/bussiness-user-details/use-user-details-hook";
+import { BussinessUserEditFields } from "@/hooks/bussiness-user-details/use-bussiness-user-details-hook";
+import { MutationResult } from "@/hooks/use-mutation";
 import { eventBus } from "@/lib/event-bus";
 import { ParsedErrors } from "@/lib/helpers";
-import { BussinessUserType } from "@/types/bussiness-user-types";
+import { BussinessUser, BussinessUserType } from "@/types/bussiness-user-types";
 import React, { useState } from "react";
 import {
 	ScrollView,
@@ -18,19 +19,13 @@ import AppModal from "../ui/app-modal";
 type Props = {
 	open: boolean;
 	onClose: () => void;
-	handleCreateBussinessUser: (
-		payload: {
-			name: string;
-			phone_number: string;
-			default_commission_percent: number;
-			default_draw_times?: number;
-		},
-		bussinessUserType: BussinessUserType,
-	) => Promise<{
-		success: boolean;
-		errors: ParsedErrors<BussinessUserEditFields>;
-	}>;
+	createBussinessUser: (
+		variables: Partial<BussinessUser>,
+	) => Promise<
+		MutationResult<BussinessUser, ParsedErrors<BussinessUserEditFields>>
+	>;
 	bussinessUserType: BussinessUserType;
+	creatingUser: boolean;
 };
 
 type FormState = {
@@ -52,7 +47,8 @@ type CreatePayload =
 const CreateBussinessUserModal = ({
 	open,
 	onClose,
-	handleCreateBussinessUser,
+	createBussinessUser,
+	creatingUser,
 	bussinessUserType,
 }: Props) => {
 	const [form, setForm] = useState<FormState>({
@@ -63,8 +59,7 @@ const CreateBussinessUserModal = ({
 		),
 		default_draw_times: Number(process.env.EXPO_PUBLIC_DEFAULT_DRAW_TIMES ?? 0),
 	});
-	const [loading, setLoading] = useState(false);
-	const [errors, setErrors] = useState<
+	const [error, setErrors] = useState<
 		Partial<Record<BussinessUserEditFields, string>>
 	>({});
 
@@ -88,47 +83,38 @@ const CreateBussinessUserModal = ({
 	};
 
 	const handleSave = async () => {
-		setLoading(true);
-		try {
-			const payload: CreatePayload =
-				bussinessUserType === "resold_user"
-					? {
-							name: form.name,
-							phone_number: form.phone_number,
-							default_commission_percent: form.default_commission_percent,
-							default_draw_times: form.default_draw_times!,
-						}
-					: {
-							name: form.name,
-							phone_number: form.phone_number,
-							default_commission_percent: form.default_commission_percent,
-						};
-			const res = await handleCreateBussinessUser(payload, bussinessUserType);
+		const payload: CreatePayload =
+			bussinessUserType === "resold_user"
+				? {
+						name: form.name,
+						phone_number: form.phone_number,
+						default_commission_percent: form.default_commission_percent,
+						default_draw_times: form.default_draw_times!,
+					}
+				: {
+						name: form.name,
+						phone_number: form.phone_number,
+						default_commission_percent: form.default_commission_percent,
+					};
+		const res = await createBussinessUser(payload);
 
-			if (res.success) {
-				onCloseModal();
-				return;
-			}
-
-			if (res.errors.form && Object.keys(res.errors.fields).length === 0) {
-				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-					type: "error",
-					title: "Creation Failed",
-					description: res.errors.form,
-				});
-			} else {
-				setErrors(res.errors.fields);
-			}
-		} catch (err) {
-			console.error(err);
-		} finally {
-			setLoading(false);
+		if (!res.error) {
+			onCloseModal();
+			return;
+		} else if (res.error.form && Object.keys(res.error.fields).length === 0) {
+			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+				type: "error",
+				title: "Creation Failed",
+				description: res.error.form,
+			});
+		} else {
+			setErrors(res.error.fields);
 		}
 	};
 
 	return (
 		<AppModal open={open}>
-			{loading ? (
+			{creatingUser ? (
 				<View className="bg-gray-100 w-1/2 h-40 flex-col rounded-2xl p-6 py-8 shadow-lg">
 					<Loading />
 				</View>
@@ -150,8 +136,8 @@ const CreateBussinessUserModal = ({
 							onChangeText={(text) => handleChange("name", text)}
 							className="border border-gray-300 rounded-lg px-3 py-2"
 						/>
-						{errors.name && (
-							<Text className="text-red-500 text-sm">{errors.name}</Text>
+						{error.name && (
+							<Text className="text-red-500 text-sm">{error.name}</Text>
 						)}
 
 						<Text className="font-semibold text-gray-700">Phone Number</Text>
@@ -161,10 +147,8 @@ const CreateBussinessUserModal = ({
 							onChangeText={(text) => handleChange("phone_number", text)}
 							className="border border-gray-300 rounded-lg px-3 py-2"
 						/>
-						{errors.phone_number && (
-							<Text className="text-red-500 text-sm">
-								{errors.phone_number}
-							</Text>
+						{error.phone_number && (
+							<Text className="text-red-500 text-sm">{error.phone_number}</Text>
 						)}
 
 						<Text className="font-semibold text-gray-700">
@@ -182,9 +166,9 @@ const CreateBussinessUserModal = ({
 							}
 							className="border border-gray-300 rounded-lg px-3 py-2"
 						/>
-						{errors.default_commission_percent && (
+						{error.default_commission_percent && (
 							<Text className="text-red-500 text-sm">
-								{errors.default_commission_percent}
+								{error.default_commission_percent}
 							</Text>
 						)}
 
@@ -205,9 +189,9 @@ const CreateBussinessUserModal = ({
 									}
 									className="border border-gray-300 rounded-lg px-3 py-2"
 								/>
-								{errors.default_draw_times && (
+								{error.default_draw_times && (
 									<Text className="text-red-500 text-sm">
-										{errors.default_draw_times}
+										{error.default_draw_times}
 									</Text>
 								)}
 							</>
@@ -227,7 +211,7 @@ const CreateBussinessUserModal = ({
 
 						<TouchableOpacity
 							onPress={handleSave}
-							disabled={loading}
+							disabled={creatingUser}
 							className="px-4 py-2 rounded-lg bg-indigo-600 disabled:bg-indigo-400 border border-indigo-600"
 						>
 							<Text className="font-semibold text-white">Save</Text>

@@ -1,4 +1,5 @@
-import { BussinessUserEditFields } from "@/hooks/bussiness-user-details/use-user-details-hook";
+import { BussinessUserEditFields } from "@/hooks/bussiness-user-details/use-bussiness-user-details-hook";
+import { MutationResult } from "@/hooks/use-mutation";
 import { ParsedErrors } from "@/lib/helpers";
 import { BussinessUser, BussinessUserType } from "@/types/bussiness-user-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -7,17 +8,17 @@ import { TouchableOpacity, View } from "react-native";
 import CreateBussinessUserModal from "../bussiness-user-details/create-bussiness-user-modal";
 
 const BussinessUserPageHeaderRight = ({
-	handleCreateBussinessUser,
+	createBussinessUser,
 	bussinessUserType,
+	creatingUser,
 }: {
-	handleCreateBussinessUser: (
-		payload: Partial<BussinessUser>,
-		bussinessUserType: BussinessUserType,
-	) => Promise<{
-		success: boolean;
-		errors: ParsedErrors<BussinessUserEditFields>;
-	}>;
+	createBussinessUser: (
+		variables: Partial<BussinessUser>,
+	) => Promise<
+		MutationResult<BussinessUser, ParsedErrors<BussinessUserEditFields>>
+	>;
 	bussinessUserType: BussinessUserType;
+	creatingUser: boolean;
 }) => {
 	const [open, setOpen] = useState(false);
 
@@ -46,7 +47,8 @@ const BussinessUserPageHeaderRight = ({
 			<CreateBussinessUserModal
 				bussinessUserType={bussinessUserType}
 				open={open}
-				handleCreateBussinessUser={handleCreateBussinessUser}
+				createBussinessUser={createBussinessUser}
+				creatingUser={creatingUser}
 				onClose={() => setOpen(false)}
 			/>
 		</View>

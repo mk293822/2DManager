@@ -1,8 +1,14 @@
 import { EVENT_NAMES } from "@/event-names";
-import { BussinessUserSectionEditFields } from "@/hooks/bussiness-user-details/use-user-details-hook";
+import { BussinessUserSectionEditFields } from "@/hooks/bussiness-user-details/use-bussiness-user-sections-hook";
+import { MutationResult } from "@/hooks/use-mutation";
+import { isToday } from "@/lib/datetime-helper";
 import { eventBus } from "@/lib/event-bus";
-import { isToday, ParsedErrors } from "@/lib/helpers";
-import { BussinessUserType, SectionSale } from "@/types/bussiness-user-types";
+import { ParsedErrors } from "@/lib/helpers";
+import {
+	BussinessUserType,
+	SectionSale,
+	SectionSaleGroup,
+} from "@/types/bussiness-user-types";
 import React, { useEffect, useState } from "react";
 import {
 	ScrollView,
@@ -16,20 +22,20 @@ import AppModal from "../ui/app-modal";
 
 type EditManageSectionModalProps = {
 	sectionObj: SectionSale;
-	editBussinessUserSection: (
-		id: string,
-		userId: string,
-		form: Partial<SectionSale>,
-		bussinessUserType: BussinessUserType,
-	) => Promise<{
-		success: boolean;
-		errors: ParsedErrors<BussinessUserSectionEditFields>;
-	}>;
+	editBussinessUserSection: (variables: {
+		sectionId: string;
+		form: Partial<SectionSale>;
+	}) => Promise<
+		MutationResult<
+			SectionSaleGroup,
+			ParsedErrors<BussinessUserSectionEditFields>
+		>
+	>;
 	onClose: () => void;
 	open: boolean;
 	bussinessUserType: BussinessUserType;
-	userId: string;
 	date: Date;
+	editingSection: boolean;
 };
 
 type FormState = {
@@ -45,18 +51,17 @@ const EditSectionSaleModal = ({
 	onClose,
 	open,
 	bussinessUserType,
-	userId,
 	date,
+	editingSection,
 }: EditManageSectionModalProps) => {
 	const [form, setForm] = useState<FormState>({
 		total_amount: sectionObj.total_amount,
 		commission_percent: sectionObj.commission_percent,
 		total_draw_value: sectionObj.total_draw_value,
-		draw_times: sectionObj.draw_times ?? 0, // ✅ added
+		draw_times: sectionObj.draw_times ?? 0,
 	});
 
-	const [loading, setLoading] = useState(false);
-	const [errors, setErrors] = useState<
+	const [error, setErrors] = useState<
 		Partial<Record<BussinessUserSectionEditFields, string>>
 	>({});
 
@@ -74,61 +79,50 @@ const EditSectionSaleModal = ({
 	}, [date, sectionObj]);
 
 	const handleClose = () => {
-		onClose();
 		setErrors({});
+		onClose();
 	};
 
 	const handleSave = async () => {
-		try {
-			setLoading(true);
+		const payload: Partial<SectionSale> = {
+			commission_percent: form.commission_percent,
+		};
 
-			const payload: Partial<SectionSale> = {
-				commission_percent: form.commission_percent,
-			};
-
-			if (isToday(date)) {
-				if (bussinessUserType === "resold_user") {
-					payload.draw_times = form.draw_times!;
-				}
-			} else {
-				payload.total_amount = form.total_amount!;
-				payload.total_draw_value = form.total_draw_value!;
-
-				if (bussinessUserType === "resold_user") {
-					payload.draw_times = form.draw_times!;
-				}
+		if (isToday(date) && sectionObj.numbers_exists) {
+			if (bussinessUserType === "resold_user") {
+				payload.draw_times = form.draw_times!;
 			}
+		} else {
+			payload.total_amount = form.total_amount!;
+			payload.total_draw_value = form.total_draw_value!;
 
-			const res = await editBussinessUserSection(
-				sectionObj.id,
-				userId,
-				payload,
-				bussinessUserType,
-			);
-
-			if (res.success) {
-				handleClose();
-				setErrors({});
-				return;
+			if (bussinessUserType === "resold_user") {
+				payload.draw_times = form.draw_times!;
 			}
+		}
 
-			if (res.errors.form && Object.keys(res.errors.fields).length === 0) {
-				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-					type: "error",
-					title: "Edit Failed",
-					description: res.errors.form,
-				});
-			} else {
-				setErrors(res.errors.fields);
-			}
-		} finally {
-			setLoading(false);
+		const res = await editBussinessUserSection({
+			sectionId: sectionObj.id,
+			form: payload,
+		});
+
+		if (!res.error) {
+			handleClose();
+			return;
+		} else if (res.error.form && Object.keys(res.error.fields).length === 0) {
+			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+				type: "error",
+				title: "Edit Failed",
+				description: res.error.form,
+			});
+		} else {
+			setErrors(res.error.fields);
 		}
 	};
 
 	return (
 		<AppModal open={open}>
-			{loading ? (
+			{editingSection ? (
 				<View className="bg-gray-100 w-1/2 h-40 flex-col rounded-2xl p-6 py-8 shadow-lg">
 					<Loading />
 				</View>
@@ -142,45 +136,46 @@ const EditSectionSaleModal = ({
 						showsVerticalScrollIndicator={false}
 						contentContainerClassName="flex-col gap-2"
 					>
-						{!isToday(date) && (
-							<>
-								<Text className="font-semibold text-gray-700">
-									Total Amount
-								</Text>
-								<TextInput
-									value={(form.total_amount ?? 0).toLocaleString()}
-									onChangeText={(text) => {
-										const clean = text.replace(/,/g, "");
-										handleChange("total_amount", Number(clean || 0));
-									}}
-									className="border border-gray-300 rounded-lg px-3 py-2"
-									keyboardType="numeric"
-								/>
-								{errors.total_amount && (
-									<Text className="text-red-500 text-sm">
-										{errors.total_amount}
+						{!isToday(date) ||
+							(!sectionObj.numbers_exists && (
+								<>
+									<Text className="font-semibold text-gray-700">
+										Total Amount
 									</Text>
-								)}
+									<TextInput
+										value={(form.total_amount ?? 0).toLocaleString()}
+										onChangeText={(text) => {
+											const clean = text.replace(/,/g, "");
+											handleChange("total_amount", Number(clean || 0));
+										}}
+										className="border border-gray-300 rounded-lg px-3 py-2"
+										keyboardType="numeric"
+									/>
+									{error.total_amount && (
+										<Text className="text-red-500 text-sm">
+											{error.total_amount}
+										</Text>
+									)}
 
-								<Text className="font-semibold text-gray-700">
-									Total Draw Value
-								</Text>
-								<TextInput
-									value={(form.total_draw_value ?? 0).toLocaleString()}
-									onChangeText={(text) => {
-										const clean = text.replace(/,/g, "");
-										handleChange("total_draw_value", Number(clean || 0));
-									}}
-									className="border border-gray-300 rounded-lg px-3 py-2"
-									keyboardType="numeric"
-								/>
-								{errors.total_draw_value && (
-									<Text className="text-red-500 text-sm">
-										{errors.total_draw_value}
+									<Text className="font-semibold text-gray-700">
+										Total Draw Value
 									</Text>
-								)}
-							</>
-						)}
+									<TextInput
+										value={(form.total_draw_value ?? 0).toLocaleString()}
+										onChangeText={(text) => {
+											const clean = text.replace(/,/g, "");
+											handleChange("total_draw_value", Number(clean || 0));
+										}}
+										className="border border-gray-300 rounded-lg px-3 py-2"
+										keyboardType="numeric"
+									/>
+									{error.total_draw_value && (
+										<Text className="text-red-500 text-sm">
+											{error.total_draw_value}
+										</Text>
+									)}
+								</>
+							))}
 
 						{/* ALWAYS */}
 						<Text className="font-semibold text-gray-700">Commission %</Text>
@@ -193,9 +188,9 @@ const EditSectionSaleModal = ({
 							className="border border-gray-300 rounded-lg px-3 py-2"
 							keyboardType="numeric"
 						/>
-						{errors.commission_percent && (
+						{error.commission_percent && (
 							<Text className="text-red-500 text-sm">
-								{errors.commission_percent}
+								{error.commission_percent}
 							</Text>
 						)}
 
@@ -210,9 +205,9 @@ const EditSectionSaleModal = ({
 									className="border border-gray-300 rounded-lg px-3 py-2"
 									keyboardType="numeric"
 								/>
-								{errors.draw_times && (
+								{error.draw_times && (
 									<Text className="text-red-500 text-sm">
-										{errors.draw_times}
+										{error.draw_times}
 									</Text>
 								)}
 							</>
@@ -231,8 +226,8 @@ const EditSectionSaleModal = ({
 						</TouchableOpacity>
 
 						<TouchableOpacity
-							onPress={handleSave}
-							disabled={loading}
+							onPress={() => handleSave()}
+							disabled={editingSection}
 							className="px-4 py-2 rounded-lg bg-indigo-600 disabled:bg-indigo-400"
 						>
 							<Text className="font-semibold text-white">Save</Text>

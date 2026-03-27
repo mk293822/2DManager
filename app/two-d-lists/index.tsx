@@ -3,16 +3,18 @@ import TwoDListsPageHeaderRight from "@/components/header-rights/two-d-lists";
 import PageWrapper from "@/components/page-wrapper";
 import TwoDListToolBar from "@/components/two-d-lists/toolbar";
 import TwoDListsRow from "@/components/two-d-lists/two-d-lists-row";
-import { useBussinessUserContext } from "@/hooks/bussiness-users/use-context";
-import { useManageContext } from "@/hooks/manage/use-manage-context";
-import { useTwoDListsContext } from "@/hooks/two-d-list/use-two-d-list-context";
-import { useAbortableEffect } from "@/hooks/use-abortable-effect";
+import useBussinessUserHook from "@/hooks/bussiness-users/use-bussiness-user-hook";
+import useTwoDListHook from "@/hooks/two-d-list/use-two-d-list-hook";
 import { useCalculatedNumbersData } from "@/hooks/use-calculated-numbers-data";
 import { useDebounce } from "@/hooks/use-debounce";
 import { changeSectionName } from "@/lib/helpers";
 import { chunkIntoPairs } from "@/lib/two-d-list-helper";
 import { SectionName } from "@/types/manage-types";
-import { FilterModeType, NumberItem } from "@/types/two-d-list-types";
+import {
+	FilterModeType,
+	NumberItem,
+	NumberType,
+} from "@/types/two-d-list-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -25,19 +27,19 @@ import {
 } from "react-native";
 
 const TwoDLists = () => {
-	const { section: sec } = useLocalSearchParams<{ section?: SectionName }>();
-	const section = sec ?? "morning_section";
-	const date = new Date();
-	const {
-		twoDListGroup,
-		loading,
-		error,
-		setError,
-		fetchTwoDList,
+	const [numberType, setNumberType] = useState<NumberType>("sold_number");
+	const { section, id, draw_number } = useLocalSearchParams<{
+		section: SectionName;
+		id: string;
+		draw_number: string;
+	}>();
+	const { twoDListGroup, loading, error, refetch } = useTwoDListHook(
 		numberType,
-		setNumberType,
-	} = useTwoDListsContext();
-	const { bussinessUsers, setBussinessUserType } = useBussinessUserContext();
+		id,
+	);
+	const { bussinessUsers } = useBussinessUserHook(
+		numberType === "sold_number" ? "commission_user" : "resold_user",
+	);
 	const [filterMode, setFilterMode] = useState<FilterModeType>("all");
 	const [limit, setLimit] = useState<number>(1000);
 	const [inputValue, setInputValue] = useState(limit);
@@ -46,22 +48,6 @@ const TwoDLists = () => {
 	const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 	const [refreshing, setRefreshing] = useState(false); // ⬅️ for pull-to-refresh
 	const debouncedQuery = useDebounce(inputValue, 500);
-	const {
-		sections,
-		fetchSection,
-		loading: sectionLoading,
-		reset,
-	} = useManageContext();
-
-	useAbortableEffect(
-		(signal) => {
-			setBussinessUserType(
-				numberType === "sold_number" ? "commission_user" : "resold_user",
-			);
-			fetchTwoDList(signal, sections?.[0][section]?.id);
-		},
-		[sections, numberType],
-	);
 
 	useEffect(() => {
 		if (debouncedQuery) {
@@ -70,17 +56,8 @@ const TwoDLists = () => {
 	}, [debouncedQuery]);
 
 	const onRefresh = async () => {
-		setError(null);
 		setRefreshing(true);
-		const abortController = new AbortController();
-		await fetchSection(
-			abortController.signal,
-			{
-				type: "day",
-				date: date,
-			},
-			false,
-		);
+		await refetch();
 		setRefreshing(false);
 	};
 
@@ -101,7 +78,7 @@ const TwoDLists = () => {
 
 	const renderItem = ({ item }: { item: (typeof chunkedData)[0] }) => (
 		<TwoDListsRow
-			draw_number={sections?.[0][section]?.draw_number || null}
+			draw_number={draw_number || null}
 			limit={limit}
 			left={item.left}
 			right={item.right}
@@ -138,9 +115,9 @@ const TwoDLists = () => {
 			/>
 
 			<PageWrapper
-				loading={loading || sectionLoading}
+				loading={loading && !refreshing}
 				error={error}
-				onReload={reset}
+				onReload={refetch}
 				empty={!twoDListGroup}
 				emptyMessage={`No sections found for ${changeSectionName(section)} section.`}
 			>

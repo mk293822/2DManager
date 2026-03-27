@@ -1,6 +1,6 @@
 import { EVENT_NAMES } from "@/event-names";
-import { LoginFields } from "@/hooks/use-auth";
-import { useAuthContext } from "@/hooks/use-auth-context";
+import { LoginFields } from "@/hooks/auth/use-auth";
+import { useAuthContext } from "@/hooks/auth/use-auth-context";
 import { eventBus } from "@/lib/event-bus";
 import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -14,11 +14,10 @@ import {
 } from "react-native";
 
 const Login = () => {
-	const { login } = useAuthContext();
+	const { login, loggingIn } = useAuthContext();
 
 	const [phoneNumber, setPhoneNumber] = useState("");
 	const [password, setPassword] = useState("");
-	const [loading, setLoading] = useState(false);
 
 	const [errors, setErrors] = useState<Partial<Record<LoginFields, string>>>(
 		{},
@@ -27,13 +26,9 @@ const Login = () => {
 	const router = useRouter();
 
 	const handleLogin = async () => {
-		setLoading(true);
+		const res = await login({ phone_number: phoneNumber, password });
 
-		const res = await login(phoneNumber, password);
-
-		setLoading(false);
-
-		if (res.success) {
+		if (!res.error) {
 			setErrors({});
 
 			setPhoneNumber("");
@@ -41,17 +36,14 @@ const Login = () => {
 
 			router.replace("/profile");
 			return;
-		}
-
-		// global error
-		if (res.errors.form && Object.keys(res.errors.fields).length === 0) {
+		} else if (res.error.form && Object.keys(res.error.fields).length === 0) {
 			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
 				type: "error",
 				title: "Login Failed",
-				description: res.errors.form,
+				description: res.error.form,
 			});
 		} else {
-			setErrors(res.errors.fields);
+			setErrors(res.error.fields);
 		}
 	};
 
@@ -121,11 +113,11 @@ const Login = () => {
 				{/* Login Button */}
 				<TouchableOpacity
 					onPress={handleLogin}
-					disabled={loading}
+					disabled={loggingIn}
 					activeOpacity={0.85}
 					className="bg-indigo-400 py-3 rounded-lg mt-2"
 				>
-					{loading ? (
+					{loggingIn ? (
 						<View className="items-center justify-center">
 							<ActivityIndicator
 								size={20}

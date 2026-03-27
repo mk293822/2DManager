@@ -4,37 +4,25 @@ import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "./global.css";
 
-import { Loading } from "@/components/loading";
-import NoInternetScreen from "@/components/ui/no-internet-screen";
-import BussinessUserProvider from "@/contexts/bussiness-user-provider";
 import ManageProvider from "@/contexts/manage-provider";
-import { useInternet } from "@/hooks/use-internet";
+import OfflineActionHandler from "@/lib/offline-action-handler";
 
 export default function RootLayout() {
-	const isConnected = useInternet();
-
-	if (isConnected === null) {
-		return <Loading />; // waiting for network detection
-	}
-
-	if (isConnected === false) {
-		return <NoInternetScreen />;
-	}
 	return (
-		<AuthContextProvider>
-			<SafeAreaProvider>
-				<NotificationProvider>
-					<ManageProvider>
-						<BussinessUserProvider>
+		<>
+			<AuthContextProvider>
+				<SafeAreaProvider>
+					<NotificationProvider>
+						<ManageProvider>
 							<Stack screenOptions={{ headerShown: false }}>
 								<Stack.Screen name="(tabs)" />
 								<Stack.Screen name="(auth)" />
-								<Stack.Screen name="(bussiness)" />
 							</Stack>
-						</BussinessUserProvider>
-					</ManageProvider>
-				</NotificationProvider>
-			</SafeAreaProvider>
-		</AuthContextProvider>
+						</ManageProvider>
+					</NotificationProvider>
+				</SafeAreaProvider>
+			</AuthContextProvider>
+			<OfflineActionHandler />
+		</>
 	);
 }

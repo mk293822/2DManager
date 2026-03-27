@@ -1,9 +1,9 @@
 import BussinessUserPageHeaderRight from "@/components/header-rights/bussiness-user";
 import PageWrapper from "@/components/page-wrapper";
-import { useBussinessUserContext } from "@/hooks/bussiness-users/use-context";
+import useBussinessUserHook from "@/hooks/bussiness-users/use-bussiness-user-hook";
 import { BussinessUser } from "@/types/bussiness-user-types";
-import { Tabs, useFocusEffect, useRouter } from "expo-router";
-import React, { useCallback, useState } from "react";
+import { Tabs, useRouter } from "expo-router";
+import React, { useState } from "react";
 import {
 	FlatList,
 	RefreshControl,
@@ -12,30 +12,23 @@ import {
 	View,
 } from "react-native";
 
+const UserType = "commission_user" as const;
 const CommissionUsers = () => {
 	const router = useRouter();
 	const {
 		bussinessUsers,
 		loading,
 		error,
-		fetchBussinessUsers,
-		handleCreateBussinessUser,
-		setBussinessUserType,
-		bussinessUserType,
-	} = useBussinessUserContext();
-
-	useFocusEffect(
-		useCallback(() => {
-			setBussinessUserType("commission_user");
-		}, []),
-	);
+		createBussinessUser,
+		creatingUser,
+		refetch,
+	} = useBussinessUserHook(UserType);
 
 	const [refreshing, setRefreshing] = useState(false);
 
 	const onRefresh = async () => {
-		const controller = new AbortController();
 		setRefreshing(true);
-		await fetchBussinessUsers(controller.signal, false);
+		await refetch();
 		setRefreshing(false);
 	};
 
@@ -50,6 +43,7 @@ const CommissionUsers = () => {
 						pathname: "/bussiness-user-details/[id]",
 						params: {
 							id: String(item.id),
+							bussinessUserType: UserType,
 						},
 					})
 				}
@@ -71,15 +65,16 @@ const CommissionUsers = () => {
 					headerRight: () => (
 						<BussinessUserPageHeaderRight
 							bussinessUserType="commission_user"
-							handleCreateBussinessUser={handleCreateBussinessUser}
+							createBussinessUser={createBussinessUser}
+							creatingUser={creatingUser}
 						/>
 					),
 				}}
 			/>
 			<PageWrapper
-				loading={loading || bussinessUserType !== "commission_user"}
+				loading={loading && !refreshing}
 				error={error}
-				onReload={onRefresh}
+				onReload={refetch}
 				empty={!bussinessUsers || bussinessUsers.length === 0}
 				emptyMessage="No Commission user yet!"
 			>

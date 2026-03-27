@@ -1,9 +1,9 @@
 import BussinessUserPageHeaderRight from "@/components/header-rights/bussiness-user";
 import PageWrapper from "@/components/page-wrapper";
-import { useBussinessUserContext } from "@/hooks/bussiness-users/use-context";
+import useBussinessUserHook from "@/hooks/bussiness-users/use-bussiness-user-hook";
 import { BussinessUser } from "@/types/bussiness-user-types";
-import { Tabs, useFocusEffect, useRouter } from "expo-router";
-import React, { useCallback, useState } from "react";
+import { Tabs, useRouter } from "expo-router";
+import React, { useState } from "react";
 import {
 	FlatList,
 	RefreshControl,
@@ -12,30 +12,24 @@ import {
 	View,
 } from "react-native";
 
+const UserType = "resold_user" as const;
+
 const ResoldUsers = () => {
 	const router = useRouter();
 	const {
 		bussinessUsers,
 		loading,
 		error,
-		fetchBussinessUsers,
-		handleCreateBussinessUser,
-		setBussinessUserType,
-		bussinessUserType,
-	} = useBussinessUserContext();
-
-	useFocusEffect(
-		useCallback(() => {
-			setBussinessUserType("resold_user");
-		}, []),
-	);
+		createBussinessUser,
+		creatingUser,
+		refetch,
+	} = useBussinessUserHook(UserType);
 
 	const [refreshing, setRefreshing] = useState(false);
 
 	const onRefresh = async () => {
-		const controller = new AbortController();
 		setRefreshing(true);
-		await fetchBussinessUsers(controller.signal, false);
+		await refetch();
 		setRefreshing(false);
 	};
 
@@ -48,7 +42,7 @@ const ResoldUsers = () => {
 				onPress={() =>
 					router.push({
 						pathname: "/bussiness-user-details/[id]",
-						params: { id: String(item.id) },
+						params: { id: String(item.id), bussinessUserType: UserType },
 					})
 				}
 				activeOpacity={0.8}
@@ -69,15 +63,16 @@ const ResoldUsers = () => {
 					headerRight: () => (
 						<BussinessUserPageHeaderRight
 							bussinessUserType="resold_user"
-							handleCreateBussinessUser={handleCreateBussinessUser}
+							createBussinessUser={createBussinessUser}
+							creatingUser={creatingUser}
 						/>
 					),
 				}}
 			/>
 			<PageWrapper
-				loading={loading || bussinessUserType !== "resold_user"}
+				loading={loading && !refreshing}
 				error={error}
-				onReload={onRefresh}
+				onReload={refetch}
 				empty={!bussinessUsers || bussinessUsers.length === 0}
 				emptyMessage="No Resold user yet!"
 			>

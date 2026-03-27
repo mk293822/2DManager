@@ -1,11 +1,9 @@
 // UserTwoDList.tsx
 import UserTwoDListHeaderRight from "@/components/header-rights/user-two-d-list";
-import { Loading } from "@/components/loading";
 import PageWrapper from "@/components/page-wrapper";
-import { useBussinessUserDetailsContext } from "@/hooks/bussiness-user-details/use-context";
-import { useTwoDListsContext } from "@/hooks/two-d-list/use-two-d-list-context";
-import { useAbortableEffect } from "@/hooks/use-abortable-effect";
+import useSectionTwoDListHook from "@/hooks/two-d-list/use-section-two-d-list-hook";
 import { ENGLISH_TO_BURMESE_MAP } from "@/lib/custom-keyboard-helper";
+import { BussinessUserType } from "@/types/bussiness-user-types";
 import { SectionName } from "@/types/manage-types";
 import { NumberItem, TwoDListType } from "@/types/two-d-list-types";
 import { Stack, useLocalSearchParams } from "expo-router";
@@ -13,40 +11,24 @@ import React, { useState } from "react";
 import { FlatList, RefreshControl, Text, View } from "react-native";
 
 const UserTwoDList = () => {
-	const { twoDList, fetchTwoDListBySectionSale, loading, error } =
-		useTwoDListsContext();
-	const { bussinessUserDetails } = useBussinessUserDetailsContext();
-	const { section } = useLocalSearchParams<{
-		section: SectionName;
-	}>();
-	const sectionSale = bussinessUserDetails?.section_sales[section];
+	const { id, userName, draw_times, bussinessUserType, section } =
+		useLocalSearchParams<{
+			id: string;
+			section: SectionName;
+			userName: string;
+			draw_times: string;
+			bussinessUserType: BussinessUserType;
+		}>();
+
+	const { twoDList, loading, error, refetch } = useSectionTwoDListHook(
+		bussinessUserType === "commission_user" ? "sold_number" : "resold_number",
+		id,
+	);
 	const [refreshing, setRefreshing] = useState(false);
 
-	useAbortableEffect(
-		(signal) => {
-			if (sectionSale?.id) fetchTwoDListBySectionSale(signal, sectionSale.id);
-		},
-		[sectionSale],
-	);
-
-	if (loading) return <Loading />;
-
-	if (!sectionSale?.id || !section || !twoDList) {
-		return (
-			<View className="flex-1 items-center justify-center bg-white p-4">
-				<Text className="text-red-600 font-semibold text-center mb-4">
-					Section not found or invalid Section.
-				</Text>
-			</View>
-		);
-	}
-
 	const onRefresh = async () => {
-		const controller = new AbortController();
-
-		if (!sectionSale?.id) return;
 		setRefreshing(true);
-		await fetchTwoDListBySectionSale(controller.signal, sectionSale.id);
+		await refetch();
 		setRefreshing(false);
 	};
 
@@ -92,7 +74,7 @@ const UserTwoDList = () => {
 	};
 
 	const renderTwoDItem = ({ item }: { item: TwoDListType }) => {
-		const drawTimes = sectionSale.draw_times;
+		const drawTimes = Number(draw_times) ?? 1;
 		const totalDrawAmount = item.total_draw_value * drawTimes;
 		const balance = item.total_amount - totalDrawAmount;
 
@@ -174,11 +156,12 @@ const UserTwoDList = () => {
 		<>
 			<Stack.Screen
 				options={{
-					headerTitle: bussinessUserDetails?.name || "User",
+					headerTitle: userName || "User",
 					headerRight: () => (
 						<UserTwoDListHeaderRight
-							id={sectionSale?.id}
-							user_name={bussinessUserDetails?.name ?? "User"}
+							bussinessUserType={bussinessUserType}
+							id={id}
+							user_name={userName ?? "User"}
 							section={section}
 						/>
 					),
@@ -186,14 +169,14 @@ const UserTwoDList = () => {
 			/>
 
 			<PageWrapper
-				loading={loading}
+				loading={loading && !refreshing}
 				error={error}
 				onReload={onRefresh}
 				empty={!twoDList || twoDList.length === 0}
 				emptyMessage="No 2D list data found."
 			>
 				<FlatList
-					data={twoDList.reverse()}
+					data={twoDList?.reverse() ?? []}
 					renderItem={renderTwoDItem}
 					keyExtractor={(item) => item.id}
 					refreshControl={

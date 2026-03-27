@@ -1,13 +1,12 @@
 import HolidayInfo from "@/components/holiday-info";
 import { Loading } from "@/components/loading";
+import useFetchLiveTwoD from "@/hooks/live-two-d/use-fetch-live-two-d";
 import { useBlink } from "@/hooks/use-blink";
-import useFetchLiveTwoD from "@/hooks/use-fetch-live-two-d";
+import { formatTimeIntl } from "@/lib/datetime-helper";
 import { getTwoDResultTime, toSeconds } from "@/lib/get-twod-result-time";
-import { formatTimeIntl } from "@/lib/helpers";
 import { renderStyledValue } from "@/lib/render-styled-value";
 import { TwoDData, TwoDHistoryItem, TwoDResponse } from "@/types/two-d-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 
@@ -25,15 +24,9 @@ const History = () => {
 	const [mainResult, setMainResult] = useState<TwoDHistoryItem | undefined>();
 	const [isBlinking, setIsBlinking] = useState<boolean>(false);
 	const { style } = useBlink(isBlinking);
-	const router = useRouter();
 
 	useEffect(() => {
 		if (!data || !data.liveData) return;
-		if (data.liveData.result === undefined) {
-			router.replace("/error-page");
-			return;
-		}
-
 		const date = new Date();
 		const m_Result = data.liveData.result.find(
 			(d) =>

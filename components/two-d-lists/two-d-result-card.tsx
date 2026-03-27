@@ -1,4 +1,4 @@
-import { formatTimeIntl } from "@/lib/helpers";
+import { formatTimeIntl } from "@/lib/datetime-helper";
 import { TwoDHistoryItem } from "@/types/two-d-types";
 import { Text, View } from "react-native";
 

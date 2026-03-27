@@ -1,5 +1,6 @@
 import { EVENT_NAMES } from "@/event-names";
-import { ChangePasswordFields } from "@/hooks/use-auth";
+import { ChangePasswordFields } from "@/hooks/auth/use-auth";
+import { MutationResult } from "@/hooks/use-mutation";
 import { eventBus } from "@/lib/event-bus";
 import { ParsedErrors } from "@/lib/helpers";
 import React, { useState } from "react";
@@ -16,15 +17,13 @@ import AppModal from "../ui/app-modal";
 type Props = {
 	open: boolean;
 	onClose: () => void;
-	changePassword: (form: {
+	changePassword: (variables: {
 		current_password: string;
 		new_password: string;
 		confirm_password: string;
-	}) => Promise<{
-		success: boolean;
-		errors: ParsedErrors<ChangePasswordFields>;
-	}>;
+	}) => Promise<MutationResult<void, ParsedErrors<ChangePasswordFields>>>;
 	fetchUser: () => void;
+	changingPassword: boolean;
 };
 
 const ChangePasswordModal = ({
@@ -32,13 +31,13 @@ const ChangePasswordModal = ({
 	onClose,
 	changePassword,
 	fetchUser,
+	changingPassword,
 }: Props) => {
 	const [form, setForm] = useState<Record<ChangePasswordFields, string>>({
 		current_password: "",
 		new_password: "",
 		confirm_password: "",
 	});
-	const [loading, setLoading] = useState(false);
 	const [errors, setErrors] = useState<
 		Partial<Record<ChangePasswordFields, string>>
 	>({});
@@ -54,50 +53,41 @@ const ChangePasswordModal = ({
 	};
 
 	const handleSave = async () => {
-		setLoading(true);
+		const res = await changePassword(form);
 
-		try {
-			const res = await changePassword(form);
-
-			if (res.success) {
-				setErrors({});
-				onCloseModal();
-				await fetchUser();
-
-				setForm({
-					current_password: "",
-					new_password: "",
-					confirm_password: "",
-				});
-
-				return;
-			}
-
-			// form error (non field error)
-			if (res.errors.form && Object.keys(res.errors.fields).length === 0) {
-				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-					type: "error",
-					title: "Error",
-					description: res.errors.form,
-				});
-			} else {
-				// field errors
-				setErrors(res.errors.fields || {});
-			}
+		if (!res.error) {
+			setErrors({});
+			onCloseModal();
+			await fetchUser();
 
 			setForm({
-				current_password: form.current_password,
+				current_password: "",
 				new_password: "",
 				confirm_password: "",
 			});
-		} finally {
-			setLoading(false);
+
+			return;
+		} else if (res.error.form && Object.keys(res.error.fields).length === 0) {
+			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+				type: "error",
+				title: "Error",
+				description: res.error.form,
+			});
+		} else {
+			// field errors
+			setErrors(res.error.fields || {});
 		}
+
+		setForm({
+			current_password: form.current_password,
+			new_password: "",
+			confirm_password: "",
+		});
 	};
 
 	return (
 		<AppModal open={open}>
-			{loading ? (
+			{changingPassword ? (
 				<View className="bg-gray-100 w-1/2 h-40 flex-col rounded-2xl p-6 py-8 shadow-lg">
 					<Loading />
 				</View>
@@ -169,7 +159,7 @@ const ChangePasswordModal = ({
 
 						<TouchableOpacity
 							onPress={handleSave}
-							disabled={loading}
+							disabled={changingPassword}
 							className="px-4 py-2 disabled:bg-indigo-500 rounded-lg bg-indigo-600 border border-indigo-600"
 						>
 							<Text className="font-semibold text-white">Save</Text>

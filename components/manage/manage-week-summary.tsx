@@ -1,8 +1,6 @@
-import { calculateWeekSectionSummary } from "@/lib/calculate-week-summary";
-import { formatDateDisplay } from "@/lib/helpers";
+import { formatDateDisplay } from "@/lib/datetime-helper";
 import {
 	RangeMode,
-	SectionName,
 	SectionRange,
 	SectionSummaries,
 } from "@/types/manage-types";
@@ -12,88 +10,55 @@ import SummaryCard from "./summary-card";
 
 /* ===== Week Summary ===== */
 const ManageWeekSummary = ({
-	sections,
+	section,
 	setSelectedSectionRange,
 	setRangeMode,
 }: {
-	sections: SectionSummaries[];
+	section: SectionSummaries;
 	setSelectedSectionRange: React.Dispatch<React.SetStateAction<SectionRange>>;
-	handleCreateSection: (section: SectionName, date?: Date) => Promise<void>;
 	setRangeMode: React.Dispatch<React.SetStateAction<RangeMode>>;
 }) => {
-	if (!sections || sections.length === 0) {
-		return (
-			<View className="flex-1 items-center justify-center bg-gray-100 p-6">
-				<View className="bg-white rounded-2xl shadow p-6 w-full max-w-sm items-center">
-					<Text className="text-gray-500 text-center text-lg mb-4">
-						No sections available for this week.
-					</Text>
-
-					<Text className="text-gray-400 text-center text-sm mb-6">
-						It looks like there are no records yet.
-					</Text>
-				</View>
-			</View>
-		);
-	}
-
-	const weekSummary = calculateWeekSectionSummary(sections);
+	const { summary, morning_section, evening_section } = section;
+	const date = new Date(section.date);
+	const handleToggle = () => {
+		setRangeMode("day");
+		setSelectedSectionRange({
+			type: "day",
+			date: date,
+		});
+	};
 
 	return (
 		<>
-			<SummaryCard
-				summary={weekSummary}
-				type="week"
-			/>
-			{sections.map((section, idx) => {
-				const { summary, morning_section, evening_section } = section;
-				const date = new Date(section.date);
-				const handleToggle = () => {
-					setRangeMode("day");
-					setSelectedSectionRange({
-						type: "day",
-						date: date,
-					});
-				};
-
-				if (!morning_section && !evening_section) {
-					return (
-						<Pressable
-							onPress={handleToggle}
-							key={idx}
+			{!morning_section && !evening_section ? (
+				<Pressable onPress={handleToggle}>
+					{({ pressed }) => (
+						<View
+							className={`bg-white border border-gray-200 rounded-2xl p-6 mb-4 shadow ${
+								pressed ? "opacity-70 scale-95" : ""
+							}`}
 						>
-							{({ pressed }) => (
-								<View
-									className={`bg-white border border-gray-200 rounded-2xl p-6 mb-4 shadow ${
-										pressed ? "opacity-70 scale-95" : ""
-									}`}
-								>
-									<View className="flex-row justify-between items-center">
-										<Text className="text-gray-500 font-medium">
-											No section for {formatDateDisplay(date)}
-										</Text>
+							<View className="flex-row justify-between items-center">
+								<Text className="text-gray-500 font-medium">
+									No section for {formatDateDisplay(date)}
+								</Text>
 
-										<Text className="text-blue-500 text-sm font-semibold">
-											View
-										</Text>
-									</View>
-								</View>
-							)}
-						</Pressable>
-					);
-				}
-
-				return (
-					<SummaryCard
-						type="day"
-						key={idx}
-						summary={summary}
-						date={section.date}
-						handleToggle={handleToggle}
-						showDetailsBtn
-					/>
-				);
-			})}
+								<Text className="text-blue-500 text-sm font-semibold">
+									View
+								</Text>
+							</View>
+						</View>
+					)}
+				</Pressable>
+			) : (
+				<SummaryCard
+					type="day"
+					summary={summary}
+					date={section.date}
+					handleToggle={handleToggle}
+					showDetailsBtn
+				/>
+			)}
 		</>
 	);
 };

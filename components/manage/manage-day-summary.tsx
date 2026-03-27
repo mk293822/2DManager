@@ -1,41 +1,41 @@
 import { SectionSummaryEditFields } from "@/hooks/manage/use-manage-hook";
+import { MutationResult } from "@/hooks/use-mutation";
 import { ParsedErrors } from "@/lib/helpers";
-import { SectionName, SectionSummaries } from "@/types/manage-types";
+import { Section, SectionName, SectionSummaries } from "@/types/manage-types";
 import React from "react";
 import DaySectionCard from "./day-section-card";
 import SummaryCard from "./summary-card";
 
+type Props = {
+	sections: SectionSummaries;
+	createSection: (variables: {
+		sectionName: SectionName;
+		date?: Date;
+	}) => Promise<MutationResult<SectionSummaries, string>>;
+	editSection: (variables: {
+		form: Partial<Section>;
+		id: string;
+	}) => Promise<
+		MutationResult<SectionSummaries, ParsedErrors<SectionSummaryEditFields>>
+	>;
+	deleteSection: (variables: {
+		id: string;
+		date: string;
+	}) => Promise<MutationResult<void, string>>;
+	creatingSection: boolean;
+	editingSection: boolean;
+	deletingSection: boolean;
+};
+
 const ManageDaySummary = ({
 	sections,
-	handleCreateSection,
-	onEditSave,
-	onConfirmDelete,
-}: {
-	sections: SectionSummaries;
-	handleCreateSection: (section: SectionName, date?: Date) => Promise<void>;
-	onEditSave: (
-		form:
-			| {
-					draw_number: string | null;
-					draw_times: number;
-					total_amount: number;
-					total_commission: number;
-					total_resold: number;
-					total_resold_commission: number;
-					total_resold_draw_value: number;
-					total_draw_value: number;
-			  }
-			| {
-					draw_number: string;
-					draw_times: number;
-			  },
-		id: string,
-	) => Promise<{
-		success: boolean;
-		errors: ParsedErrors<SectionSummaryEditFields>;
-	}>;
-	onConfirmDelete: (id: string, date: string) => Promise<void>;
-}) => {
+	createSection,
+	creatingSection,
+	editSection,
+	editingSection,
+	deleteSection,
+	deletingSection,
+}: Props) => {
 	const sectionList: SectionName[] = ["morning_section", "evening_section"];
 
 	if (!sections) return null;
@@ -48,12 +48,15 @@ const ManageDaySummary = ({
 			/>
 			{sectionList.map((sec) => (
 				<DaySectionCard
-					handleCreateSection={handleCreateSection}
-					onConfirmDelete={onConfirmDelete}
-					onEditSave={onEditSave}
+					createSection={createSection}
+					creatingSection={creatingSection}
+					editSection={editSection}
+					editingSection={editingSection}
+					deleteSection={deleteSection}
+					deletingSection={deletingSection}
 					key={sec}
-					section={sec}
-					data={sections[sec]}
+					sectionName={sec}
+					section={sections[sec]}
 					date={sections.date}
 				/>
 			))}

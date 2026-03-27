@@ -1,3 +1,5 @@
+// components/DateWeekPickerModal.tsx
+import { getWeeksForYear, Week } from "@/lib/datetime-helper";
 import React, { useEffect, useMemo, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
 import AppModal from "./ui/app-modal";
@@ -8,28 +10,54 @@ const PICKER_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS;
 
 type Mode = "date" | "week";
 
-type DateValue = {
+export type DateValue = {
 	type: "date";
 	year: number;
 	month: number;
 	day: number;
 };
 
-type WeekValue = {
+export type WeekValue = {
 	type: "week";
-	year: number;
-	month: number;
-	week: number;
+	start_date: Date;
+	end_date: Date;
 };
 
-type Props = {
+export type Props = {
 	visible: boolean;
-	mode: Mode; // 🔥 controlled mode
+	mode: Mode;
 	initialDate?: DateValue;
 	initialWeek?: WeekValue;
 	onDismiss: () => void;
 	onConfirm: (data: DateValue | WeekValue) => void;
 };
+
+// Helper to get week index from a date (1-based, Monday as first day)
+function getWeekIndex(date: Date, weeksOfYear: Week[]): number {
+	const weekStart = new Date(date);
+	weekStart.setHours(0, 0, 0, 0);
+
+	const index = weeksOfYear.findIndex((week) => {
+		const start = new Date(week.start);
+		start.setHours(0, 0, 0, 0);
+		const end = new Date(week.end);
+		end.setHours(23, 59, 59, 999);
+		return weekStart >= start && weekStart <= end;
+	});
+
+	return index + 1; // 1-based index
+}
+
+// Helper to get week by index
+function getWeekByIndex(index: number, weeksOfYear: Week[]): WeekValue | null {
+	if (index < 1 || index > weeksOfYear.length) return null;
+	const week = weeksOfYear[index - 1];
+	return {
+		type: "week",
+		start_date: week.start,
+		end_date: week.end,
+	};
+}
 
 export default function DateWeekPickerModal({
 	visible,
@@ -40,47 +68,77 @@ export default function DateWeekPickerModal({
 	onConfirm,
 }: Props) {
 	const [year, setYear] = useState(
-		initialDate?.year || initialWeek?.year || new Date().getFullYear(),
+		initialDate?.year ||
+			initialWeek?.start_date?.getFullYear() ||
+			new Date().getFullYear(),
 	);
-	const [month, setMonth] = useState(
-		initialDate?.month || initialWeek?.month || new Date().getMonth(),
-	);
-
+	const [month, setMonth] = useState(initialDate?.month || 0);
 	const [day, setDay] = useState(initialDate?.day || 1);
-	const [week, setWeek] = useState(initialWeek?.week || 1);
+	const [selectedWeek, setSelectedWeek] = useState<WeekValue | null>(
+		initialWeek || null,
+	);
 
+	// Years
 	const years = useMemo(() => {
 		const currentYear = new Date().getFullYear();
 		return Array.from({ length: 20 }, (_, i) => currentYear - 10 + i);
 	}, []);
 
+	// Months
 	const months = Array.from({ length: 12 }, (_, i) => i);
 
-	const daysInMonth = useMemo(() => {
-		return new Date(year, month + 1, 0).getDate();
-	}, [year, month]);
-
+	// Days for selected month
+	const daysInMonth = useMemo(
+		() => new Date(year, month + 1, 0).getDate(),
+		[year, month],
+	);
 	const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-	const weeksInMonth = useMemo(() => {
-		return Math.ceil(daysInMonth / 7);
-	}, [daysInMonth]);
+	// Weeks for selected year
+	const weeksList = useMemo(() => getWeeksForYear(year), [year]);
 
-	const weeks = Array.from({ length: weeksInMonth }, (_, i) => i + 1);
-
-	// Fix overflow
-	useEffect(() => {
-		if (day > daysInMonth) {
-			setDay(daysInMonth);
+	// Get current week index based on selectedWeek
+	const currentWeekIndex = useMemo(() => {
+		if (selectedWeek) {
+			return getWeekIndex(selectedWeek.start_date, weeksList);
 		}
+		// Default to current week if no selection
+		const today = new Date();
+		if (today.getFullYear() === year) {
+			return getWeekIndex(today, weeksList);
+		}
+		return 1;
+	}, [selectedWeek, weeksList, year]);
+
+	const [weekIndex, setWeekIndex] = useState(currentWeekIndex);
+
+	// Fix overflows
+	useEffect(() => {
+		if (day > daysInMonth) setDay(daysInMonth);
 	}, [day, daysInMonth]);
 
 	useEffect(() => {
-		if (week > weeksInMonth) {
-			setWeek(weeksInMonth);
-		}
-	}, [week, weeksInMonth]);
+		if (weekIndex > weeksList.length) setWeekIndex(weeksList.length);
+		if (weekIndex < 1) setWeekIndex(1);
+	}, [weekIndex, weeksList.length]);
 
+	// Update selected week when weekIndex or year changes
+	useEffect(() => {
+		const week = getWeekByIndex(weekIndex, weeksList);
+		setSelectedWeek(week);
+	}, [weekIndex, weeksList, year]);
+
+	// Update weekIndex when selectedWeek changes externally
+	useEffect(() => {
+		if (initialWeek && initialWeek.start_date) {
+			const index = getWeekIndex(initialWeek.start_date, weeksList);
+			setWeekIndex(index);
+		}
+	}, [initialWeek, weeksList]);
+
+	// -------------------
+	// FlatList Column Renderer
+	// -------------------
 	const renderColumn = (
 		data: number[],
 		selected: number,
@@ -145,6 +203,54 @@ export default function DateWeekPickerModal({
 		</View>
 	);
 
+	const renderWeekColumn = () =>
+		renderColumn(
+			Array.from({ length: weeksList.length }, (_, i) => i + 1),
+			weekIndex,
+			setWeekIndex,
+			(i) => {
+				const week = weeksList[i - 1];
+				if (!week) return `Week ${i}`;
+				const startLabel = week.start.toLocaleDateString("default", {
+					day: "numeric",
+					month: "short",
+				});
+				const endLabel = week.end.toLocaleDateString("default", {
+					day: "numeric",
+					month: "short",
+				});
+				return `Week ${i}: ${startLabel} – ${endLabel}`;
+			},
+		);
+
+	const renderDateColumns = () => (
+		<View className="flex-row justify-between">
+			<View className="flex-1 items-center">
+				{renderColumn(years, year, setYear)}
+			</View>
+			<View className="flex-1 items-center">
+				{renderColumn(months, month, setMonth, (m) =>
+					new Date(0, m).toLocaleString("default", { month: "short" }),
+				)}
+			</View>
+			<View className="flex-1 items-center">
+				{renderColumn(days, day, setDay)}
+			</View>
+		</View>
+	);
+
+	const renderWeekPicker = () => (
+		<View className="flex-row justify-between">
+			<View className="flex-[1] items-center">
+				{renderColumn(years, year, setYear)}
+			</View>
+			<View className="flex-[2] items-center">{renderWeekColumn()}</View>
+		</View>
+	);
+
+	// -------------------
+	// Render
+	// -------------------
 	return (
 		<AppModal open={visible}>
 			<View className="flex-1 justify-center items-center w-11/12">
@@ -153,25 +259,7 @@ export default function DateWeekPickerModal({
 						{mode === "date" ? "Select Date" : "Select Week"}
 					</Text>
 
-					<View className="flex-row justify-between">
-						<View className="flex-1 items-center">
-							{renderColumn(years, year, setYear)}
-						</View>
-
-						<View className="flex-1 items-center">
-							{renderColumn(months, month, setMonth, (m) =>
-								new Date(0, m).toLocaleString("default", {
-									month: "short",
-								}),
-							)}
-						</View>
-
-						<View className="flex-1 items-center">
-							{mode === "date"
-								? renderColumn(days, day, setDay)
-								: renderColumn(weeks, week, setWeek)}
-						</View>
-					</View>
+					{mode === "date" ? renderDateColumns() : renderWeekPicker()}
 
 					<View className="flex-row justify-end mt-6 gap-2">
 						<Pressable
@@ -184,19 +272,9 @@ export default function DateWeekPickerModal({
 						<Pressable
 							onPress={() => {
 								if (mode === "date") {
-									onConfirm({
-										type: "date",
-										year,
-										month,
-										day,
-									});
-								} else {
-									onConfirm({
-										type: "week",
-										year,
-										month,
-										week,
-									});
+									onConfirm({ type: "date", year, month, day });
+								} else if (selectedWeek) {
+									onConfirm(selectedWeek);
 								}
 							}}
 							className="bg-indigo-600 px-6 py-2 rounded-xl"

@@ -1,6 +1,6 @@
 import { EVENT_NAMES } from "@/event-names";
 import { eventBus } from "@/lib/event-bus";
-import { Notification, NotificationPayload } from "@/types/event-bus";
+import { AppEvents, Notification } from "@/types/event-bus";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import React, { useEffect, useRef, useState } from "react";
 import { Animated, Pressable, Text, View } from "react-native";
@@ -15,7 +15,7 @@ export const NotificationProvider = ({
 	// ===== Event Bus Subscriptions =====
 	useEffect(() => {
 		// Handler for success notifications
-		const notificationHandler = (notif: NotificationPayload) => {
+		const notificationHandler = (notif: AppEvents["NOTIFICATION"]) => {
 			const id = Date.now();
 			setNotifications((prev) => [...prev, { id, ...notif }]);
 			setTimeout(() => remove(id), 4000);

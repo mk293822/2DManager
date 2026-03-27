@@ -1,20 +1,22 @@
-import { formatDateDisplay } from "@/lib/helpers";
-import { SectionRange, WeekRange } from "@/types/manage-types";
+import { formatDateDisplay, formatWeekDisplay } from "@/lib/datetime-helper";
+import { SectionRange } from "@/types/manage-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import React, { useState } from "react";
 import { Pressable, Text, View } from "react-native";
-import DateWeekPickerModal from "../date-week-picker-modal";
+import DateWeekPickerModal from "./date-week-picker-modal";
 
 type Props = {
 	selectedSectionRange: SectionRange;
 	setSelectedSectionRange: React.Dispatch<React.SetStateAction<SectionRange>>;
 };
 
-const ManageDatePickerHeader = ({
+const DatePickerHeader = ({
 	selectedSectionRange,
 	setSelectedSectionRange,
 }: Props) => {
 	const [showPicker, setShowPicker] = useState(false);
+
+	// Helper to format week range for display
 
 	return (
 		<>
@@ -40,12 +42,7 @@ const ManageDatePickerHeader = ({
 						<Text className="text-indigo-700 font-semibold">
 							{selectedSectionRange.type === "day"
 								? formatDateDisplay(selectedSectionRange.date)
-								: `${selectedSectionRange.year} • ${new Date(
-										selectedSectionRange.year,
-										selectedSectionRange.month,
-									).toLocaleString("default", {
-										month: "long",
-									})} • Week ${(selectedSectionRange as WeekRange).week}`}
+								: formatWeekDisplay(selectedSectionRange)}
 						</Text>
 					</View>
 				</View>
@@ -70,9 +67,8 @@ const ManageDatePickerHeader = ({
 					selectedSectionRange.type === "week"
 						? {
 								type: "week",
-								year: selectedSectionRange.year,
-								month: selectedSectionRange.month,
-								week: selectedSectionRange.week,
+								start_date: selectedSectionRange.start_date,
+								end_date: selectedSectionRange.end_date,
 							}
 						: undefined
 				}
@@ -88,9 +84,8 @@ const ManageDatePickerHeader = ({
 					} else {
 						setSelectedSectionRange({
 							type: "week",
-							year: data.year,
-							month: data.month,
-							week: data.week,
+							start_date: data.start_date,
+							end_date: data.end_date,
 						});
 					}
 				}}
@@ -99,4 +94,4 @@ const ManageDatePickerHeader = ({
 	);
 };
 
-export default ManageDatePickerHeader;
+export default DatePickerHeader;

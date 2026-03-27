@@ -3,10 +3,11 @@ import HolidayInfo from "@/components/holiday-info";
 import LiveCard from "@/components/live-card";
 import { Loading } from "@/components/loading";
 import TwoDResultCard from "@/components/two-d-lists/two-d-result-card";
+import useFetchLiveTwoD from "@/hooks/live-two-d/use-fetch-live-two-d";
 import { useBlink } from "@/hooks/use-blink";
-import useFetchLiveTwoD from "@/hooks/use-fetch-live-two-d";
+import { useInternet } from "@/hooks/use-internet";
+import { formatTimeIntl } from "@/lib/datetime-helper";
 import { getTwoDResultTime, toSeconds } from "@/lib/get-twod-result-time";
-import { formatTimeIntl } from "@/lib/helpers";
 import { TwoDHistoryItem } from "@/types/two-d-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Tabs, useRouter } from "expo-router";
@@ -14,6 +15,7 @@ import { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 
 export default function Index() {
+	const isConnected = useInternet();
 	const { liveData } = useFetchLiveTwoD();
 	// eslint-disable-next-line eqeqeq
 	const isHoliday = liveData?.holiday?.status == 3;
@@ -27,10 +29,6 @@ export default function Index() {
 
 	useEffect(() => {
 		if (!liveData) return;
-		if (liveData.result === undefined) {
-			router.replace("/error-page");
-			return;
-		}
 
 		setShowLiveCard(
 			!liveData.result.some(
@@ -55,6 +53,19 @@ export default function Index() {
 		setMainResult(m_Result);
 		setIsBlinking(!m_Result);
 	}, [liveData, router]);
+
+	if (isConnected === false) {
+		return (
+			<View className="flex-1 items-center justify-center bg-gray-100 px-6">
+				<Text className="text-indigo-600 text-2xl font-bold mb-2 text-center">
+					No Internet Connection
+				</Text>
+				<Text className="text-gray-600 text-center mb-6">
+					This page requires an internet connection.
+				</Text>
+			</View>
+		);
+	}
 
 	return (
 		<>
@@ -94,10 +105,7 @@ export default function Index() {
 											? liveData.live?.time.split(" ")[0]
 											: mainResult?.stock_datetime.split(" ")[0]}
 									</Text>
-									<Text
-										className="ml-1 text-green-600 font-semibold"
-										style={style}
-									>
+									<Text className="ml-1 text-green-600 font-semibold">
 										{formatTimeIntl(
 											isBlinking
 												? liveData.live?.time.split(" ")[1]

@@ -1,3 +1,4 @@
+import { BussinessUserType } from "@/types/bussiness-user-types";
 import { SectionName } from "@/types/manage-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
@@ -8,9 +9,11 @@ const UserTwoDListHeaderRight = ({
 	id,
 	user_name,
 	section,
+	bussinessUserType,
 }: {
 	id: string;
 	user_name: string;
+	bussinessUserType: BussinessUserType;
 	section: SectionName;
 }) => {
 	const router = useRouter();
@@ -30,6 +33,7 @@ const UserTwoDListHeaderRight = ({
 							id: id,
 							user_name: user_name,
 							section: section,
+							bussinessUserType,
 						},
 					})
 				}

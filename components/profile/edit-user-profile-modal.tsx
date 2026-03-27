@@ -1,7 +1,9 @@
 import { EVENT_NAMES } from "@/event-names";
-import { EditUserFields } from "@/hooks/use-auth";
+import { EditUserFields } from "@/hooks/auth/use-auth";
+import { MutationResult } from "@/hooks/use-mutation";
 import { eventBus } from "@/lib/event-bus";
 import { ParsedErrors } from "@/lib/helpers";
+import { User } from "@/types/main";
 import React, { useState } from "react";
 import {
 	ScrollView,
@@ -18,10 +20,11 @@ type Props = {
 	onClose: () => void;
 	name: string;
 	phone_number: string;
-	editUserDetails: (form: { name: string; phone_number: string }) => Promise<{
-		success: boolean;
-		errors: ParsedErrors<EditUserFields>;
-	}>;
+	editUserDetails: (variables: {
+		name: string;
+		phone_number: string;
+	}) => Promise<MutationResult<User, ParsedErrors<EditUserFields>>>;
+	updatingProfile: boolean;
 };
 
 const EditUserProfileModal = ({
@@ -30,9 +33,8 @@ const EditUserProfileModal = ({
 	editUserDetails,
 	name,
 	phone_number,
+	updatingProfile,
 }: Props) => {
-	const [loading, setLoading] = useState(false);
-
 	const [form, setForm] = useState<{ name: string; phone_number: string }>({
 		name,
 		phone_number,
@@ -52,36 +54,26 @@ const EditUserProfileModal = ({
 	};
 
 	const handleSave = async () => {
-		setLoading(true);
+		const res = await editUserDetails(form);
 
-		try {
-			const res = await editUserDetails(form);
-
-			if (res.success) {
-				setErrors({});
-				onCloseModal();
-				return;
-			}
-
-			// field errors
-
-			if (res.errors.form && Object.keys(res.errors.fields).length === 0) {
-				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-					type: "error",
-					title: "Update Failed",
-					description: res.errors.form,
-				});
-			} else {
-				setErrors(res.errors.fields);
-			}
-		} finally {
-			setLoading(false);
+		if (!res.error) {
+			setErrors({});
+			onCloseModal();
+			return;
+		} else if (res.error.form && Object.keys(res.error.fields).length === 0) {
+			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+				type: "error",
+				title: "Update Failed",
+				description: res.error.form,
+			});
+		} else {
+			setErrors(res.error.fields);
 		}
 	};
 
 	return (
 		<AppModal open={open}>
-			{loading ? (
+			{updatingProfile ? (
 				<View className="bg-gray-100 w-1/2 h-40 flex-col rounded-2xl p-6 py-8 shadow-lg">
 					<Loading />
 				</View>
@@ -139,7 +131,7 @@ const EditUserProfileModal = ({
 
 						<TouchableOpacity
 							onPress={handleSave}
-							disabled={loading}
+							disabled={updatingProfile}
 							className="px-4 py-2 rounded-lg disabled:bg-indigo-500 bg-indigo-600 border border-indigo-600"
 						>
 							<Text className="font-semibold text-white">Save</Text>

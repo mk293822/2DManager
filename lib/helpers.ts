@@ -6,16 +6,6 @@ import {
 	SectionSummary,
 } from "@/types/manage-types";
 
-export const DAYS: string[] = [
-	"Monday",
-	"Tuesday",
-	"Wednesday",
-	"Thursday",
-	"Friday",
-	"Saturday",
-	"Sunday",
-];
-
 export const formatSmartNumber = (num: number | string) => {
 	const n = Number(num);
 	if (Number.isNaN(n)) return "0";
@@ -26,36 +16,6 @@ export const formatSmartNumber = (num: number | string) => {
 };
 
 export const formatKs = (num: number) => `${num.toLocaleString()} Ks`;
-
-export function formatTimeIntl(
-	time: string = "00:00:00",
-	showSecond: boolean = false,
-): string {
-	// Split time into parts
-	const [hh, mm, ss] = time.split(":").map(Number);
-
-	// Convert to 12-hour format manually
-	const hour12 = hh % 12 === 0 ? 12 : hh % 12;
-	const ampm = hh < 12 || hh === 24 ? "AM" : "PM";
-	const minute = String(mm).padStart(2, "0");
-
-	return `${hour12}:${minute}${showSecond ? ":" + ss.toString() : ""} ${ampm}`;
-}
-
-export const formatDateDisplay = (date: Date) => {
-	const dayName = DAYS[date.getDay()];
-	const month = date.toLocaleString("default", { month: "short" });
-	const day = date.getDate();
-	const year = date.getFullYear();
-	return `${dayName}, ${month} ${day}, ${year}`;
-};
-
-export const formatDateRequest = (date: Date) => {
-	const year = date.getFullYear();
-	const month = (date.getMonth() + 1).toString().padStart(2, "0");
-	const day = date.getDate().toString().padStart(2, "0");
-	return `${year}-${month}-${day}`;
-};
 
 export const changeSectionName = (section: SectionName) =>
 	section === "morning_section" ? "Morning" : "Evening";
@@ -72,14 +32,6 @@ export const getTotalArray = (
 	["Total Resold Draw Value", data.total_resold_draw_value],
 	["Total Resold Draw Amount", data.total_resold_draw_amount],
 ];
-
-export function getWeekOfMonth(date: Date): number {
-	const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
-	const dayOfMonth = date.getDate();
-	const startDay = firstDayOfMonth.getDay();
-
-	return Math.ceil((dayOfMonth + startDay) / 7);
-}
 
 export function changePlace(value: string) {
 	if (value.length > 2) return value;
@@ -146,10 +98,4 @@ export function upsertByDate<T extends SectionSummaries | SectionSaleGroup>(
 	return [...prev, newDay].sort(
 		(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
 	);
-}
-
-export function isToday(date: string | Date) {
-	if (typeof date === "string")
-		return new Date(date).toDateString() === new Date().toDateString();
-	return date.toDateString() === new Date().toDateString();
 }

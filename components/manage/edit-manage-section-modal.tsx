@@ -1,9 +1,10 @@
 // EditManageSectionModal.tsx
 import { EVENT_NAMES } from "@/event-names";
 import { SectionSummaryEditFields } from "@/hooks/manage/use-manage-hook";
+import { MutationResult } from "@/hooks/use-mutation";
 import { eventBus } from "@/lib/event-bus";
 import { ParsedErrors } from "@/lib/helpers";
-import { Section } from "@/types/manage-types";
+import { Section, SectionSummaries } from "@/types/manage-types";
 import React, { useState } from "react";
 import {
 	ScrollView,
@@ -17,32 +18,25 @@ import AppModal from "../ui/app-modal";
 
 type EditManageSectionModalProps = {
 	sectionObj: Section;
-	onEditSave: (
-		form: {
-			draw_number: string | null;
-			draw_times: number;
-			total_amount: number;
-			total_commission: number;
-			total_resold: number;
-			total_resold_commission: number;
-			total_resold_draw_value: number;
-			total_draw_value: number;
-			total_resold_draw_amount: number;
-		},
-		id: string,
-	) => Promise<{
-		success: boolean;
-		errors: ParsedErrors<SectionSummaryEditFields>;
-	}>;
+	editSection: (variables: {
+		form: Partial<Section>;
+		id: string;
+	}) => Promise<
+		MutationResult<SectionSummaries, ParsedErrors<SectionSummaryEditFields>>
+	>;
+	editingSection: boolean;
 	onClose: () => void;
 	open: boolean;
+	isDrawNumberEdit: boolean;
 };
 
 const EditManageSectionModal = ({
 	sectionObj,
-	onEditSave,
+	editSection,
 	onClose,
 	open,
+	editingSection,
+	isDrawNumberEdit,
 }: EditManageSectionModalProps) => {
 	const {
 		draw_number,
@@ -68,7 +62,6 @@ const EditManageSectionModal = ({
 		total_resold_draw_amount,
 	});
 
-	const [loading, setLoading] = useState(false);
 	const [errors, setErrors] = useState<
 		Partial<Record<SectionSummaryEditFields, string>>
 	>({});
@@ -83,32 +76,33 @@ const EditManageSectionModal = ({
 	};
 
 	const handleSave = async () => {
-		try {
-			setLoading(true);
-			const res = await onEditSave(form, sectionObj.id);
-			if (res.success) {
-				handleClose();
-				setErrors({});
-				return;
-			}
+		const payload: Partial<Section> = isDrawNumberEdit
+			? {
+					draw_number: form.draw_number,
+					draw_times: form.draw_times,
+				}
+			: form;
 
-			if (res.errors.form && Object.keys(res.errors.fields).length === 0) {
-				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-					type: "error",
-					title: "Edit Failed",
-					description: res.errors.form,
-				});
-			} else {
-				setErrors(res.errors.fields);
-			}
-		} finally {
-			setLoading(false);
+		const res = await editSection({ form: payload, id: sectionObj.id });
+
+		if (!res.error) {
+			handleClose();
+			setErrors({});
+			return;
+		} else if (res.error.form && Object.keys(res.error.fields).length === 0) {
+			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+				type: "error",
+				title: "Edit Failed",
+				description: res.error.form,
+			});
+		} else {
+			setErrors(res.error.fields);
 		}
 	};
 
 	return (
 		<AppModal open={open}>
-			{loading ? (
+			{editingSection ? (
 				<View className="bg-gray-100 w-1/2 h-40 flex-col rounded-2xl p-6 py-8 shadow-lg">
 					<Loading />
 				</View>
@@ -148,134 +142,138 @@ const EditManageSectionModal = ({
 						{errors.draw_times && (
 							<Text className="text-red-500 text-sm">{errors.draw_times}</Text>
 						)}
-
-						{/* Total Amount */}
-						<Text className="font-semibold text-gray-700">Total Amount</Text>
-						<TextInput
-							value={form.total_amount.toLocaleString()}
-							onChangeText={(text) => {
-								const clean = text.replace(/,/g, "");
-								handleChange("total_amount", Number(clean || 0));
-							}}
-							className="border border-gray-300 rounded-lg px-3 py-2"
-							keyboardType="numeric"
-						/>
-						{errors.total_amount && (
-							<Text className="text-red-500 text-sm">
-								{errors.total_amount}
-							</Text>
-						)}
-
-						{/* Total Commission */}
-						<Text className="font-semibold text-gray-700">
-							Total Commission
-						</Text>
-						<TextInput
-							value={form.total_commission.toLocaleString()}
-							onChangeText={(text) => {
-								const clean = text.replace(/,/g, "");
-								handleChange("total_commission", Number(clean || 0));
-							}}
-							className="border border-gray-300 rounded-lg px-3 py-2"
-							keyboardType="numeric"
-						/>
-						{errors.total_commission && (
-							<Text className="text-red-500 text-sm">
-								{errors.total_commission}
-							</Text>
-						)}
-
-						{/* Total Resold */}
-						<Text className="font-semibold text-gray-700">Total Resold</Text>
-						<TextInput
-							value={form.total_resold.toLocaleString()}
-							onChangeText={(text) => {
-								const clean = text.replace(/,/g, "");
-								handleChange("total_resold", Number(clean || 0));
-							}}
-							className="border border-gray-300 rounded-lg px-3 py-2"
-							keyboardType="numeric"
-						/>
-						{errors.total_resold && (
-							<Text className="text-red-500 text-sm">
-								{errors.total_resold}
-							</Text>
-						)}
-
-						{/* Total Resold Commission */}
-						<Text className="font-semibold text-gray-700">
-							Total Resold Commission
-						</Text>
-						<TextInput
-							value={form.total_resold_commission.toLocaleString()}
-							onChangeText={(text) => {
-								const clean = text.replace(/,/g, "");
-								handleChange("total_resold_commission", Number(clean || 0));
-							}}
-							className="border border-gray-300 rounded-lg px-3 py-2"
-							keyboardType="numeric"
-						/>
-						{errors.total_resold_commission && (
-							<Text className="text-red-500 text-sm">
-								{errors.total_resold_commission}
-							</Text>
-						)}
-
-						{/* Total Resold Draw Value */}
-						<Text className="font-semibold text-gray-700">
-							Total Resold Draw Value
-						</Text>
-						<TextInput
-							value={form.total_resold_draw_value.toLocaleString()}
-							onChangeText={(text) => {
-								const clean = text.replace(/,/g, "");
-								handleChange("total_resold_draw_value", Number(clean || 0));
-							}}
-							className="border border-gray-300 rounded-lg px-3 py-2"
-							keyboardType="numeric"
-						/>
-						{errors.total_resold_draw_value && (
-							<Text className="text-red-500 text-sm">
-								{errors.total_resold_draw_value}
-							</Text>
-						)}
-
-						{/* Total Resold Draw Value */}
-						<Text className="font-semibold text-gray-700">
-							Total Resold Draw Amount
-						</Text>
-						<TextInput
-							value={form.total_resold_draw_amount.toLocaleString()}
-							onChangeText={(text) => {
-								const clean = text.replace(/,/g, "");
-								handleChange("total_resold_draw_amount", Number(clean || 0));
-							}}
-							className="border border-gray-300 rounded-lg px-3 py-2"
-							keyboardType="numeric"
-						/>
-						{errors.total_resold_draw_amount && (
-							<Text className="text-red-500 text-sm">
-								{errors.total_resold_draw_amount}
-							</Text>
-						)}
-
-						{/* Total Draw Value */}
-						<Text className="font-semibold text-gray-700">
-							Total Draw Value
-						</Text>
-						<TextInput
-							value={form.total_draw_value.toLocaleString()}
-							onChangeText={(text) => {
-								const clean = text.replace(/,/g, "");
-								handleChange("total_draw_value", Number(clean || 0));
-							}}
-							className="border border-gray-300 rounded-lg px-3 py-2"
-							keyboardType="numeric"
-						/>
-						{errors.total_draw_value && (
-							<Text className="text-red-500 text-sm">
-								{errors.total_draw_value}
-							</Text>
+						{!isDrawNumberEdit && (
+							<>
+								{/* Total Amount */}
+								<Text className="font-semibold text-gray-700">
+									Total Amount
+								</Text>
+								<TextInput
+									value={form.total_amount.toLocaleString()}
+									onChangeText={(text) => {
+										const clean = text.replace(/,/g, "");
+										handleChange("total_amount", Number(clean || 0));
+									}}
+									className="border border-gray-300 rounded-lg px-3 py-2"
+									keyboardType="numeric"
+								/>
+								{errors.total_amount && (
+									<Text className="text-red-500 text-sm">
+										{errors.total_amount}
+									</Text>
+								)}
+								{/* Total Commission */}
+								<Text className="font-semibold text-gray-700">
+									Total Commission
+								</Text>
+								<TextInput
+									value={form.total_commission.toLocaleString()}
+									onChangeText={(text) => {
+										const clean = text.replace(/,/g, "");
+										handleChange("total_commission", Number(clean || 0));
+									}}
+									className="border border-gray-300 rounded-lg px-3 py-2"
+									keyboardType="numeric"
+								/>
+								{errors.total_commission && (
+									<Text className="text-red-500 text-sm">
+										{errors.total_commission}
+									</Text>
+								)}
+								{/* Total Resold */}
+								<Text className="font-semibold text-gray-700">
+									Total Resold
+								</Text>
+								<TextInput
+									value={form.total_resold.toLocaleString()}
+									onChangeText={(text) => {
+										const clean = text.replace(/,/g, "");
+										handleChange("total_resold", Number(clean || 0));
+									}}
+									className="border border-gray-300 rounded-lg px-3 py-2"
+									keyboardType="numeric"
+								/>
+								{errors.total_resold && (
+									<Text className="text-red-500 text-sm">
+										{errors.total_resold}
+									</Text>
+								)}
+								{/* Total Resold Commission */}
+								<Text className="font-semibold text-gray-700">
+									Total Resold Commission
+								</Text>
+								<TextInput
+									value={form.total_resold_commission.toLocaleString()}
+									onChangeText={(text) => {
+										const clean = text.replace(/,/g, "");
+										handleChange("total_resold_commission", Number(clean || 0));
+									}}
+									className="border border-gray-300 rounded-lg px-3 py-2"
+									keyboardType="numeric"
+								/>
+								{errors.total_resold_commission && (
+									<Text className="text-red-500 text-sm">
+										{errors.total_resold_commission}
+									</Text>
+								)}
+								{/* Total Resold Draw Value */}
+								<Text className="font-semibold text-gray-700">
+									Total Resold Draw Value
+								</Text>
+								<TextInput
+									value={form.total_resold_draw_value.toLocaleString()}
+									onChangeText={(text) => {
+										const clean = text.replace(/,/g, "");
+										handleChange("total_resold_draw_value", Number(clean || 0));
+									}}
+									className="border border-gray-300 rounded-lg px-3 py-2"
+									keyboardType="numeric"
+								/>
+								{errors.total_resold_draw_value && (
+									<Text className="text-red-500 text-sm">
+										{errors.total_resold_draw_value}
+									</Text>
+								)}
+								{/* Total Resold Draw Value */}
+								<Text className="font-semibold text-gray-700">
+									Total Resold Draw Amount
+								</Text>
+								<TextInput
+									value={form.total_resold_draw_amount.toLocaleString()}
+									onChangeText={(text) => {
+										const clean = text.replace(/,/g, "");
+										handleChange(
+											"total_resold_draw_amount",
+											Number(clean || 0),
+										);
+									}}
+									className="border border-gray-300 rounded-lg px-3 py-2"
+									keyboardType="numeric"
+								/>
+								{errors.total_resold_draw_amount && (
+									<Text className="text-red-500 text-sm">
+										{errors.total_resold_draw_amount}
+									</Text>
+								)}
+								{/* Total Draw Value */}
+								<Text className="font-semibold text-gray-700">
+									Total Draw Value
+								</Text>
+								<TextInput
+									value={form.total_draw_value.toLocaleString()}
+									onChangeText={(text) => {
+										const clean = text.replace(/,/g, "");
+										handleChange("total_draw_value", Number(clean || 0));
+									}}
+									className="border border-gray-300 rounded-lg px-3 py-2"
+									keyboardType="numeric"
+								/>
+								{errors.total_draw_value && (
+									<Text className="text-red-500 text-sm">
+										{errors.total_draw_value}
+									</Text>
+								)}
+							</>
 						)}
 					</ScrollView>
 
@@ -292,7 +290,7 @@ const EditManageSectionModal = ({
 						</TouchableOpacity>
 						<TouchableOpacity
 							onPress={handleSave}
-							disabled={loading}
+							disabled={editingSection}
 							className="px-4 py-2 rounded-lg bg-indigo-600 disabled:bg-indigo-400"
 						>
 							<Text className="font-semibold text-white">Save</Text>

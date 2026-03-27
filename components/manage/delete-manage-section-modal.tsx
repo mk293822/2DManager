@@ -1,7 +1,10 @@
+import { EVENT_NAMES } from "@/event-names";
+import { MutationResult } from "@/hooks/use-mutation";
+import { eventBus } from "@/lib/event-bus";
 import { changeSectionName } from "@/lib/helpers";
 import { SectionName } from "@/types/manage-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import React, { useState } from "react";
+import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { Loading } from "../loading";
 import AppModal from "../ui/app-modal";
@@ -9,35 +12,40 @@ import AppModal from "../ui/app-modal";
 type DeleteManageSectionModalProps = {
 	open: boolean;
 	onClose: () => void;
-	onConfirmDelete: (id: string, date: string) => Promise<void>;
+	deleteSection: (variables: {
+		id: string;
+		date: string;
+	}) => Promise<MutationResult<void, string>>;
 	sectionName: SectionName;
 	section_id: string;
 	date: string;
+	deletingSection: boolean;
 };
 
 const DeleteManageSectionModal = ({
 	open,
 	onClose,
-	onConfirmDelete,
+	deleteSection,
 	sectionName,
 	section_id,
 	date,
+	deletingSection,
 }: DeleteManageSectionModalProps) => {
-	const [loading, setLoading] = useState(false);
-
 	const handleDelete = async () => {
-		try {
-			setLoading(true);
-			await onConfirmDelete(section_id, date);
-		} finally {
-			setLoading(false);
-			onClose();
+		const res = await deleteSection({ id: section_id, date });
+		if (res.error) {
+			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+				type: "error",
+				title: "Error",
+				description: res.error,
+			});
 		}
+		onClose();
 	};
 
 	return (
 		<AppModal open={open}>
-			{loading ? (
+			{deletingSection ? (
 				<View className="bg-gray-100 w-1/2 h-40 flex-col rounded-2xl p-6 py-8 shadow-lg">
 					<Loading />
 				</View>
@@ -82,7 +90,7 @@ const DeleteManageSectionModal = ({
 
 						<TouchableOpacity
 							onPress={handleDelete}
-							disabled={loading}
+							disabled={deletingSection}
 							className="flex-1 px-4 py-3 rounded-lg bg-red-600"
 						>
 							<Text className="text-white font-semibold text-center">

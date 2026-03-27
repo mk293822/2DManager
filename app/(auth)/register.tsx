@@ -1,5 +1,5 @@
 import { EVENT_NAMES } from "@/event-names";
-import { useAuthContext } from "@/hooks/use-auth-context";
+import { useAuthContext } from "@/hooks/auth/use-auth-context";
 import { eventBus } from "@/lib/event-bus";
 import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -13,36 +13,30 @@ import {
 } from "react-native";
 
 const Register = () => {
-	const { register } = useAuthContext();
+	const { register, registering } = useAuthContext();
 	const router = useRouter();
 
 	const [name, setName] = useState("");
 	const [phoneNumber, setPhoneNumber] = useState("");
 	const [password, setPassword] = useState("");
 	const [passwordConfirm, setPasswordConfirm] = useState("");
-	const [loading, setLoading] = useState(false);
 
-	const [errors, setErrors] = useState<
+	const [error, setErrors] = useState<
 		Partial<Record<"name" | "phone_number" | "password", string>>
 	>({});
 
 	const handleRegister = async () => {
-		setLoading(true);
-
 		// local password confirmation check
 		if (password !== passwordConfirm) {
 			setErrors({ password: "Passwords do not match" });
 			setPasswordConfirm("");
-			setLoading(false);
 			return;
 		}
 
 		// call hook
-		const res = await register(name, phoneNumber, password);
+		const res = await register({ name, phone_number: phoneNumber, password });
 
-		setLoading(false);
-
-		if (res?.success) {
+		if (!res?.error) {
 			setErrors({});
 			setName("");
 			setPhoneNumber("");
@@ -51,16 +45,14 @@ const Register = () => {
 
 			router.replace("/profile");
 			return;
-		}
-
-		if (res.errors.form && Object.keys(res.errors.fields).length === 0) {
+		} else if (res.error.form && Object.keys(res.error.fields).length === 0) {
 			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
 				type: "error",
 				title: "Register Failed",
-				description: res.errors.form,
+				description: res.error.form,
 			});
 		} else {
-			setErrors(res.errors.fields);
+			setErrors(res.error.fields);
 		}
 	};
 
@@ -94,8 +86,8 @@ const Register = () => {
 						placeholder="Enter your name"
 						placeholderTextColor="#9ca3af"
 					/>
-					{errors.name && (
-						<Text className="text-red-500 text-sm">{errors.name}</Text>
+					{error.name && (
+						<Text className="text-red-500 text-sm">{error.name}</Text>
 					)}
 				</View>
 
@@ -116,8 +108,8 @@ const Register = () => {
 						placeholder="Enter phone number"
 						placeholderTextColor="#9ca3af"
 					/>
-					{errors.phone_number && (
-						<Text className="text-red-500 text-sm">{errors.phone_number}</Text>
+					{error.phone_number && (
+						<Text className="text-red-500 text-sm">{error.phone_number}</Text>
 					)}
 				</View>
 
@@ -136,8 +128,8 @@ const Register = () => {
 						placeholder="Create password"
 						placeholderTextColor="#9ca3af"
 					/>
-					{errors.password && (
-						<Text className="text-red-500 text-sm">{errors.password}</Text>
+					{error.password && (
+						<Text className="text-red-500 text-sm">{error.password}</Text>
 					)}
 				</View>
 
@@ -163,7 +155,7 @@ const Register = () => {
 					activeOpacity={0.85}
 					className="bg-indigo-400 py-3 rounded-lg mt-2"
 				>
-					{loading ? (
+					{registering ? (
 						<View className="flex-1 items-center justify-center bg-indigo-400">
 							<ActivityIndicator
 								size={20}

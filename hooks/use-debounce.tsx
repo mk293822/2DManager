@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Debounces a value by the specified delay.
@@ -7,8 +7,14 @@ import { useEffect, useState } from "react";
  */
 export function useDebounce<T>(value: T, delay: number = 500): T {
 	const [debouncedValue, setDebouncedValue] = useState<T>(value);
+	const isFirstRender = useRef(true);
 
 	useEffect(() => {
+		if (isFirstRender.current) {
+			isFirstRender.current = false;
+			setDebouncedValue(value);
+			return;
+		}
 		const handler = setTimeout(() => {
 			setDebouncedValue(value);
 		}, delay);

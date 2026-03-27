@@ -1,6 +1,6 @@
 import { Loading } from "@/components/loading";
-import useFetchLiveTwoD from "@/hooks/use-fetch-live-two-d";
-import { formatDateDisplay, formatTimeIntl } from "@/lib/helpers";
+import useFetchLiveTwoD from "@/hooks/live-two-d/use-fetch-live-two-d";
+import { formatDateDisplay, formatTimeIntl } from "@/lib/datetime-helper";
 import { TwoDData } from "@/types/two-d-types";
 import React, { useState } from "react";
 import { FlatList, RefreshControl, Text, View } from "react-native";

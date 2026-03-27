@@ -1,8 +1,9 @@
 import { EVENT_NAMES } from "@/event-names";
-import { BussinessUserEditFields } from "@/hooks/bussiness-user-details/use-user-details-hook";
+import { BussinessUserEditFields } from "@/hooks/bussiness-user-details/use-bussiness-user-details-hook";
+import { MutationResult } from "@/hooks/use-mutation";
 import { eventBus } from "@/lib/event-bus";
 import { ParsedErrors } from "@/lib/helpers";
-import { BussinessUserType } from "@/types/bussiness-user-types";
+import { BussinessUser, BussinessUserType } from "@/types/bussiness-user-types";
 import React, { useState } from "react";
 import {
 	ScrollView,
@@ -17,18 +18,11 @@ import AppModal from "../ui/app-modal";
 type Props = {
 	open: boolean;
 	onClose: () => void;
-	editCommissionUserDetails: (
-		id: string,
-		form: {
-			name: string;
-			phone_number: string;
-			default_commission_percent: number;
-		},
-		bussinessUserType: BussinessUserType,
-	) => Promise<{
-		success: boolean;
-		errors: ParsedErrors<BussinessUserEditFields>;
-	}>;
+	editBussinessUserDetails: (
+		variables: Partial<BussinessUser>,
+	) => Promise<
+		MutationResult<BussinessUser, ParsedErrors<BussinessUserEditFields>>
+	>;
 	id: string;
 	name: string;
 	phone_number: string;
@@ -39,7 +33,7 @@ type Props = {
 const EditBussinessUserModal = ({
 	open,
 	onClose,
-	editCommissionUserDetails,
+	editBussinessUserDetails,
 	id,
 	name,
 	phone_number,
@@ -57,7 +51,7 @@ const EditBussinessUserModal = ({
 	});
 	const [loading, setLoading] = useState(false);
 
-	const [errors, setErrors] = useState<
+	const [error, setErrors] = useState<
 		Partial<Record<BussinessUserEditFields, string>>
 	>({});
 
@@ -73,21 +67,19 @@ const EditBussinessUserModal = ({
 	const handleSave = async () => {
 		try {
 			setLoading(true);
-			const res = await editCommissionUserDetails(id, form, bussinessUserType);
-			if (res.success) {
+			const res = await editBussinessUserDetails(form);
+			if (!res.error) {
 				handleClose();
 				setErrors({});
 				return;
-			}
-
-			if (res.errors.form && Object.keys(res.errors.fields).length === 0) {
+			} else if (res.error.form && Object.keys(res.error.fields).length === 0) {
 				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
 					type: "error",
 					title: "Edit Failed",
-					description: res.errors.form,
+					description: res.error.form,
 				});
 			} else {
-				setErrors(res.errors.fields);
+				setErrors(res.error.fields);
 			}
 		} finally {
 			setLoading(false);
@@ -116,8 +108,8 @@ const EditBussinessUserModal = ({
 							onChangeText={(text) => handleChange("name", text)}
 							className="border border-gray-300 rounded-lg px-3 py-2"
 						/>
-						{errors.name && (
-							<Text className="text-red-500 text-sm">{errors.name}</Text>
+						{error.name && (
+							<Text className="text-red-500 text-sm">{error.name}</Text>
 						)}
 
 						<Text className="font-semibold text-gray-700">Phone Number</Text>
@@ -127,10 +119,8 @@ const EditBussinessUserModal = ({
 							onChangeText={(text) => handleChange("phone_number", text)}
 							className="border border-gray-300 rounded-lg px-3 py-2"
 						/>
-						{errors.phone_number && (
-							<Text className="text-red-500 text-sm">
-								{errors.phone_number}
-							</Text>
+						{error.phone_number && (
+							<Text className="text-red-500 text-sm">{error.phone_number}</Text>
 						)}
 
 						<Text className="font-semibold text-gray-700">
@@ -146,9 +136,9 @@ const EditBussinessUserModal = ({
 							}}
 							className="border border-gray-300 rounded-lg px-3 py-2"
 						/>
-						{errors.default_commission_percent && (
+						{error.default_commission_percent && (
 							<Text className="text-red-500 text-sm">
-								{errors.default_commission_percent}
+								{error.default_commission_percent}
 							</Text>
 						)}
 					</ScrollView>

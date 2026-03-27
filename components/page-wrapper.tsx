@@ -1,10 +1,11 @@
 import React from "react";
 import { Pressable, Text, View } from "react-native";
 import { Loading } from "./loading";
+import OfflineBanner from "./ui/offline-banner";
 
 type BussinessPageType = {
 	loading?: boolean;
-	error?: string | null;
+	error?: Error | null;
 	onReload?: () => void;
 	empty?: boolean;
 	emptyMessage?: string;
@@ -21,9 +22,9 @@ export default function PageWrapper({
 }: BussinessPageType) {
 	if (error) {
 		return (
-			<View className="flex-1 items-center justify-center bg-white p-4">
+			<View className="flex-1 items-center justify-center bg-white p-4 mb-12">
 				<Text className="text-red-600 font-semibold text-center mb-4">
-					{error}
+					{error.message}
 				</Text>
 				{onReload && (
 					<Pressable
@@ -56,5 +57,12 @@ export default function PageWrapper({
 			</View>
 		);
 	}
-	return <>{children}</>;
+	return (
+		<View className="flex-1 bg-gray-100">
+			<OfflineBanner />
+
+			{/* existing loading / error / content */}
+			{children}
+		</View>
+	);
 }

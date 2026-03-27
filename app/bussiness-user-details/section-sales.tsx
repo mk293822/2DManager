@@ -1,52 +1,60 @@
 // SectionSales.tsx
+import DatePickerHeader from "@/components/date-picker-header";
 import SectionSalesPageHeaderRight from "@/components/header-rights/section-sales";
-import { Loading } from "@/components/loading";
-import ManageDatePickerHeader from "@/components/manage/manage-date-picker-header";
 import PageWrapper from "@/components/page-wrapper";
 import SectionSaleList from "@/components/section-sales/section-sale-list";
 import WeekSectionSaleList from "@/components/section-sales/week-section-sale-list";
-import { useBussinessUserDetailsContext } from "@/hooks/bussiness-user-details/use-context";
-import { useAbortableEffect } from "@/hooks/use-abortable-effect";
-import { getWeekOfMonth } from "@/lib/helpers";
+import useBussinessUserDetailsHook from "@/hooks/bussiness-user-details/use-bussiness-user-details-hook";
+import useBussinessUserSectionsHook from "@/hooks/bussiness-user-details/use-bussiness-user-sections-hook";
+import { getWeekRangeFromDate } from "@/lib/datetime-helper";
+import { BussinessUserType } from "@/types/bussiness-user-types";
 import { RangeMode, SectionRange } from "@/types/manage-types";
 import { Stack, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { FlatList, RefreshControl, Text, View } from "react-native";
 
 const SectionSales = () => {
-	const { id } = useLocalSearchParams<{
-		id?: string;
+	const { id, bussinessUserType } = useLocalSearchParams<{
+		id: string;
+		bussinessUserType: BussinessUserType;
 	}>();
-	const [rangeMode, setRangeMode] = useState<RangeMode>("day");
-
-	const {
-		bussinessUserDetails,
-		bussinessUserType,
-		fetchSectionSales,
-		sectionSales,
-		loading,
-		error,
-		setError,
-		editBussinessUserSection,
-	} = useBussinessUserDetailsContext();
-
 	const date = new Date();
+	const [refreshing, setRefreshing] = useState(false);
+	const [rangeMode, setRangeMode] = useState<RangeMode>("day");
 	const [selectedSectionRange, setSelectedSectionRange] =
 		useState<SectionRange>({
 			type: "day",
 			date: date,
 		});
-	const [refreshing, setRefreshing] = useState(false);
+	const {
+		bussinessUserDetails,
+		bussinessUserDetailsLoading,
+		bussinessDetailsError,
+	} = useBussinessUserDetailsHook(id, bussinessUserType);
+	const {
+		sectionSales,
+		sectionSaleLoading,
+		secitonSalesError,
+		refetchSectionSales,
+		createBussinessUserSection,
+		creatingSection,
+		deleteBussinessUserSection,
+		deletingSection,
+		editBussinessUserSection,
+		editingSection,
+	} = useBussinessUserSectionsHook(id, selectedSectionRange, bussinessUserType);
 
 	useEffect(() => {
 		setSelectedSectionRange((prev) => {
 			if (!prev) return prev;
+			const date = new Date();
+
 			if (rangeMode === "week" && prev.type === "day") {
+				const { start, end } = getWeekRangeFromDate(date);
 				return {
 					type: "week",
-					year: date.getFullYear(),
-					month: date.getMonth(),
-					week: getWeekOfMonth(date),
+					start_date: start,
+					end_date: end,
 				};
 			}
 			if (rangeMode === "day" && prev.type === "week") {
@@ -54,41 +62,16 @@ const SectionSales = () => {
 			}
 			return prev;
 		});
-	}, [rangeMode]);
-
-	useAbortableEffect(
-		(signal) => {
-			if (id)
-				fetchSectionSales(signal, id, selectedSectionRange, bussinessUserType);
-		},
-		[id, selectedSectionRange],
-	);
-
-	if (loading) return <Loading />;
+	}, [rangeMode, setSelectedSectionRange]);
 
 	if (!id || !bussinessUserDetails || !bussinessUserType || !sectionSales) {
-		return (
-			<View className="flex-1 items-center justify-center bg-white p-4">
-				<Text className="text-red-600 font-semibold text-center mb-4">
-					Section not found or invalid ID.
-				</Text>
-			</View>
-		);
+		return;
 	}
 
 	const onRefresh = async () => {
 		if (!id) return;
-		const controller = new AbortController();
-
 		setRefreshing(true);
-		setError(null);
-		await fetchSectionSales(
-			controller.signal,
-			id,
-			selectedSectionRange,
-			bussinessUserType,
-			false,
-		);
+		await refetchSectionSales();
 		setRefreshing(false);
 	};
 
@@ -99,7 +82,7 @@ const SectionSales = () => {
 		switch (item.type) {
 			case "datePicker":
 				return (
-					<ManageDatePickerHeader
+					<DatePickerHeader
 						selectedSectionRange={selectedSectionRange}
 						setSelectedSectionRange={setSelectedSectionRange}
 					/>
@@ -108,10 +91,17 @@ const SectionSales = () => {
 				if (rangeMode === "day" && bussinessUserDetails) {
 					return (
 						<SectionSaleList
-							editBussinessUserSection={editBussinessUserSection}
 							showBtns={false}
 							sales={sectionSales[0]}
 							userId={id}
+							bussinessUserType={bussinessUserType}
+							userName={bussinessUserDetails.name}
+							createBussinessUserSection={createBussinessUserSection}
+							creatingSection={creatingSection}
+							editBussinessUserSection={editBussinessUserSection}
+							editingSection={editingSection}
+							deleteBussinessUserSection={deleteBussinessUserSection}
+							deletingSection={deletingSection}
 						/>
 					);
 				}
@@ -159,8 +149,10 @@ const SectionSales = () => {
 				}}
 			/>
 			<PageWrapper
-				loading={loading}
-				error={error}
+				loading={
+					(sectionSaleLoading || bussinessUserDetailsLoading) && !refreshing
+				}
+				error={secitonSalesError || bussinessDetailsError}
 				onReload={onRefresh}
 				empty={!bussinessUserDetails || !sectionSales}
 				emptyMessage="No section sales found for this user."

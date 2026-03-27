@@ -1,5 +1,5 @@
+import { formatTimeIntl } from "@/lib/datetime-helper";
 import { resultTime } from "@/lib/get-twod-result-time";
-import { formatTimeIntl } from "@/lib/helpers";
 import { TwoDHistoryItem, TwoDResponse } from "@/types/two-d-types";
 import { Text, View } from "react-native";
 

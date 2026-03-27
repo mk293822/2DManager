@@ -6,6 +6,7 @@ import { TwoDResponse } from "@/types/two-d-types";
 import { useIsFocused } from "@react-navigation/native";
 import { isAxiosError } from "axios";
 import { useCallback, useRef, useState } from "react";
+import { useInternet } from "../use-internet";
 
 type Options = {
 	interval?: number | false;
@@ -23,7 +24,7 @@ function useFetchLiveTwoD<T = TwoDResponse>(
 	options: Options = {},
 ): UseFetchLiveTwoD<T> {
 	const { interval = 3000, immediate = true } = options;
-
+	const isConnected = useInternet();
 	const [liveData, setLiveData] = useState<T | null>(null);
 	const [loading, setLoading] = useState(false);
 	const isFocused = useIsFocused();
@@ -33,7 +34,7 @@ function useFetchLiveTwoD<T = TwoDResponse>(
 
 	const fetchLive2D = useCallback(
 		async (signal: AbortSignal, showLoading: boolean = true) => {
-			if (!isFocused) return;
+			if (!isFocused || !isConnected) return;
 
 			if (retryCount.current === 0 && showLoading) setLoading(true);
 
@@ -71,12 +72,12 @@ function useFetchLiveTwoD<T = TwoDResponse>(
 				setLoading(false);
 			}
 		},
-		[url, isFocused],
+		[url, isFocused, isConnected],
 	);
 
 	useAbortableEffect(
 		(signal) => {
-			if (!isFocused) return;
+			if (!isFocused || !isConnected) return;
 
 			if (immediate) {
 				fetchLive2D(signal);

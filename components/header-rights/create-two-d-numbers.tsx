@@ -1,3 +1,4 @@
+import { BussinessUserType } from "@/types/bussiness-user-types";
 import { SectionName } from "@/types/manage-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
@@ -8,10 +9,14 @@ const CreateTwoDNumbersHeaderRight = ({
 	id,
 	user_name,
 	section,
+	bussinessUserType,
+	draw_times,
 }: {
 	id: string;
 	user_name: string;
 	section: SectionName;
+	bussinessUserType: BussinessUserType;
+	draw_times: number;
 }) => {
 	const router = useRouter();
 	return (
@@ -24,10 +29,13 @@ const CreateTwoDNumbersHeaderRight = ({
 				}}
 				onPress={() =>
 					router.push({
-						pathname:
-							"/bussiness-user-details/bussiness-user-two-d-list/[section]",
+						pathname: "/bussiness-user-details/bussiness-user-two-d-list/[id]",
 						params: {
+							id: id,
 							section: section,
+							userName: user_name,
+							draw_times,
+							bussinessUserType,
 						},
 					})
 				}

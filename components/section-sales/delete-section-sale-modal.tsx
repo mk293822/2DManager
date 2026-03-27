@@ -1,7 +1,7 @@
 import { changeSectionName } from "@/lib/helpers";
 import { SectionName } from "@/types/manage-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import React, { useState } from "react";
+import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { Loading } from "../loading";
 import AppModal from "../ui/app-modal";
@@ -11,6 +11,7 @@ type DeleteSectionSaleModalProps = {
 	onClose: () => void;
 	handleDelete: () => Promise<void>;
 	sectionName: SectionName;
+	deletingSection: boolean;
 };
 
 const DeleteSectionSaleModal = ({
@@ -18,22 +19,16 @@ const DeleteSectionSaleModal = ({
 	onClose,
 	sectionName,
 	handleDelete,
+	deletingSection,
 }: DeleteSectionSaleModalProps) => {
-	const [loading, setLoading] = useState(false);
-
 	const handleDeleteSection = async () => {
-		try {
-			setLoading(true);
-			await handleDelete();
-		} finally {
-			setLoading(false);
-			onClose();
-		}
+		await handleDelete();
+		onClose();
 	};
 
 	return (
 		<AppModal open={open}>
-			{loading ? (
+			{deletingSection ? (
 				<View className="bg-gray-100 w-1/2 h-40 flex-col rounded-2xl p-6 py-8 shadow-lg">
 					<Loading />
 				</View>
@@ -77,7 +72,7 @@ const DeleteSectionSaleModal = ({
 						</TouchableOpacity>
 
 						<TouchableOpacity
-							disabled={loading}
+							disabled={deletingSection}
 							onPress={handleDeleteSection}
 							className="flex-1 px-4 py-3 rounded-lg bg-red-600"
 						>

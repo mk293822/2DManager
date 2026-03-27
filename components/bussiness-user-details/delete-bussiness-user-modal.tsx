@@ -27,7 +27,10 @@ const DeleteBussinessUserModal = ({
 		} finally {
 			setLoading(false);
 			onClose();
-			if (router.canGoBack()) router.back();
+			if (router.canGoBack()) {
+				router.back();
+				return;
+			}
 			router.replace("/");
 		}
 	};

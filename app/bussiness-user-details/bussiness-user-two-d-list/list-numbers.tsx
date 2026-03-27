@@ -3,23 +3,27 @@ import { Loading } from "@/components/loading";
 import PageWrapper from "@/components/page-wrapper";
 import TwoDListsRow from "@/components/two-d-lists/two-d-lists-row";
 import { useManageContext } from "@/hooks/manage/use-manage-context";
-import { useTwoDListsContext } from "@/hooks/two-d-list/use-two-d-list-context";
+import useSectionTwoDListHook from "@/hooks/two-d-list/use-section-two-d-list-hook";
 import { useCalculatedNumbersData } from "@/hooks/use-calculated-numbers-data";
 import { chunkIntoPairs } from "@/lib/two-d-list-helper";
+import { BussinessUserType } from "@/types/bussiness-user-types";
 import { SectionName } from "@/types/manage-types";
 import { Stack, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import { FlatList, RefreshControl, Text, View } from "react-native";
 
 const UserTwoDListNumbers = () => {
-	const { twoDList, fetchTwoDListBySectionSale, loading, error } =
-		useTwoDListsContext();
-	const { sections } = useManageContext();
-	const { id, user_name, section } = useLocalSearchParams<{
+	const { id, user_name, section, bussinessUserType } = useLocalSearchParams<{
 		id: string;
 		user_name: string;
 		section: SectionName;
+		bussinessUserType: BussinessUserType;
 	}>();
+	const { twoDList, loading, error, refetch } = useSectionTwoDListHook(
+		bussinessUserType === "commission_user" ? "sold_number" : "sold_number",
+		id,
+	);
+	const { sections } = useManageContext();
 	const [refreshing, setRefreshing] = useState(false);
 	const numbers = useCalculatedNumbersData(
 		twoDList?.flatMap((value) => value.numbers_data) || [],
@@ -42,10 +46,8 @@ const UserTwoDListNumbers = () => {
 
 	const onRefresh = async () => {
 		if (!id) return;
-		const controller = new AbortController();
-
 		setRefreshing(true);
-		await fetchTwoDListBySectionSale(controller.signal, id);
+		refetch();
 		setRefreshing(false);
 	};
 
@@ -68,7 +70,7 @@ const UserTwoDListNumbers = () => {
 			/>
 
 			<PageWrapper
-				loading={loading}
+				loading={loading && !refreshing}
 				error={error}
 				onReload={onRefresh}
 				empty={!chunkedData || chunkedData.length === 0}

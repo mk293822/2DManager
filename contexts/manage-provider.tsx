@@ -1,11 +1,26 @@
 import { ManageContext } from "@/contexts/contexts";
 import useManageHook from "@/hooks/manage/use-manage-hook";
-import React from "react";
+import { SectionRange } from "@/types/manage-types";
+import React, { useMemo, useState } from "react";
 
 const ManageProvider = ({ children }: { children: React.ReactNode }) => {
-	const data = useManageHook();
+	const [selectedSectionRange, setSelectedSectionRange] =
+		useState<SectionRange>({
+			type: "day",
+			date: new Date(),
+		});
+
+	const data = useManageHook(selectedSectionRange);
+
+	const contextValue = useMemo(
+		() => ({ ...data, selectedSectionRange, setSelectedSectionRange }),
+		[data, selectedSectionRange],
+	);
+
 	return (
-		<ManageContext.Provider value={data}>{children}</ManageContext.Provider>
+		<ManageContext.Provider value={contextValue}>
+			{children}
+		</ManageContext.Provider>
 	);
 };
 

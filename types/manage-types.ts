@@ -61,9 +61,8 @@ export type DayRange = {
 
 export type WeekRange = {
 	type: "week";
-	year: number;
-	month: number; // 1–12 (backend-friendly)
-	week: number;
+	start_date: Date;
+	end_date: Date;
 };
 
 export type SectionRange = DayRange | WeekRange;

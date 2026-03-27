@@ -1,10 +1,7 @@
 import HapticTab from "@/components/haptic-tab";
-import { useBussinessUserContext } from "@/hooks/bussiness-users/use-context";
-import { useManageContext } from "@/hooks/manage/use-manage-context";
-import { useAbortableEffect } from "@/hooks/use-abortable-effect";
-import { useAuthContext } from "@/hooks/use-auth-context";
+import { useAuthContext } from "@/hooks/auth/use-auth-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { Tabs, useRouter } from "expo-router";
+import { router, Tabs } from "expo-router";
 import React, { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 
@@ -58,21 +55,6 @@ const TabIcon = ({ focused, icon }: Page & { focused: boolean }) => {
 
 const TabsLayout = () => {
 	const { authLoading, isAuthenticated } = useAuthContext();
-	const router = useRouter();
-	const { fetchSection } = useManageContext();
-	const { fetchBussinessUsers } = useBussinessUserContext();
-
-	useAbortableEffect((signal) => {
-		if (isAuthenticated)
-			fetchSection(signal, {
-				type: "day",
-				date: new Date(),
-			});
-	}, []);
-
-	useAbortableEffect((signal) => {
-		if (isAuthenticated) fetchBussinessUsers(signal);
-	}, []);
 
 	useEffect(() => {
 		if (!authLoading && !isAuthenticated) {
@@ -80,7 +62,7 @@ const TabsLayout = () => {
 		}
 	}, [authLoading, isAuthenticated]);
 
-	if (authLoading || !isAuthenticated) {
+	if (authLoading) {
 		return (
 			<View className="flex-1 items-center justify-center bg-gray-100">
 				<ActivityIndicator

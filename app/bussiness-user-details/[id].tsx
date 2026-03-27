@@ -1,22 +1,18 @@
 // BussinessUserPage.tsx
 import DeleteBussinessUserModal from "@/components/bussiness-user-details/delete-bussiness-user-modal";
 import BussinessUserDetailsHeaderRight from "@/components/header-rights/bussiness-user-details";
-import { Loading } from "@/components/loading";
 import PageWrapper from "@/components/page-wrapper";
 import SectionSaleList from "@/components/section-sales/section-sale-list";
-import { useBussinessUserDetailsContext } from "@/hooks/bussiness-user-details/use-context";
-import { useBussinessUserContext } from "@/hooks/bussiness-users/use-context";
-import { useTwoDListsContext } from "@/hooks/two-d-list/use-two-d-list-context";
-import { useAbortableEffect } from "@/hooks/use-abortable-effect";
+import { EVENT_NAMES } from "@/event-names";
+import useBussinessUserDetailsHook from "@/hooks/bussiness-user-details/use-bussiness-user-details-hook";
+import useBussinessUserSectionsHook from "@/hooks/bussiness-user-details/use-bussiness-user-sections-hook";
+import useBussinessUserHook from "@/hooks/bussiness-users/use-bussiness-user-hook";
 import { usePhoneActions } from "@/hooks/use-phone-actions";
+import { eventBus } from "@/lib/event-bus";
+import { BussinessUserType } from "@/types/bussiness-user-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import {
-	Stack,
-	useFocusEffect,
-	useLocalSearchParams,
-	useRouter,
-} from "expo-router";
-import React, { useCallback, useState } from "react";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import React, { useState } from "react";
 import {
 	FlatList,
 	RefreshControl,
@@ -26,62 +22,65 @@ import {
 } from "react-native";
 
 const BussinessUserPage = () => {
-	const { id } = useLocalSearchParams<{ id?: string }>();
+	const { id, bussinessUserType } = useLocalSearchParams<{
+		id: string;
+		bussinessUserType: BussinessUserType;
+	}>();
 	const router = useRouter();
 	const { call, message } = usePhoneActions();
-	const { deleteBussinessUser } = useBussinessUserContext();
+	const { deleteBussinessUser } = useBussinessUserHook(bussinessUserType);
 	const [refreshing, setRefreshing] = useState(false);
 	const [open, setOpen] = useState(false);
 
 	const {
-		fetchBussinessUserDetails,
 		bussinessUserDetails,
-		loading,
-		error,
 		editBussinessUserDetails,
-		bussinessUserType,
+		bussinessUserDetailsLoading,
+		refetchBussinessUserDetails,
+		bussinessDetailsError,
+	} = useBussinessUserDetailsHook(id, bussinessUserType);
+
+	const {
+		todaySectionSales,
+		sectionSaleLoading,
+		secitonSalesError,
+		refetchSectionSales,
+		createBussinessUserSection,
+		creatingSection,
+		deleteBussinessUserSection,
+		deletingSection,
 		editBussinessUserSection,
-	} = useBussinessUserDetailsContext();
-	const { setNumberType } = useTwoDListsContext();
-
-	useFocusEffect(
-		useCallback(() => {
-			setNumberType(
-				bussinessUserType === "commission_user"
-					? "sold_number"
-					: "resold_number",
-			);
-		}, [bussinessUserType]),
-	);
-
-	useAbortableEffect(
-		(signal) => {
-			if (id) fetchBussinessUserDetails(signal, id);
+		editingSection,
+	} = useBussinessUserSectionsHook(
+		id,
+		{
+			type: "day",
+			date: new Date(),
 		},
-		[id],
+		bussinessUserType,
 	);
-
-	if (loading) return <Loading />;
 
 	if (!id || !bussinessUserDetails || !bussinessUserType) {
-		return (
-			<View className="flex-1 items-center justify-center bg-white p-4">
-				<Text className="text-red-600 font-semibold text-center mb-4">
-					User not found or invalid ID.
-				</Text>
-			</View>
-		);
+		return;
 	}
 
 	const onRefresh = async () => {
-		const controller = new AbortController();
 		setRefreshing(true);
-		await fetchBussinessUserDetails(controller.signal, id, false);
+		refetchBussinessUserDetails();
+		refetchSectionSales();
 		setRefreshing(false);
 	};
 
 	const handleDeleteUser = async () => {
-		await deleteBussinessUser(id, bussinessUserType);
+		const res = await deleteBussinessUser(id);
+
+		if (res.error) {
+			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+				type: "error",
+				title: "Error",
+				description: res.error,
+			});
+		}
 	};
 
 	// Flatten all sections into a list
@@ -149,9 +148,16 @@ const BussinessUserPage = () => {
 			case "sectionSales":
 				return (
 					<SectionSaleList
-						editBussinessUserSection={editBussinessUserSection}
-						sales={bussinessUserDetails.section_sales}
+						bussinessUserType={bussinessUserType}
+						sales={todaySectionSales}
 						userId={id}
+						userName={bussinessUserDetails.name}
+						createBussinessUserSection={createBussinessUserSection}
+						creatingSection={creatingSection}
+						editBussinessUserSection={editBussinessUserSection}
+						editingSection={editingSection}
+						deleteBussinessUserSection={deleteBussinessUserSection}
+						deletingSection={deletingSection}
 					/>
 				);
 			case "dangerZone":
@@ -232,10 +238,12 @@ const BussinessUserPage = () => {
 			/>
 
 			<PageWrapper
-				loading={loading}
-				error={error}
+				loading={
+					(bussinessUserDetailsLoading || sectionSaleLoading) && !refreshing
+				}
+				error={bussinessDetailsError || secitonSalesError}
 				onReload={onRefresh}
-				empty={!bussinessUserDetails || !bussinessUserType}
+				empty={!bussinessUserDetails || !todaySectionSales || !id}
 				emptyMessage="No details found for this user."
 			>
 				<FlatList
@@ -262,7 +270,7 @@ const BussinessUserPage = () => {
 				handleDelete={handleDeleteUser}
 				open={open}
 				onClose={() => setOpen(false)}
-				user_name={bussinessUserDetails?.name}
+				user_name={bussinessUserDetails.name}
 			/>
 		</>
 	);

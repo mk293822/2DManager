@@ -1,183 +1,222 @@
 import { EVENT_NAMES } from "@/event-names";
 import { api } from "@/lib/api";
+import { createKey, syncCachesByDate } from "@/lib/cache-helper";
+import { calculateSectionSaleSummary } from "@/lib/calculate-summary";
 import { eventBus } from "@/lib/event-bus";
-import { formatDateRequest, ParsedErrors, parseErrors } from "@/lib/helpers";
-import { BussinessUser, BussinessUserType } from "@/types/bussiness-user-types";
-import { useCallback, useRef, useState } from "react";
-import { BussinessUserEditFields } from "../bussiness-user-details/use-user-details-hook";
-import { useAbortableEffect } from "../use-abortable-effect";
+import { ParsedErrors, parseErrors } from "@/lib/helpers";
+import {
+	BussinessUser,
+	BussinessUserType,
+	SectionSaleGroup,
+} from "@/types/bussiness-user-types";
+import { AppEvents } from "@/types/event-bus";
+import { isAxiosError } from "axios";
+import { useEffect } from "react";
+import { BussinessUserEditFields } from "../bussiness-user-details/use-bussiness-user-details-hook";
+import { useCache } from "../use-cache";
+import { MutationResult, useMutation } from "../use-mutation";
 
+// -------------------------
 // Hook return type
+// -------------------------
 export type BussinessUserHookType = {
-	loading: boolean; // indicates fetch or mutation in progress
-	bussinessUsers: BussinessUser[] | null; // list of users for the current type
-	error: string | null; // error messages
-	reset: () => void; // refetch the data
-	handleCreateBussinessUser: (
-		payload: Partial<BussinessUser>,
-		bussinessUserType: BussinessUserType,
-	) => Promise<{
-		success: boolean;
-		errors: ParsedErrors<BussinessUserEditFields>;
-	}>;
-	deleteBussinessUser: (
-		id: string,
-		bussinessUserType: BussinessUserType,
-	) => Promise<void>; // delete a user
-	fetchBussinessUsers: (
-		signal: AbortSignal,
-		showLoading?: boolean,
-	) => Promise<void>; // manual fetch
+	loading: boolean;
+	bussinessUsers: BussinessUser[] | null;
+	error: Error | null;
+	createBussinessUser: (
+		variables: Partial<BussinessUser>,
+	) => Promise<
+		MutationResult<BussinessUser, ParsedErrors<BussinessUserEditFields>>
+	>;
+
+	deleteBussinessUser: (id: string) => Promise<MutationResult<void, string>>;
+
+	creatingUser: boolean;
+	deletingUser: boolean;
+
+	refetch: () => Promise<void>;
 };
 
+const MODEL = "bussinessUsers";
+
+// -------------------------
+// Hook implementation
+// -------------------------
 const useBussinessUserHook = (
 	bussinessUserType: BussinessUserType,
 ): BussinessUserHookType => {
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-	const [bussinessUsers, setBussinessUsers] = useState<BussinessUser[] | null>(
-		null,
-	);
+	const cacheKey = createKey("bussinessUsers", {
+		userType: bussinessUserType,
+	});
+	// -------------------
+	// STATE
+	// -------------------
+	const endpoint =
+		bussinessUserType === "commission_user"
+			? "/commission-users/"
+			: "/resold-users/";
 
-	// Cache user lists per type to avoid refetching when switching between commission/resold users
-	const cacheRef = useRef<Record<BussinessUserType, BussinessUser[] | null>>({
-		commission_user: null,
-		resold_user: null,
+	const {
+		data: bussinessUsers,
+		isLoading: loading,
+		error,
+		refetch,
+		setData,
+	} = useCache<BussinessUser[]>(cacheKey, async () => {
+		const { data } = await api.get<BussinessUser[]>(endpoint);
+		return data;
 	});
 
-	// Fetch users from API
-	const fetchBussinessUsers = useCallback(
-		async (signal: AbortSignal, showLoading: boolean = true) => {
-			try {
-				if (showLoading) setLoading(true);
-				setError(null);
+	// -------------------
+	// CREATE
+	// -------------------
+	const { mutate: createBussinessUser, isMutating: creatingUser } = useMutation<
+		BussinessUser,
+		Partial<BussinessUser>,
+		ParsedErrors<BussinessUserEditFields>
+	>(
+		async (payload) => {
+			const { data } = await api.post<BussinessUser>(endpoint, payload);
+			return data;
+		},
+		{
+			onSuccess: (data) => {
+				setData((prev) => (prev ? [...prev, data] : [data]));
 
-				// Use cache if available
-				const cached = cacheRef.current[bussinessUserType];
-				if (cached && showLoading) {
-					setBussinessUsers(cached);
-					return;
+				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+					type: "success",
+					title: "Success",
+					description: "User created successfully",
+				});
+			},
+			onError: (err) => {
+				if (isAxiosError(err)) {
+					const errors = parseErrors<Partial<BussinessUserEditFields>>(
+						err?.response?.data || {},
+						[
+							"name",
+							"phone_number",
+							"default_commission_percent",
+							"default_draw_times",
+						],
+					);
+
+					return errors;
+				}
+				if (err instanceof Error) {
+					// Regular JS Error
+					return { form: err.message, fields: {} };
 				}
 
-				// Determine endpoint based on user type
-				const endpoint =
-					bussinessUserType === "commission_user"
-						? "/commission-users/"
-						: "/resold-users/";
+				// Unknown / unexpected error
+				return { form: "Something went wrong", fields: {} };
+			},
+		},
+	);
 
-				const { data } = await api.get<BussinessUser[]>(endpoint, {
-					signal,
-					params: {
-						date: formatDateRequest(new Date()),
+	// -------------------
+	// DELETE
+	// -------------------
+	const { mutate: deleteBussinessUser, isMutating: deletingUser } = useMutation<
+		void,
+		string,
+		string
+	>(
+		async (id) => {
+			await api.delete(`${endpoint}${id}/`);
+		},
+		{
+			onSuccess: (_, id) => {
+				setData((prev) => (prev ? prev.filter((u) => u.id !== id) : []));
+				eventBus.emit(EVENT_NAMES.ONLINE_ACTION, {
+					action: "delete",
+					model: MODEL,
+					id: id,
+					meta: {
+						bussinessUserType: bussinessUserType,
 					},
 				});
+			},
+			onError: (err) => {
+				let message = "Delete failed.";
 
-				if (!signal.aborted) {
-					setBussinessUsers(data);
-					cacheRef.current[bussinessUserType] = data; // cache result
+				if (isAxiosError(err)) {
+					message = err.response?.data?.detail || message;
+				} else if (err instanceof Error) {
+					message = err.message;
 				}
-			} catch (err: any) {
-				if (err.name === "CanceledError" || err.name === "AbortError") return;
-				setError(`Failed to load ${bussinessUserType}. Please try again.`);
-				setBussinessUsers([]);
-			} finally {
-				if (!signal.aborted) setLoading(false);
+
+				return message;
+			},
+		},
+	);
+
+	// -------------------
+	// Listening Events
+	// -------------------
+	useEffect(() => {
+		const handler = (event: AppEvents["ONLINE_ACTION"]) => {
+			if (
+				event.model === "sectionSummaries" &&
+				event.action === "delete" &&
+				event.meta?.date
+			) {
+				const updater = (prev: SectionSaleGroup[] | null | undefined) => {
+					if (!prev) return [];
+					return prev.map((day) => {
+						if (day.date !== event.meta?.date) return day;
+
+						const morning =
+							day.morning_section?.section_summary_id === event.id
+								? null
+								: day.morning_section;
+						const evening =
+							day.evening_section?.section_summary_id === event.id
+								? null
+								: day.evening_section;
+
+						const summary = calculateSectionSaleSummary(morning, evening);
+
+						return {
+							...day,
+							summary,
+							morning_section: morning,
+							evening_section: evening,
+						};
+					});
+				};
+				const userIds = bussinessUsers?.map((u) => u.id) ?? [];
+
+				for (const id of userIds) {
+					syncCachesByDate<SectionSaleGroup[]>(
+						"sectionSales",
+						event.meta.date,
+						updater,
+						undefined,
+						undefined,
+						{
+							id: id,
+							userType: bussinessUserType,
+						},
+					);
+				}
 			}
-		},
-		[bussinessUserType],
-	);
+		};
 
-	// Automatically fetch data on mount or when bussinessUserType changes
-	useAbortableEffect(
-		(signal) => {
-			fetchBussinessUsers(signal);
-		},
-		[bussinessUserType],
-	);
+		eventBus.on(EVENT_NAMES.ONLINE_ACTION, handler);
 
-	// Create a new user
-	const handleCreateBussinessUser = async (
-		payload: Partial<BussinessUser>,
-		bussinessUserType: BussinessUserType,
-	) => {
-		try {
-			const endpoint =
-				bussinessUserType === "commission_user"
-					? "/commission-users/"
-					: "/resold-users/";
-
-			const { data } = await api.post<BussinessUser>(endpoint, { ...payload });
-
-			// Update state & cache
-			setBussinessUsers((prev) => {
-				const updated = prev ? [...prev, data] : [data];
-				cacheRef.current[bussinessUserType] = updated;
-				return updated;
-			});
-
-			// Notify user
-			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-				type: "success",
-				title: "Success",
-				description: "User created successfully",
-			});
-
-			return { success: true, errors: { fields: {} } };
-		} catch (err: any) {
-			const data = err?.response?.data || {};
-			const errors = parseErrors<BussinessUserEditFields>(data, [
-				"phone_number",
-				"name",
-				"default_commission_percent",
-			]);
-			return { success: false, errors };
-		}
-	};
-
-	// Delete a user
-	const deleteBussinessUser = async (
-		id: string,
-		bussinessUserType: BussinessUserType,
-	) => {
-		try {
-			setLoading(true);
-			setError(null);
-
-			const endpoint =
-				bussinessUserType === "commission_user"
-					? "/commission-users/"
-					: "/resold-users/";
-
-			await api.delete(`${endpoint}${id}/`);
-
-			setBussinessUsers((prev) => {
-				const updated = prev?.filter((u) => u.id !== id) || [];
-				cacheRef.current[bussinessUserType] = updated; // update cache
-				return updated;
-			});
-		} catch (err: any) {
-			if (err.name === "CanceledError" || err.name === "AbortError") return;
-			setError(`Failed to delete ${bussinessUserType}. Please try again.`);
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	// Reset fetch (refetch data)
-	const reset = () => {
-		setError(null);
-		const { signal } = new AbortController();
-		fetchBussinessUsers(signal);
-	};
+		return () => eventBus.off(EVENT_NAMES.ONLINE_ACTION, handler);
+	}, [bussinessUserType, cacheKey, bussinessUsers]);
 
 	return {
 		loading,
 		bussinessUsers,
 		error,
-		reset,
-		handleCreateBussinessUser,
+		refetch,
+		createBussinessUser,
 		deleteBussinessUser,
-		fetchBussinessUsers,
+		creatingUser,
+		deletingUser,
 	};
 };
 
