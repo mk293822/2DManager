@@ -1,6 +1,7 @@
 // hooks/useCache.ts
 import { isAxiosError } from "axios";
 import { useEffect, useRef, useState } from "react";
+import { useInternet } from "./use-internet";
 
 type UseCacheTypes<T> = {
 	data: T | null;
@@ -82,6 +83,7 @@ export function useCache<T>(
 	const [data, setData] = useState<T | null>(cache[key] || null);
 	const [isLoading, setIsLoading] = useState(!cache[key]);
 	const [error, setError] = useState<Error | null>(null);
+	const isConnected = useInternet();
 
 	const isMounted = useRef(true);
 
@@ -154,23 +156,29 @@ export function useCache<T>(
 	// -------------------------
 	const refetch = async () => {
 		setIsLoading(true);
-		setError(null);
-
-		delete cache[key];
-		delete pending[key];
-
-		try {
-			const result = await fetcher();
-			cache[key] = result;
-
-			// Notify all subscribers
-			notify(key, result);
-
-			setData(result);
-		} catch (e: unknown) {
-			setError(new Error(getErrorMessage(e)));
-		} finally {
+		if (!isConnected) {
+			setError(new Error("You are Offline!"));
 			setIsLoading(false);
+			return;
+		} else {
+			setError(null);
+
+			delete cache[key];
+			delete pending[key];
+
+			try {
+				const result = await fetcher();
+				cache[key] = result;
+
+				// Notify all subscribers
+				notify(key, result);
+
+				setData(result);
+			} catch (e: unknown) {
+				setError(new Error(getErrorMessage(e)));
+			} finally {
+				setIsLoading(false);
+			}
 		}
 	};
 
