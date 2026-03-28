@@ -1,4 +1,4 @@
-import { Loading } from "@/components/loading";
+import PageWrapper from "@/components/page-wrapper";
 import useFetchLiveTwoD from "@/hooks/live-two-d/use-fetch-live-two-d";
 import { formatDateDisplay, formatTimeIntl } from "@/lib/datetime-helper";
 import { TwoDData } from "@/types/two-d-types";
@@ -6,7 +6,7 @@ import React, { useState } from "react";
 import { FlatList, RefreshControl, Text, View } from "react-native";
 
 const ResultsHistory = () => {
-	const { liveData, loading, refetch } = useFetchLiveTwoD<TwoDData[]>(
+	const { liveData, loading, refetch, error } = useFetchLiveTwoD<TwoDData[]>(
 		"/2d_result",
 		{
 			interval: false,
@@ -82,30 +82,32 @@ const ResultsHistory = () => {
 	};
 
 	return (
-		<View className="flex-1 items-center justify-center">
-			{loading ? (
-				<Loading />
-			) : (
-				<FlatList
-					data={liveData || []}
-					renderItem={renderSection}
-					keyExtractor={(child, index) => `${child.date}-${index}`}
-					contentContainerStyle={{
-						padding: 16,
-						paddingBottom: 32,
-						backgroundColor: "#f3f4f6", // gray-100
-					}}
-					refreshControl={
-						<RefreshControl
-							colors={["#0000ff"]}
-							refreshing={refreshing}
-							onRefresh={onRefresh}
-						/>
-					}
-					ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
-				/>
-			)}
-		</View>
+		<PageWrapper
+			loading={loading}
+			error={error}
+			onReload={() => refetch(true)}
+			empty={!loading && (!liveData || liveData.length === 0)}
+			emptyMessage="Something went wrong!"
+		>
+			<FlatList
+				data={liveData || []}
+				renderItem={renderSection}
+				keyExtractor={(child, index) => `${child.date}-${index}`}
+				contentContainerStyle={{
+					padding: 16,
+					paddingBottom: 32,
+					backgroundColor: "#f3f4f6", // gray-100
+				}}
+				refreshControl={
+					<RefreshControl
+						colors={["#0000ff"]}
+						refreshing={refreshing}
+						onRefresh={onRefresh}
+					/>
+				}
+				ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+			/>
+		</PageWrapper>
 	);
 };
 

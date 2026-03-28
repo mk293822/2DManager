@@ -2,6 +2,7 @@ import HolidayInfo from "@/components/holiday-info";
 import { Loading } from "@/components/loading";
 import useFetchLiveTwoD from "@/hooks/live-two-d/use-fetch-live-two-d";
 import { useBlink } from "@/hooks/use-blink";
+import { useInternet } from "@/hooks/use-internet";
 import { formatTimeIntl } from "@/lib/datetime-helper";
 import { getTwoDResultTime, toSeconds } from "@/lib/get-twod-result-time";
 import { renderStyledValue } from "@/lib/render-styled-value";
@@ -24,6 +25,7 @@ const History = () => {
 	const [mainResult, setMainResult] = useState<TwoDHistoryItem | undefined>();
 	const [isBlinking, setIsBlinking] = useState<boolean>(false);
 	const { style } = useBlink(isBlinking);
+	const isConnected = useInternet();
 
 	useEffect(() => {
 		if (!data || !data.liveData) return;
@@ -47,6 +49,19 @@ const History = () => {
 	}, [data, currentTime]);
 
 	if (!data.liveData) return <Loading />;
+
+	if (isConnected === false) {
+		return (
+			<View className="flex-1 items-center justify-center bg-gray-100 px-6">
+				<Text className="text-indigo-600 text-2xl font-bold mb-2 text-center">
+					No Internet Connection
+				</Text>
+				<Text className="text-gray-600 text-center mb-6">
+					This page requires an internet connection.
+				</Text>
+			</View>
+		);
+	}
 
 	return (
 		<ScrollView className="bg-gray-100">

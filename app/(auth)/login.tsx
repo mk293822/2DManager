@@ -73,6 +73,8 @@ const Login = () => {
 							// keep only digits
 							const digits = text.replace(/\D/g, "");
 							setPhoneNumber(digits);
+							if (errors.phone_number)
+								setErrors((p) => ({ ...p, phone_number: undefined }));
 						}}
 						placeholder="09 123 456 789"
 						keyboardType="phone-pad"
@@ -94,7 +96,8 @@ const Login = () => {
 						secureTextEntry
 						onChangeText={(v) => {
 							setPassword(v);
-							setErrors((p) => ({ ...p, password: undefined }));
+							if (errors.password)
+								setErrors((p) => ({ ...p, password: undefined }));
 						}}
 						value={password}
 						textContentType="password"

@@ -6,6 +6,7 @@ import { TwoDResponse } from "@/types/two-d-types";
 import { useIsFocused } from "@react-navigation/native";
 import { isAxiosError } from "axios";
 import { useCallback, useRef, useState } from "react";
+import { getErrorMessage } from "../use-cache";
 import { useInternet } from "../use-internet";
 
 type Options = {
@@ -16,7 +17,8 @@ type Options = {
 type UseFetchLiveTwoD<T> = {
 	liveData: T | null;
 	loading: boolean;
-	refetch: () => void;
+	refetch: (showLoading?: boolean) => Promise<void>;
+	error: Error | null;
 };
 
 function useFetchLiveTwoD<T = TwoDResponse>(
@@ -28,6 +30,7 @@ function useFetchLiveTwoD<T = TwoDResponse>(
 	const [liveData, setLiveData] = useState<T | null>(null);
 	const [loading, setLoading] = useState(false);
 	const isFocused = useIsFocused();
+	const [error, setError] = useState<Error | null>(null);
 
 	const retryCount = useRef(0);
 	const MAX_RETRY = 3;
@@ -40,6 +43,8 @@ function useFetchLiveTwoD<T = TwoDResponse>(
 
 			try {
 				const { data } = await two_d_api.get<T>(url, { signal });
+				if (!data)
+					setError(new Error(getErrorMessage("Something went wrong!")));
 
 				setLiveData(data);
 
@@ -51,7 +56,7 @@ function useFetchLiveTwoD<T = TwoDResponse>(
 				retryCount.current += 1;
 
 				// only show error after 3 failures
-				if (retryCount.current >= MAX_RETRY) {
+				if (retryCount.current >= MAX_RETRY && interval !== false) {
 					retryCount.current = 0;
 
 					if (isAxiosError(err)) {
@@ -67,12 +72,14 @@ function useFetchLiveTwoD<T = TwoDResponse>(
 							type: "error",
 						});
 					}
+				} else {
+					setError(new Error(getErrorMessage(err)));
 				}
 			} finally {
 				setLoading(false);
 			}
 		},
-		[url, isFocused, isConnected],
+		[url, isFocused, isConnected, interval],
 	);
 
 	useAbortableEffect(
@@ -92,12 +99,12 @@ function useFetchLiveTwoD<T = TwoDResponse>(
 		[fetchLive2D, isFocused, interval, immediate],
 	);
 
-	const refetch = useCallback(() => {
+	const refetch = async (showLoading: boolean = false) => {
 		const controller = new AbortController();
-		fetchLive2D(controller.signal, false);
-	}, [fetchLive2D]);
+		await fetchLive2D(controller.signal, showLoading);
+	};
 
-	return { liveData, loading, refetch };
+	return { liveData, loading, refetch, error };
 }
 
 export default useFetchLiveTwoD;
