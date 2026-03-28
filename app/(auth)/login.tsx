@@ -1,17 +1,12 @@
+import InlineLoadingButton from "@/components/ui/inline-loading-button";
 import { EVENT_NAMES } from "@/event-names";
 import { LoginFields } from "@/hooks/auth/use-auth";
 import { useAuthContext } from "@/hooks/auth/use-auth-context";
 import { eventBus } from "@/lib/event-bus";
+import { formatPhone } from "@/lib/helpers";
 import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
-import {
-	ActivityIndicator,
-	ScrollView,
-	Text,
-	TextInput,
-	TouchableOpacity,
-	View,
-} from "react-native";
+import { ScrollView, Text, TextInput, View } from "react-native";
 
 const Login = () => {
 	const { login, loggingIn } = useAuthContext();
@@ -47,6 +42,8 @@ const Login = () => {
 		}
 	};
 
+	const displayPhoneNumber = formatPhone(phoneNumber);
+
 	return (
 		<ScrollView
 			contentContainerStyle={{
@@ -71,15 +68,16 @@ const Login = () => {
 					</Text>
 
 					<TextInput
-						onChangeText={(v) => {
-							setPhoneNumber(v);
-							setErrors((p) => ({ ...p, phone_number: undefined }));
+						value={displayPhoneNumber}
+						onChangeText={(text) => {
+							// keep only digits
+							const digits = text.replace(/\D/g, "");
+							setPhoneNumber(digits);
 						}}
-						value={phoneNumber}
+						placeholder="09 123 456 789"
 						keyboardType="phone-pad"
 						textContentType="telephoneNumber"
 						className="bg-gray-100 rounded-lg px-4 py-3 text-base"
-						placeholder="Enter phone number"
 						placeholderTextColor="#9ca3af"
 					/>
 
@@ -111,25 +109,11 @@ const Login = () => {
 				</View>
 
 				{/* Login Button */}
-				<TouchableOpacity
+				<InlineLoadingButton
 					onPress={handleLogin}
-					disabled={loggingIn}
-					activeOpacity={0.85}
-					className="bg-indigo-400 py-3 rounded-lg mt-2"
-				>
-					{loggingIn ? (
-						<View className="items-center justify-center">
-							<ActivityIndicator
-								size={20}
-								color="#fff"
-							/>
-						</View>
-					) : (
-						<Text className="text-white font-bold text-lg text-center">
-							Login
-						</Text>
-					)}
-				</TouchableOpacity>
+					label="Login"
+					loading={loggingIn}
+				/>
 
 				{/* Footer */}
 				<View className="flex-row justify-center gap-1 mt-2">

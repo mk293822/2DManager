@@ -81,16 +81,17 @@ function SegmentedControl<T extends string>({
 						key={opt.value}
 						onPress={() => onChange(opt.value)}
 						style={{
-							flex: 1,
 							alignItems: "center",
 							justifyContent: "center",
 							paddingVertical: 6,
+							paddingHorizontal: 16,
 						}}
 					>
 						<Text
 							style={{
 								color: isActive ? "white" : "#4f46e5",
 								fontWeight: "bold",
+								textAlign: "center",
 							}}
 						>
 							{opt.label}

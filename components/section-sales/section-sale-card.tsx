@@ -19,8 +19,9 @@ import { SectionName } from "@/types/manage-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { SectinDetailRow } from "../info-components";
+import InlineLoadingButton from "../ui/inline-loading-button";
 import DeleteSectionSaleModal from "./delete-section-sale-modal";
 import EditSectionSaleModal from "./edit-section-sale-modal";
 
@@ -73,9 +74,12 @@ const SectionSaleCard = ({
 	const { sections, refetch: refetchSectionSummary } = useManageContext();
 	const [open, setOpen] = useState(false);
 	const [openEditModal, setOpenEditModal] = useState(false);
+	const [creatingSectionName, setCreatingSectionName] =
+		useState<SectionName>("morning_section");
 
 	if (!sale) {
 		const handleCreate = async () => {
+			setCreatingSectionName(section);
 			await createBussinessUserSection({
 				section,
 				date,
@@ -90,32 +94,12 @@ const SectionSaleCard = ({
 				<Text className="text-gray-500 text-sm text-center mb-4">
 					This session has no records yet.
 				</Text>
-				<TouchableOpacity
-					disabled={creatingSection}
-					activeOpacity={0.85}
+				<InlineLoadingButton
 					onPress={handleCreate}
-					className="bg-indigo-600 px-6 py-3 rounded-xl shadow"
-				>
-					{creatingSection ? (
-						<View className="items-center justify-center">
-							<ActivityIndicator
-								size={20}
-								color="#fff"
-							/>
-						</View>
-					) : (
-						<View className="flex-row items-center justify-center gap-2">
-							<AntDesign
-								name="plus"
-								color="#fff"
-								size={15}
-							/>
-							<Text className="text-white font-semibold text-center">
-								Create
-							</Text>
-						</View>
-					)}
-				</TouchableOpacity>
+					loading={creatingSection && creatingSectionName === section}
+					label="Create"
+					icon="plus"
+				/>
 			</View>
 		);
 	}

@@ -2,6 +2,7 @@
 import CustomKeyboard from "@/components/custom-keyboard";
 import CreateTwoDNumbersHeaderRight from "@/components/header-rights/create-two-d-numbers";
 import PageWrapper from "@/components/page-wrapper";
+import InlineLoadingButton from "@/components/ui/inline-loading-button";
 import { EVENT_NAMES } from "@/event-names";
 import useBussinessUserDetailsHook from "@/hooks/bussiness-user-details/use-bussiness-user-details-hook";
 import useBussinessUserSectionsHook from "@/hooks/bussiness-user-details/use-bussiness-user-sections-hook";
@@ -23,13 +24,7 @@ import {
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
-import {
-	ActivityIndicator,
-	FlatList,
-	Text,
-	TouchableOpacity,
-	View,
-} from "react-native";
+import { FlatList, Text, TouchableOpacity, View } from "react-native";
 
 const CreateTwoDNumbersPage = () => {
 	const { section, id, bussinessUserType } = useLocalSearchParams<{
@@ -256,32 +251,12 @@ const CreateTwoDNumbersPage = () => {
 					ListFooterComponent={
 						<View className="px-4 w-full mt-2">
 							{list && list.length > 0 && (
-								<TouchableOpacity
+								<InlineLoadingButton
 									onPress={handleAdd}
-									disabled={creatingTwoDList}
-									activeOpacity={0.85}
-									className="bg-indigo-600 py-3 rounded-xl shadow flex-row items-center justify-center"
-								>
-									{creatingTwoDList ? (
-										<View className="items-center justify-center">
-											<ActivityIndicator
-												size={20}
-												color="#fff"
-											/>
-										</View>
-									) : (
-										<View className="flex-row items-center justify-center gap-2">
-											<AntDesign
-												name="plus"
-												color="#fff"
-												size={15}
-											/>
-											<Text className="text-white font-semibold text-center">
-												Add
-											</Text>
-										</View>
-									)}
-								</TouchableOpacity>
+									loading={creatingTwoDList}
+									label="Add"
+									icon="plus"
+								/>
 							)}
 						</View>
 					}

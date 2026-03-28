@@ -101,6 +101,7 @@ const Manage = () => {
 							setRangeMode={setRangeMode}
 						/>
 					),
+					headerRightContainerStyle: { paddingRight: 16 },
 				}}
 			/>
 			<PageWrapper

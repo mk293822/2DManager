@@ -1,4 +1,4 @@
-import { updateCache } from "@/hooks/use-cache";
+import { getCache, updateCache } from "@/hooks/use-cache";
 import { Model } from "@/types/event-bus";
 import { SectionRange } from "@/types/manage-types";
 import { formatDateRequest, getWeekRangeFromDate } from "./datetime-helper";
@@ -84,7 +84,6 @@ export function syncCachesByDate<T>(
 ) {
 	const dayKey = getDayKeyFromDate(model, date, keyParams);
 	const weekKey = getWeekKeyFromDate(model, date, keyParams);
-	console.log(weekKey);
 
 	// update current hook state
 	if (setData) setData(updater);
@@ -94,5 +93,6 @@ export function syncCachesByDate<T>(
 		updateCache(dayKey, updater);
 	}
 
-	updateCache(weekKey, updater);
+	const weekData = getCache(weekKey);
+	if (weekData) updateCache(weekKey, updater);
 }

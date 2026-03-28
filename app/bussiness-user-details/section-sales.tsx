@@ -11,7 +11,7 @@ import { BussinessUserType } from "@/types/bussiness-user-types";
 import { RangeMode, SectionRange } from "@/types/manage-types";
 import { Stack, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { FlatList, RefreshControl, Text, View } from "react-native";
+import { FlatList, RefreshControl } from "react-native";
 
 const SectionSales = () => {
 	const { id, bussinessUserType } = useLocalSearchParams<{
@@ -126,25 +126,6 @@ const SectionSales = () => {
 							rangeMode={rangeMode}
 							setRangeMode={setRangeMode}
 						/>
-					),
-					headerTitle: () => (
-						<View
-							style={{
-								minHeight: 64,
-								justifyContent: "center",
-								paddingBottom: 6,
-							}}
-						>
-							<Text
-								style={{
-									color: "#e5e7eb",
-									fontWeight: "600",
-									fontSize: 20,
-								}}
-							>
-								Section Sales
-							</Text>
-						</View>
 					),
 				}}
 			/>

@@ -99,3 +99,15 @@ export function upsertByDate<T extends SectionSummaries | SectionSaleGroup>(
 		(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
 	);
 }
+
+export const formatPhone = (digits: string) => {
+	// Example: 0912345678 -> 09 123 456 78
+	const cleaned = digits.replace(/\D/g, "");
+
+	if (cleaned.length <= 2) return cleaned;
+	if (cleaned.length <= 5) return `${cleaned.slice(0, 2)} ${cleaned.slice(2)}`;
+	if (cleaned.length <= 8)
+		return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5)}`;
+
+	return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5, 8)} ${cleaned.slice(8, 11)}`;
+};

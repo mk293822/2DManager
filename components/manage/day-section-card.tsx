@@ -11,7 +11,8 @@ import { Section, SectionName, SectionSummaries } from "@/types/manage-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
+import InlineLoadingButton from "../ui/inline-loading-button";
 import DeleteManageSectionModal from "./delete-manage-section-modal";
 import EditManageSectionModal from "./edit-manage-section-modal";
 
@@ -61,8 +62,14 @@ const DaySectionCard = ({
 		open: false,
 	});
 	const [openDeleteModal, setOpenDeleteModal] = useState(false);
+	const [creatingSectionName, setCreatingSectionName] =
+		useState<SectionName>("morning_section");
 
 	if (!section) {
+		const handleCreate = async () => {
+			setCreatingSectionName(sectionName);
+			await createSection({ sectionName, date: new Date(date) });
+		};
 		return (
 			<View className="bg-white rounded-2xl shadow p-6 mb-6 items-center">
 				<Text className="text-gray-400 font-extrabold text-xl mb-2">
@@ -71,31 +78,12 @@ const DaySectionCard = ({
 				<Text className="text-gray-500 text-sm text-center mb-4">
 					This session has no records yet.
 				</Text>
-				<TouchableOpacity
-					activeOpacity={0.85}
-					onPress={() => createSection({ sectionName, date: new Date(date) })}
-					className="bg-indigo-600 px-6 py-3 rounded-xl shadow"
-				>
-					{creatingSection ? (
-						<View className="items-center justify-center">
-							<ActivityIndicator
-								size={20}
-								color="#fff"
-							/>
-						</View>
-					) : (
-						<View className="flex-row items-center justify-center gap-2">
-							<AntDesign
-								name="plus"
-								color="#fff"
-								size={15}
-							/>
-							<Text className="text-white font-semibold text-center">
-								Create
-							</Text>
-						</View>
-					)}
-				</TouchableOpacity>
+				<InlineLoadingButton
+					onPress={handleCreate}
+					loading={creatingSection && sectionName === creatingSectionName}
+					label="Create"
+					icon="plus"
+				/>
 			</View>
 		);
 	}

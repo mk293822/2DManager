@@ -3,6 +3,7 @@ import { EVENT_NAMES } from "@/event-names";
 import { eventBus } from "@/lib/event-bus";
 import { isAxiosError } from "axios";
 import { useEffect, useRef, useState } from "react";
+import { useAuthContext } from "./auth/use-auth-context";
 import { useInternet } from "./use-internet";
 
 type UseCacheTypes<T> = {
@@ -55,6 +56,13 @@ export function getCache<T>(key: string): T | null {
 }
 
 // -------------------------
+// Clear All the Cache and Pending Requests
+// -------------------------
+export const clearAllCache = () => {
+	Object.keys(cache).forEach((k) => delete cache[k]);
+	Object.keys(pending).forEach((k) => delete pending[k]);
+};
+// -------------------------
 // ERROR NORMALIZER
 // -------------------------
 export function getErrorMessage(
@@ -63,8 +71,8 @@ export function getErrorMessage(
 ): string {
 	if (isAxiosError(err)) {
 		return (
-			err.response?.data?.detail ||
 			err.response?.data?.message ||
+			err.response?.data?.detail ||
 			err.message ||
 			fallback
 		);
@@ -86,7 +94,7 @@ export function useCache<T>(
 	const [isLoading, setIsLoading] = useState(!cache[key]);
 	const [error, setError] = useState<Error | null>(null);
 	const isConnected = useInternet();
-
+	const { authLoading, isAuthenticated } = useAuthContext();
 	const isMounted = useRef(true);
 
 	// -------------------------
@@ -114,7 +122,7 @@ export function useCache<T>(
 	// -------------------------
 	useEffect(() => {
 		isMounted.current = true;
-
+		if (authLoading || !isAuthenticated) return;
 		if (cache[key]) {
 			setData(cache[key]);
 			setIsLoading(false);
@@ -151,7 +159,7 @@ export function useCache<T>(
 		return () => {
 			isMounted.current = false;
 		};
-	}, [key, fetcher]);
+	}, [key, fetcher, isAuthenticated, authLoading]);
 
 	// -------------------------
 	// REFETCH

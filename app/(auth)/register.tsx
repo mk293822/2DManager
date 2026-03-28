@@ -1,16 +1,11 @@
+import InlineLoadingButton from "@/components/ui/inline-loading-button";
 import { EVENT_NAMES } from "@/event-names";
 import { useAuthContext } from "@/hooks/auth/use-auth-context";
 import { eventBus } from "@/lib/event-bus";
+import { formatPhone } from "@/lib/helpers";
 import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
-import {
-	ActivityIndicator,
-	ScrollView,
-	Text,
-	TextInput,
-	TouchableOpacity,
-	View,
-} from "react-native";
+import { ScrollView, Text, TextInput, View } from "react-native";
 
 const Register = () => {
 	const { register, registering } = useAuthContext();
@@ -55,6 +50,7 @@ const Register = () => {
 			setErrors(res.error.fields);
 		}
 	};
+	const displayPhoneNumber = formatPhone(phoneNumber);
 
 	return (
 		<ScrollView
@@ -97,15 +93,16 @@ const Register = () => {
 						Phone number
 					</Text>
 					<TextInput
-						onChangeText={(v) => {
-							setPhoneNumber(v);
-							setErrors((p) => ({ ...p, phone_number: undefined }));
+						value={displayPhoneNumber}
+						onChangeText={(text) => {
+							// keep only digits
+							const digits = text.replace(/\D/g, "");
+							setPhoneNumber(digits);
 						}}
-						value={phoneNumber}
-						textContentType="telephoneNumber"
+						placeholder="09 123 456 789"
 						keyboardType="phone-pad"
+						textContentType="telephoneNumber"
 						className="bg-gray-100 rounded-lg px-4 py-3 text-base"
-						placeholder="Enter phone number"
 						placeholderTextColor="#9ca3af"
 					/>
 					{error.phone_number && (
@@ -150,24 +147,11 @@ const Register = () => {
 				</View>
 
 				{/* Register Button */}
-				<TouchableOpacity
+				<InlineLoadingButton
 					onPress={handleRegister}
-					activeOpacity={0.85}
-					className="bg-indigo-400 py-3 rounded-lg mt-2"
-				>
-					{registering ? (
-						<View className="flex-1 items-center justify-center bg-indigo-400">
-							<ActivityIndicator
-								size={20}
-								color="#fff"
-							/>
-						</View>
-					) : (
-						<Text className="text-white font-bold text-lg text-center">
-							Register
-						</Text>
-					)}
-				</TouchableOpacity>
+					label="Register"
+					loading={registering}
+				/>
 
 				{/* Footer */}
 				<View className="flex-row justify-center gap-1 mt-2">

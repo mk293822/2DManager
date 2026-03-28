@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import * as SecureStore from "expo-secure-store";
 
 export const two_d_api = axios.create({
@@ -50,65 +50,115 @@ export const clearTokens = async () => {
 	await SecureStore.deleteItemAsync("refreshToken");
 };
 
-// Response interceptor: handle 401 automatically
-let isRefreshing = false;
-let failedQueue: any[] = [];
+/* ---------------- TYPES ---------------- */
 
-const processQueue = (error: any, token: string | null = null) => {
-	failedQueue.forEach((prom) => {
+type QueueItem = {
+	resolve: (token: string) => void;
+	reject: (error: any) => void;
+};
+
+/* ---------------- STATE ---------------- */
+
+let isRefreshing = false;
+let failedQueue: QueueItem[] = [];
+
+/* ---------------- HELPERS ---------------- */
+
+const processQueue = (error: any, token?: string) => {
+	failedQueue.forEach((p) => {
 		if (error) {
-			prom.reject(error);
+			p.reject(error);
 		} else {
-			prom.resolve(token);
+			p.resolve(token!);
 		}
 	});
 	failedQueue = [];
 };
 
+export const clearAuthQueue = () => {
+	failedQueue = [];
+	isRefreshing = false;
+};
+
+/* ---------------- INTERCEPTOR ---------------- */
+
 api.interceptors.response.use(
 	(response) => response,
-	async (error) => {
-		const originalRequest = error.config;
+
+	async (error: AxiosError) => {
+		const originalRequest = error.config as
+			| (InternalAxiosRequestConfig & { _retry?: boolean })
+			| undefined;
+
+		// Safety check
+		if (!originalRequest) {
+			return Promise.reject(error);
+		}
+
+		/* ---------------- HANDLE 401 ---------------- */
 
 		if (
 			error.response?.status === 401 &&
 			!originalRequest._retry &&
 			!originalRequest.url?.endsWith("/auth/refresh/")
 		) {
+			/* ---------- If already refreshing ---------- */
 			if (isRefreshing) {
-				return new Promise((resolve, reject) => {
+				return new Promise<string>((resolve, reject) => {
 					failedQueue.push({ resolve, reject });
 				})
 					.then((token) => {
-						if (originalRequest.headers)
+						// retry original request with new token
+						if (originalRequest.headers) {
 							originalRequest.headers.Authorization = `Bearer ${token}`;
+						}
 						return api(originalRequest);
 					})
 					.catch((err) => Promise.reject(err));
 			}
 
+			/* ---------- Start refresh ---------- */
 			originalRequest._retry = true;
 			isRefreshing = true;
 
 			try {
 				const refreshToken = await SecureStore.getItemAsync("refreshToken");
-				if (!refreshToken) throw new Error("No refresh token");
 
-				const { data } = await api.post("/auth/refresh/", {
+				/* ---------- No refresh token ---------- */
+				if (!refreshToken) {
+					const err = new Error("NO_REFRESH_TOKEN");
+
+					processQueue(err);
+					await clearTokens();
+
+					return Promise.reject(error);
+				}
+
+				/* ---------- Refresh call ---------- */
+				const { data } = await api.post<{
+					access: string;
+					refresh: string;
+				}>("/auth/refresh/", {
 					refresh: refreshToken,
 				});
 
+				/* ---------- Save tokens ---------- */
 				await setTokens(data.access, data.refresh);
+
+				/* ---------- Resolve queued requests ---------- */
 				processQueue(null, data.access);
 
+				/* ---------- Retry original request ---------- */
 				if (originalRequest.headers) {
 					originalRequest.headers.Authorization = `Bearer ${data.access}`;
 				}
 
 				return api(originalRequest);
 			} catch (err) {
-				processQueue(err, null);
+				/* ---------- Refresh failed ---------- */
+				processQueue(err);
 				await clearTokens();
+
 				return Promise.reject(err);
 			} finally {
 				isRefreshing = false;

@@ -1,15 +1,14 @@
 import { EVENT_NAMES } from "@/event-names";
-import { api, clearTokens, setTokens } from "@/lib/api";
+import { api, clearAuthQueue, clearTokens, setTokens } from "@/lib/api";
 import { eventBus } from "@/lib/event-bus";
 import { ParsedErrors, parseErrors } from "@/lib/helpers";
 import { User } from "@/types/main";
 import { isAxiosError } from "axios";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import * as Updates from "expo-updates";
 import { useCallback, useState } from "react";
 import { useAbortableEffect } from "../use-abortable-effect";
-import { getErrorMessage } from "../use-cache";
+import { clearAllCache, getErrorMessage } from "../use-cache";
 import { MutationResult, useMutation } from "../use-mutation";
 
 export type ChangePasswordFields =
@@ -78,6 +77,7 @@ export function useAuth(): UseAuthInterface {
 
 	const fetchUser = useCallback(async (signal?: AbortSignal) => {
 		setAuthLoading(true);
+		setError(null);
 
 		try {
 			const { data } = await api.get<User>("/users/profile/", { signal });
@@ -92,8 +92,8 @@ export function useAuth(): UseAuthInterface {
 				// Unauthorized → log out
 				setUser(null);
 				setIsAuthenticated(false);
+				return "Unauthorized";
 			}
-
 			// Keep user unknown, show notification
 			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
 				type: "error",
@@ -137,7 +137,8 @@ export function useAuth(): UseAuthInterface {
 		{
 			onSuccess: async (data) => {
 				await setTokens(data.access, data.refresh);
-				await fetchUser();
+				queueMicrotask(() => fetchUser());
+				queueMicrotask(() => setIsAuthenticated(true));
 				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
 					type: "success",
 					title: "Success",
@@ -175,8 +176,9 @@ export function useAuth(): UseAuthInterface {
 		{
 			onSuccess: async (data) => {
 				await setTokens(data.access, data.refresh);
-				if (data.user) setUser(data.user);
-				else await fetchUser();
+				queueMicrotask(() => fetchUser());
+				queueMicrotask(() => setIsAuthenticated(true));
+
 				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
 					type: "success",
 					title: "Success",
@@ -266,12 +268,21 @@ export function useAuth(): UseAuthInterface {
 
 	// ------------------- LOGOUT -------------------
 	const logout = useCallback(async () => {
+		clearAuthQueue(); // stop pending requests
 		try {
 			const refresh = await SecureStore.getItemAsync("refreshToken");
-			if (refresh) await api.post("/auth/logout/", { refresh });
+			if (refresh) {
+				const res = await api.post("/auth/logout/", { refresh });
+
+				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+					type: "success",
+					title: "Logout Success",
+					description: res.data.message || "Logged out successfully!",
+				});
+			}
 		} catch (err: unknown) {
 			let message = "Server logout failed.";
-			if (isAxiosError(err)) message = err.response?.data?.detail || message;
+			if (isAxiosError(err)) message = getErrorMessage(err);
 			if (err instanceof Error) message = err.message;
 
 			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
@@ -280,9 +291,13 @@ export function useAuth(): UseAuthInterface {
 				description: message,
 			});
 		} finally {
+			clearAllCache(); // clear all cached API data
+
 			setUser(null);
+			setIsAuthenticated(false);
+
 			await clearTokens();
-			await Updates.reloadAsync();
+
 			router.replace("/login");
 		}
 	}, [setUser]);

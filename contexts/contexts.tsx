@@ -7,16 +7,6 @@ export const AuthContext = createContext<UseAuthInterface | undefined>(
 	undefined,
 );
 
-// export const BussinessUserDetailsContext = createContext<
-// 	| (BussinessUserDetailsHookType & {
-// 			bussinessUserType: BussinessUserType;
-// 			setBussinessUserType: React.Dispatch<
-// 				React.SetStateAction<BussinessUserType>
-// 			>;
-// 	  })
-// 	| undefined
-// >(undefined);
-
 export const ManageContext = createContext<
 	| (ManageHookType & {
 			selectedSectionRange: SectionRange;
