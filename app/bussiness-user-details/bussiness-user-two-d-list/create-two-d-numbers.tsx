@@ -48,7 +48,7 @@ const CreateTwoDNumbersPage = () => {
 	);
 	const section_sale = todaySectionSales[section];
 	const { createTwoDList, creatingTwoDList } = useSectionTwoDListHook(
-		bussinessUserType === "commission_user" ? "sold_number" : "sold_number",
+		bussinessUserType === "commission_user" ? "sold_number" : "resold_number",
 		section_sale?.id ?? "",
 	);
 
