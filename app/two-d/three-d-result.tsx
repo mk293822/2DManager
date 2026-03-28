@@ -95,6 +95,9 @@ const ThreeDResult = () => {
 			emptyMessage="No results found!"
 		>
 			<FlatList
+				contentContainerStyle={{
+					padding: 16,
+				}}
 				data={data?.data ?? []}
 				keyExtractor={(item) => item.datetime}
 				renderItem={renderItem}

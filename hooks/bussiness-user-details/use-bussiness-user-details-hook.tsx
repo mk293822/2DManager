@@ -30,7 +30,7 @@ export type BussinessUserDetailsHookType = {
 	editingUser: boolean;
 };
 
-const MODEL = "bussinessUser";
+const MODEL = "bussinessUser" as const;
 
 const useBussinessUserDetailsHook = (
 	id: string,

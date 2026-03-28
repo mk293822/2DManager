@@ -1,7 +1,14 @@
 import { EVENT_NAMES } from "@/event-names";
 import { api } from "@/lib/api";
-import { createKey, syncCachesByDate } from "@/lib/cache-helper";
+import {
+	createKey,
+	getDayKeyFromDate,
+	getParamsForSectionRange,
+	getWeekKeyFromDate,
+	syncCachesByDate,
+} from "@/lib/cache-helper";
 import { calculateSectionSaleSummary } from "@/lib/calculate-summary";
+import { getWeekRangeFromDate } from "@/lib/datetime-helper";
 import { eventBus } from "@/lib/event-bus";
 import { ParsedErrors, parseErrors } from "@/lib/helpers";
 import {
@@ -10,10 +17,11 @@ import {
 	SectionSaleGroup,
 } from "@/types/bussiness-user-types";
 import { AppEvents } from "@/types/event-bus";
+import { DayRange, WeekRange } from "@/types/manage-types";
 import { isAxiosError } from "axios";
 import { useEffect } from "react";
 import { BussinessUserEditFields } from "../bussiness-user-details/use-bussiness-user-details-hook";
-import { useCache } from "../use-cache";
+import { getErrorMessage, updateCache, useCache } from "../use-cache";
 import { MutationResult, useMutation } from "../use-mutation";
 
 // -------------------------
@@ -155,7 +163,7 @@ const useBussinessUserHook = (
 	// Listening Events
 	// -------------------
 	useEffect(() => {
-		const handler = (event: AppEvents["ONLINE_ACTION"]) => {
+		const handleSectionSummaryDelete = (event: AppEvents["ONLINE_ACTION"]) => {
 			if (
 				event.model === "sectionSummaries" &&
 				event.action === "delete" &&
@@ -203,9 +211,96 @@ const useBussinessUserHook = (
 			}
 		};
 
-		eventBus.on(EVENT_NAMES.ONLINE_ACTION, handler);
+		const handleSectionSummaryUpdate = (event: AppEvents["ONLINE_ACTION"]) => {
+			if (
+				event.model === "sectionSummaries" &&
+				event.action === "update" &&
+				event.meta?.date
+			) {
+				const userIds = bussinessUsers?.map((u) => u.id) ?? [];
 
-		return () => eventBus.off(EVENT_NAMES.ONLINE_ACTION, handler);
+				for (const id of userIds) {
+					const userKey = createKey("bussinessUser", {
+						id,
+						userType: bussinessUserType,
+					});
+
+					const endpoint =
+						bussinessUserType === "commission_user"
+							? `/commission-users/${id}/`
+							: `/resold-users/${id}/`;
+					api
+						.get<BussinessUser>(endpoint)
+						.then((res) => {
+							updateCache<BussinessUser>(userKey, () => res.data);
+						})
+						.catch((err) => {
+							eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+								type: "error",
+								title: "Errot",
+								description: getErrorMessage(err),
+							});
+						});
+
+					const dayKey = getDayKeyFromDate("sectionSales", event.meta.date, {
+						id,
+						userType: bussinessUserType,
+					});
+					const weekKey = getWeekKeyFromDate("sectionSales", event.meta.date, {
+						id,
+						userType: bussinessUserType,
+					});
+
+					const dayRange: DayRange = {
+						type: "day",
+						date: new Date(event.meta.date),
+					};
+
+					const { start, end } = getWeekRangeFromDate(event.meta.date);
+
+					const weekRange: WeekRange = {
+						type: "week",
+						start_date: start,
+						end_date: end,
+					};
+
+					[dayRange, weekRange].forEach((range) => {
+						const params = getParamsForSectionRange(range);
+						const sectionEndpoint =
+							bussinessUserType === "commission_user"
+								? `/commission-users/${id}/section-sales/`
+								: `/resold-users/${id}/section-sales/`;
+						api
+							.get<SectionSaleGroup[]>(sectionEndpoint, {
+								params,
+							})
+							.then((res) => {
+								if (range.type === "day") {
+									updateCache<SectionSaleGroup[]>(dayKey, () => res.data);
+								}
+								if (range.type === "week") {
+									updateCache<SectionSaleGroup[]>(weekKey, () => res.data);
+								}
+							})
+							.catch((err) => {
+								eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+									type: "error",
+									title: "Errot",
+									description: getErrorMessage(err),
+								});
+							});
+					});
+				}
+			}
+		};
+
+		eventBus.on(EVENT_NAMES.ONLINE_ACTION, handleSectionSummaryDelete);
+		eventBus.on(EVENT_NAMES.ONLINE_ACTION, handleSectionSummaryUpdate);
+
+		return () => {
+			eventBus.off(EVENT_NAMES.ONLINE_ACTION, handleSectionSummaryDelete);
+			eventBus.off(EVENT_NAMES.ONLINE_ACTION, handleSectionSummaryUpdate);
+		};
 	}, [bussinessUserType, cacheKey, bussinessUsers]);
 
 	return {

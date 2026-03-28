@@ -5,9 +5,12 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import "./global.css";
 
 import ManageProvider from "@/contexts/manage-provider";
+import { clearAllCache } from "@/hooks/use-cache";
+import { scheduleCacheClearAtMidnight } from "@/lib/datetime-helper";
 import OfflineActionHandler from "@/lib/offline-action-handler";
 
 export default function RootLayout() {
+	scheduleCacheClearAtMidnight(clearAllCache);
 	return (
 		<>
 			<AuthContextProvider>

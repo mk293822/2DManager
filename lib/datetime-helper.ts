@@ -120,3 +120,28 @@ export const formatWeekDisplay = (range: WeekRange) => {
 	}
 	return `Week ${weekNumber}: ${startMonth} ${start.getDate()} – ${endMonth} ${end.getDate()}, ${start.getFullYear()}`;
 };
+
+export function scheduleCacheClearAtMidnight(deleteAllCache: () => void) {
+	const now = new Date();
+
+	// Next midnight
+	const nextMidnight = new Date(
+		now.getFullYear(),
+		now.getMonth(),
+		now.getDate() + 1, // tomorrow
+		0,
+		0,
+		0,
+		0,
+	);
+
+	const msUntilMidnight = nextMidnight.getTime() - now.getTime();
+
+	setTimeout(() => {
+		// Call your cache clear function
+		deleteAllCache();
+
+		// Schedule the next midnight
+		scheduleCacheClearAtMidnight(deleteAllCache);
+	}, msUntilMidnight);
+}

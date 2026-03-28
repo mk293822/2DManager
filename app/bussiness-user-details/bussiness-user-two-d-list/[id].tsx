@@ -76,7 +76,10 @@ const UserTwoDList = () => {
 	const renderTwoDItem = ({ item }: { item: TwoDListType }) => {
 		const drawTimes = Number(draw_times) ?? 1;
 		const totalDrawAmount = item.total_draw_value * drawTimes;
-		const balance = item.total_amount - totalDrawAmount;
+		const balance =
+			bussinessUserType === "commission_user"
+				? item.total_amount - totalDrawAmount
+				: totalDrawAmount - item.total_amount;
 
 		return (
 			<View

@@ -149,7 +149,7 @@ const useManageHook = (range: SectionRange): ManageHookType => {
 			return data;
 		},
 		{
-			onSuccess: (data) => {
+			onSuccess: (data, { id }) => {
 				syncCachesByDate<SectionSummaries[]>(
 					MODEL,
 					data.date,
@@ -163,6 +163,14 @@ const useManageHook = (range: SectionRange): ManageHookType => {
 					type: "success",
 					title: "Success",
 					description: "Section edited successfully!",
+				});
+				eventBus.emit(EVENT_NAMES.ONLINE_ACTION, {
+					action: "update",
+					model: MODEL,
+					id: id,
+					meta: {
+						date: data.date,
+					},
 				});
 			},
 			onError: (err) => {

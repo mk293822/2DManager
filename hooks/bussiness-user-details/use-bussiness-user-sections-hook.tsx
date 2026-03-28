@@ -340,7 +340,7 @@ const useBussinessUserSectionsHook = (
 		return () => {
 			eventBus.off(EVENT_NAMES.ONLINE_ACTION, handler);
 		};
-	}, [cacheKey, sectionSales, refetchSectionSales]);
+	}, [cacheKey, refetchSectionSales, bussinessUserType, id]);
 
 	return {
 		sectionSales,
