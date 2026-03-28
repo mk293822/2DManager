@@ -201,6 +201,11 @@ const BussinessUserPage = () => {
 								editBussinessUserDetails={editBussinessUserDetails}
 								name={bussinessUserDetails.name}
 								phone_number={bussinessUserDetails.phone_number}
+								default_draw_times={
+									bussinessUserDetails.user_type === "resold_user"
+										? bussinessUserDetails.default_draw_times
+										: 0
+								}
 							/>
 						),
 					headerLeft: ({ canGoBack, tintColor }) =>

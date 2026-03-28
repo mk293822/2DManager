@@ -11,7 +11,6 @@ import {
 	TouchableOpacity,
 	View,
 } from "react-native";
-import { Loading } from "../loading";
 import AppModal from "../ui/app-modal";
 
 type Props = {
@@ -86,87 +85,78 @@ const ChangePasswordModal = ({
 	};
 
 	return (
-		<AppModal open={open}>
-			{changingPassword ? (
-				<View className="bg-gray-100 w-1/2 h-40 flex-col rounded-2xl p-6 py-8 shadow-lg">
-					<Loading />
-				</View>
-			) : (
-				<View className="bg-gray-100 w-full flex-col rounded-2xl p-6 py-8 shadow-lg">
-					<Text className="text-xl font-bold text-indigo-700 mb-4">
-						Create Commission User
-					</Text>
+		<AppModal
+			open={open}
+			loading={changingPassword}
+		>
+			<View className="bg-gray-100 w-full flex-col rounded-2xl p-6 py-8 shadow-lg">
+				<Text className="text-xl font-bold text-indigo-700 mb-4">
+					Create Commission User
+				</Text>
 
-					<ScrollView
-						showsVerticalScrollIndicator={false}
-						contentContainerClassName="flex-col gap-2"
-					>
-						<Text className="font-semibold text-gray-700">
-							Current Password
+				<ScrollView
+					showsVerticalScrollIndicator={false}
+					contentContainerClassName="flex-col gap-2"
+				>
+					<Text className="font-semibold text-gray-700">Current Password</Text>
+					<TextInput
+						secureTextEntry
+						value={form.current_password}
+						onChangeText={(text) => handleChange("current_password", text)}
+						className="border border-gray-300 rounded-lg px-3 py-2"
+					/>
+					{errors.current_password && (
+						<Text className="text-red-500 text-sm">
+							{errors.current_password}
 						</Text>
-						<TextInput
-							secureTextEntry
-							value={form.current_password}
-							onChangeText={(text) => handleChange("current_password", text)}
-							className="border border-gray-300 rounded-lg px-3 py-2"
-						/>
-						{errors.current_password && (
-							<Text className="text-red-500 text-sm">
-								{errors.current_password}
-							</Text>
-						)}
+					)}
 
-						<Text className="font-semibold text-gray-700">New Passwrod</Text>
-						<TextInput
-							secureTextEntry
-							value={form.new_password}
-							onChangeText={(text) => handleChange("new_password", text)}
-							className="border border-gray-300 rounded-lg px-3 py-2"
-						/>
-						{errors.new_password && (
-							<Text className="text-red-500 text-sm">
-								{errors.new_password}
-							</Text>
-						)}
+					<Text className="font-semibold text-gray-700">New Passwrod</Text>
+					<TextInput
+						secureTextEntry
+						value={form.new_password}
+						onChangeText={(text) => handleChange("new_password", text)}
+						className="border border-gray-300 rounded-lg px-3 py-2"
+					/>
+					{errors.new_password && (
+						<Text className="text-red-500 text-sm">{errors.new_password}</Text>
+					)}
 
-						<Text className="font-semibold text-gray-700">
-							Confirm Passwrod
+					<Text className="font-semibold text-gray-700">Confirm Passwrod</Text>
+					<TextInput
+						secureTextEntry
+						value={form.confirm_password}
+						onChangeText={(text) => handleChange("confirm_password", text)}
+						className="border border-gray-300 rounded-lg px-3 py-2"
+					/>
+					{errors.confirm_password && (
+						<Text className="text-red-500 text-sm">
+							{errors.confirm_password}
 						</Text>
-						<TextInput
-							secureTextEntry
-							value={form.confirm_password}
-							onChangeText={(text) => handleChange("confirm_password", text)}
-							className="border border-gray-300 rounded-lg px-3 py-2"
-						/>
-						{errors.confirm_password && (
-							<Text className="text-red-500 text-sm">
-								{errors.confirm_password}
-							</Text>
-						)}
-					</ScrollView>
+					)}
+				</ScrollView>
 
-					{/* Buttons */}
-					<View
-						className="w-full flex-row items-center mt-4 gap-2"
-						style={{ justifyContent: "flex-end" }}
+				{/* Buttons */}
+				<View
+					className="w-full flex-row items-center mt-4 gap-2"
+					style={{ justifyContent: "flex-end" }}
+				>
+					<TouchableOpacity
+						onPress={onCloseModal}
+						className="px-4 py-2 rounded-lg bg-white border border-gray-300"
 					>
-						<TouchableOpacity
-							onPress={onCloseModal}
-							className="px-4 py-2 rounded-lg bg-white border border-gray-300"
-						>
-							<Text className="font-semibold text-gray-700">Cancel</Text>
-						</TouchableOpacity>
+						<Text className="font-semibold text-gray-700">Cancel</Text>
+					</TouchableOpacity>
 
-						<TouchableOpacity
-							onPress={handleSave}
-							disabled={changingPassword}
-							className="px-4 py-2 disabled:bg-indigo-500 rounded-lg bg-indigo-600 border border-indigo-600"
-						>
-							<Text className="font-semibold text-white">Save</Text>
-						</TouchableOpacity>
-					</View>
+					<TouchableOpacity
+						onPress={handleSave}
+						disabled={changingPassword}
+						className="px-4 py-2 disabled:bg-indigo-500 rounded-lg bg-indigo-600 border border-indigo-600"
+					>
+						<Text className="font-semibold text-white">Save</Text>
+					</TouchableOpacity>
 				</View>
-			)}
+			</View>
 		</AppModal>
 	);
 };

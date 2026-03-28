@@ -1,3 +1,5 @@
+// file: EditSectionSaleModal.tsx
+
 import { EVENT_NAMES } from "@/event-names";
 import { BussinessUserSectionEditFields } from "@/hooks/bussiness-user-details/use-bussiness-user-sections-hook";
 import { MutationResult } from "@/hooks/use-mutation";
@@ -10,15 +12,9 @@ import {
 	SectionSaleGroup,
 } from "@/types/bussiness-user-types";
 import React, { useEffect, useState } from "react";
-import {
-	ScrollView,
-	Text,
-	TextInput,
-	TouchableOpacity,
-	View,
-} from "react-native";
-import { Loading } from "../loading";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import AppModal from "../ui/app-modal";
+import NumericInput from "../ui/numeric-input";
 
 type EditManageSectionModalProps = {
 	sectionObj: SectionSale;
@@ -40,9 +36,9 @@ type EditManageSectionModalProps = {
 
 type FormState = {
 	commission_percent: number;
-	total_amount?: number;
-	total_draw_value?: number;
-	draw_times?: number;
+	total_amount: number;
+	total_draw_value: number;
+	draw_times: number;
 };
 
 const EditSectionSaleModal = ({
@@ -65,8 +61,10 @@ const EditSectionSaleModal = ({
 		Partial<Record<BussinessUserSectionEditFields, string>>
 	>({});
 
-	const handleChange = (key: keyof FormState, value: number) => {
-		setForm((prev) => ({ ...prev, [key]: value }));
+	// Flexible handleChange: accepts string | number | undefined
+	const handleChange = (key: keyof FormState, value: string | number) => {
+		const numericValue = Number(value ?? 0);
+		setForm((prev) => ({ ...prev, [key]: numericValue }));
 	};
 
 	useEffect(() => {
@@ -121,120 +119,83 @@ const EditSectionSaleModal = ({
 	};
 
 	return (
-		<AppModal open={open}>
-			{editingSection ? (
-				<View className="bg-gray-100 w-1/2 h-40 flex-col rounded-2xl p-6 py-8 shadow-lg">
-					<Loading />
-				</View>
-			) : (
-				<View className="bg-gray-100 w-full flex-col rounded-2xl p-6 py-8 shadow-lg">
-					<Text className="text-xl font-bold text-indigo-700 mb-4">
-						Edit Section Sale
-					</Text>
+		<AppModal
+			open={open}
+			loading={editingSection}
+		>
+			<View className="bg-gray-100 w-full flex-col rounded-2xl p-6 py-8 shadow-lg">
+				<Text className="text-xl font-bold text-indigo-700 mb-4">
+					Edit Section Sale
+				</Text>
 
-					<ScrollView
-						showsVerticalScrollIndicator={false}
-						contentContainerClassName="flex-col gap-2"
-					>
-						{!isToday(date) ||
-							(!sectionObj.numbers_exists && (
-								<>
-									<Text className="font-semibold text-gray-700">
-										Total Amount
-									</Text>
-									<TextInput
-										value={(form.total_amount ?? 0).toLocaleString()}
-										onChangeText={(text) => {
-											const clean = text.replace(/,/g, "");
-											handleChange("total_amount", Number(clean || 0));
-										}}
-										className="border border-gray-300 rounded-lg px-3 py-2"
-										keyboardType="numeric"
-									/>
-									{error.total_amount && (
-										<Text className="text-red-500 text-sm">
-											{error.total_amount}
-										</Text>
-									)}
+				<ScrollView
+					showsVerticalScrollIndicator={false}
+					contentContainerClassName="flex-col gap-3"
+				>
+					{/* Editable only when allowed */}
+					{(!isToday(date) || !sectionObj.numbers_exists) && (
+						<>
+							<NumericInput
+								label="Total Amount"
+								value={form.total_amount}
+								onChange={(val) => handleChange("total_amount", val)}
+								error={error.total_amount}
+								min={0}
+							/>
 
-									<Text className="font-semibold text-gray-700">
-										Total Draw Value
-									</Text>
-									<TextInput
-										value={(form.total_draw_value ?? 0).toLocaleString()}
-										onChangeText={(text) => {
-											const clean = text.replace(/,/g, "");
-											handleChange("total_draw_value", Number(clean || 0));
-										}}
-										className="border border-gray-300 rounded-lg px-3 py-2"
-										keyboardType="numeric"
-									/>
-									{error.total_draw_value && (
-										<Text className="text-red-500 text-sm">
-											{error.total_draw_value}
-										</Text>
-									)}
-								</>
-							))}
+							<NumericInput
+								label="Total Draw Value"
+								value={form.total_draw_value}
+								onChange={(val) => handleChange("total_draw_value", val)}
+								error={error.total_draw_value}
+								min={0}
+							/>
+						</>
+					)}
 
-						{/* ALWAYS */}
-						<Text className="font-semibold text-gray-700">Commission %</Text>
-						<TextInput
-							value={form.commission_percent.toLocaleString()}
-							onChangeText={(text) => {
-								const clean = text.replace(/,/g, "");
-								handleChange("commission_percent", Number(clean || 0));
-							}}
-							className="border border-gray-300 rounded-lg px-3 py-2"
-							keyboardType="numeric"
+					{/* ALWAYS */}
+					<NumericInput
+						label="Commission %"
+						value={form.commission_percent}
+						onChange={(val) => handleChange("commission_percent", val)}
+						error={error.commission_percent}
+						min={0}
+						max={100}
+					/>
+
+					{/* ONLY FOR RESOLD USER */}
+					{bussinessUserType === "resold_user" && (
+						<NumericInput
+							label="Draw Times"
+							value={form.draw_times}
+							onChange={(val) => handleChange("draw_times", val)}
+							error={error.draw_times}
+							min={0}
+							max={100}
 						/>
-						{error.commission_percent && (
-							<Text className="text-red-500 text-sm">
-								{error.commission_percent}
-							</Text>
-						)}
+					)}
+				</ScrollView>
 
-						{bussinessUserType === "resold_user" && (
-							<>
-								<Text className="font-semibold text-gray-700">Draw Times</Text>
-								<TextInput
-									value={(form.draw_times ?? 0).toString()}
-									onChangeText={(text) => {
-										handleChange("draw_times", Number(text || 0));
-									}}
-									className="border border-gray-300 rounded-lg px-3 py-2"
-									keyboardType="numeric"
-								/>
-								{error.draw_times && (
-									<Text className="text-red-500 text-sm">
-										{error.draw_times}
-									</Text>
-								)}
-							</>
-						)}
-					</ScrollView>
-
-					<View
-						className="w-full flex-row items-center mt-4 gap-2"
-						style={{ justifyContent: "flex-end" }}
+				<View
+					className="w-full flex-row items-center mt-4 gap-2"
+					style={{ justifyContent: "flex-end" }}
+				>
+					<TouchableOpacity
+						onPress={handleClose}
+						className="px-4 py-2 rounded-lg bg-white border border-gray-300"
 					>
-						<TouchableOpacity
-							onPress={handleClose}
-							className="px-4 py-2 rounded-lg bg-white border border-gray-300"
-						>
-							<Text className="font-semibold text-gray-700">Cancel</Text>
-						</TouchableOpacity>
+						<Text className="font-semibold text-gray-700">Cancel</Text>
+					</TouchableOpacity>
 
-						<TouchableOpacity
-							onPress={() => handleSave()}
-							disabled={editingSection}
-							className="px-4 py-2 rounded-lg bg-indigo-600 disabled:bg-indigo-400"
-						>
-							<Text className="font-semibold text-white">Save</Text>
-						</TouchableOpacity>
-					</View>
+					<TouchableOpacity
+						onPress={handleSave}
+						disabled={editingSection}
+						className="px-4 py-2 rounded-lg bg-indigo-600 disabled:bg-indigo-400"
+					>
+						<Text className="font-semibold text-white">Save</Text>
+					</TouchableOpacity>
 				</View>
-			)}
+			</View>
 		</AppModal>
 	);
 };

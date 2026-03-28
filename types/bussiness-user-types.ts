@@ -48,3 +48,12 @@ export type SectionSale = {
 	section_summary_id: string;
 	numbers_exists: boolean;
 };
+
+export type BussinessUserPayload =
+	| { name: string; phone_number: string; default_commission_percent: number } // commission_user
+	| {
+			name: string;
+			phone_number: string;
+			default_commission_percent: number;
+			default_draw_times: number;
+	  }; // resold_user

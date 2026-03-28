@@ -1,4 +1,6 @@
 // hooks/useCache.ts
+import { EVENT_NAMES } from "@/event-names";
+import { eventBus } from "@/lib/event-bus";
 import { isAxiosError } from "axios";
 import { useEffect, useRef, useState } from "react";
 import { useInternet } from "./use-internet";
@@ -157,7 +159,11 @@ export function useCache<T>(
 	const refetch = async () => {
 		setIsLoading(true);
 		if (!isConnected) {
-			setError(new Error("You are Offline!"));
+			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+				type: "error",
+				title: "Network Error",
+				description: "Check your connection and retry!",
+			});
 			setIsLoading(false);
 			return;
 		} else {

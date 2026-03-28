@@ -6,15 +6,10 @@ import { eventBus } from "@/lib/event-bus";
 import { ParsedErrors } from "@/lib/helpers";
 import { Section, SectionSummaries } from "@/types/manage-types";
 import React, { useState } from "react";
-import {
-	ScrollView,
-	Text,
-	TextInput,
-	TouchableOpacity,
-	View,
-} from "react-native";
-import { Loading } from "../loading";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import AppModal from "../ui/app-modal";
+import NumericInput from "../ui/numeric-input";
+import TwoDigitInput from "../ui/two-digit-input";
 
 type EditManageSectionModalProps = {
 	sectionObj: Section;
@@ -101,203 +96,109 @@ const EditManageSectionModal = ({
 	};
 
 	return (
-		<AppModal open={open}>
-			{editingSection ? (
-				<View className="bg-gray-100 w-1/2 h-40 flex-col rounded-2xl p-6 py-8 shadow-lg">
-					<Loading />
-				</View>
-			) : (
-				<View className="bg-gray-100 w-full flex-col rounded-2xl p-6 py-8 shadow-lg">
-					<Text className="text-xl font-bold text-indigo-700 mb-4">
-						Edit Section
-					</Text>
+		<AppModal
+			open={open}
+			loading={editingSection}
+		>
+			<View className="bg-gray-100 w-full flex-col rounded-2xl p-6 py-8 shadow-lg">
+				<Text className="text-xl font-bold text-indigo-700 mb-4">
+					Edit Section
+				</Text>
+				<ScrollView
+					showsVerticalScrollIndicator={false}
+					contentContainerClassName="flex-col gap-3"
+				>
+					<TwoDigitInput
+						label="Draw Number"
+						value={form.draw_number}
+						onChange={(val) => handleChange("draw_number", val)}
+						error={errors.draw_number}
+					/>
 
-					<ScrollView
-						showsVerticalScrollIndicator={false}
-						contentContainerClassName="flex-col gap-2"
+					<NumericInput
+						label="Draw Times"
+						value={form.draw_times}
+						onChange={(val) => handleChange("draw_times", val)}
+						error={errors.draw_times}
+						min={0}
+						max={100}
+					/>
+
+					{!isDrawNumberEdit && (
+						<>
+							<NumericInput
+								label="Total Amount"
+								value={form.total_amount}
+								onChange={(val) => handleChange("total_amount", val)}
+								error={errors.total_amount}
+							/>
+
+							<NumericInput
+								label="Total Commission"
+								value={form.total_commission}
+								onChange={(val) => handleChange("total_commission", val)}
+								error={errors.total_commission}
+							/>
+
+							<NumericInput
+								label="Total Resold"
+								value={form.total_resold}
+								onChange={(val) => handleChange("total_resold", val)}
+								error={errors.total_resold}
+							/>
+
+							<NumericInput
+								label="Total Resold Commission"
+								value={form.total_resold_commission}
+								onChange={(val) => handleChange("total_resold_commission", val)}
+								error={errors.total_resold_commission}
+							/>
+
+							<NumericInput
+								label="Total Resold Draw Value"
+								value={form.total_resold_draw_value}
+								onChange={(val) => handleChange("total_resold_draw_value", val)}
+								error={errors.total_resold_draw_value}
+							/>
+
+							<NumericInput
+								label="Total Resold Draw Amount"
+								value={form.total_resold_draw_amount}
+								onChange={(val) =>
+									handleChange("total_resold_draw_amount", val)
+								}
+								error={errors.total_resold_draw_amount}
+							/>
+
+							<NumericInput
+								label="Total Draw Value"
+								value={form.total_draw_value}
+								onChange={(val) => handleChange("total_draw_value", val)}
+								error={errors.total_draw_value}
+							/>
+						</>
+					)}
+				</ScrollView>
+				{/* Buttons */}
+				<View
+					className="w-full flex-row items-center mt-4 gap-2"
+					style={{ justifyContent: "flex-end" }}
+				>
+					<TouchableOpacity
+						onPress={handleClose}
+						className="px-4 py-2 rounded-lg bg-white border border-gray-300"
 					>
-						{/* Draw Number */}
-						<Text className="font-semibold text-gray-700">Draw Number</Text>
-						<TextInput
-							value={form.draw_number || ""}
-							onChangeText={(text) => handleChange("draw_number", text)}
-							className="border border-gray-300 rounded-lg px-3 py-2"
-							keyboardType="numeric"
-						/>
-						{errors.draw_number && (
-							<Text className="text-red-500 text-sm">{errors.draw_number}</Text>
-						)}
-
-						{/* Draw Times */}
-						<Text className="font-semibold text-gray-700">Draw Times</Text>
-						<TextInput
-							value={form.draw_times.toLocaleString()}
-							onChangeText={(text) => {
-								const clean = text.replace(/,/g, "");
-								handleChange("draw_times", Number(clean || 0));
-							}}
-							className="border border-gray-300 rounded-lg px-3 py-2"
-							keyboardType="numeric"
-						/>
-						{errors.draw_times && (
-							<Text className="text-red-500 text-sm">{errors.draw_times}</Text>
-						)}
-						{!isDrawNumberEdit && (
-							<>
-								{/* Total Amount */}
-								<Text className="font-semibold text-gray-700">
-									Total Amount
-								</Text>
-								<TextInput
-									value={form.total_amount.toLocaleString()}
-									onChangeText={(text) => {
-										const clean = text.replace(/,/g, "");
-										handleChange("total_amount", Number(clean || 0));
-									}}
-									className="border border-gray-300 rounded-lg px-3 py-2"
-									keyboardType="numeric"
-								/>
-								{errors.total_amount && (
-									<Text className="text-red-500 text-sm">
-										{errors.total_amount}
-									</Text>
-								)}
-								{/* Total Commission */}
-								<Text className="font-semibold text-gray-700">
-									Total Commission
-								</Text>
-								<TextInput
-									value={form.total_commission.toLocaleString()}
-									onChangeText={(text) => {
-										const clean = text.replace(/,/g, "");
-										handleChange("total_commission", Number(clean || 0));
-									}}
-									className="border border-gray-300 rounded-lg px-3 py-2"
-									keyboardType="numeric"
-								/>
-								{errors.total_commission && (
-									<Text className="text-red-500 text-sm">
-										{errors.total_commission}
-									</Text>
-								)}
-								{/* Total Resold */}
-								<Text className="font-semibold text-gray-700">
-									Total Resold
-								</Text>
-								<TextInput
-									value={form.total_resold.toLocaleString()}
-									onChangeText={(text) => {
-										const clean = text.replace(/,/g, "");
-										handleChange("total_resold", Number(clean || 0));
-									}}
-									className="border border-gray-300 rounded-lg px-3 py-2"
-									keyboardType="numeric"
-								/>
-								{errors.total_resold && (
-									<Text className="text-red-500 text-sm">
-										{errors.total_resold}
-									</Text>
-								)}
-								{/* Total Resold Commission */}
-								<Text className="font-semibold text-gray-700">
-									Total Resold Commission
-								</Text>
-								<TextInput
-									value={form.total_resold_commission.toLocaleString()}
-									onChangeText={(text) => {
-										const clean = text.replace(/,/g, "");
-										handleChange("total_resold_commission", Number(clean || 0));
-									}}
-									className="border border-gray-300 rounded-lg px-3 py-2"
-									keyboardType="numeric"
-								/>
-								{errors.total_resold_commission && (
-									<Text className="text-red-500 text-sm">
-										{errors.total_resold_commission}
-									</Text>
-								)}
-								{/* Total Resold Draw Value */}
-								<Text className="font-semibold text-gray-700">
-									Total Resold Draw Value
-								</Text>
-								<TextInput
-									value={form.total_resold_draw_value.toLocaleString()}
-									onChangeText={(text) => {
-										const clean = text.replace(/,/g, "");
-										handleChange("total_resold_draw_value", Number(clean || 0));
-									}}
-									className="border border-gray-300 rounded-lg px-3 py-2"
-									keyboardType="numeric"
-								/>
-								{errors.total_resold_draw_value && (
-									<Text className="text-red-500 text-sm">
-										{errors.total_resold_draw_value}
-									</Text>
-								)}
-								{/* Total Resold Draw Value */}
-								<Text className="font-semibold text-gray-700">
-									Total Resold Draw Amount
-								</Text>
-								<TextInput
-									value={form.total_resold_draw_amount.toLocaleString()}
-									onChangeText={(text) => {
-										const clean = text.replace(/,/g, "");
-										handleChange(
-											"total_resold_draw_amount",
-											Number(clean || 0),
-										);
-									}}
-									className="border border-gray-300 rounded-lg px-3 py-2"
-									keyboardType="numeric"
-								/>
-								{errors.total_resold_draw_amount && (
-									<Text className="text-red-500 text-sm">
-										{errors.total_resold_draw_amount}
-									</Text>
-								)}
-								{/* Total Draw Value */}
-								<Text className="font-semibold text-gray-700">
-									Total Draw Value
-								</Text>
-								<TextInput
-									value={form.total_draw_value.toLocaleString()}
-									onChangeText={(text) => {
-										const clean = text.replace(/,/g, "");
-										handleChange("total_draw_value", Number(clean || 0));
-									}}
-									className="border border-gray-300 rounded-lg px-3 py-2"
-									keyboardType="numeric"
-								/>
-								{errors.total_draw_value && (
-									<Text className="text-red-500 text-sm">
-										{errors.total_draw_value}
-									</Text>
-								)}
-							</>
-						)}
-					</ScrollView>
-
-					{/* Buttons */}
-					<View
-						className="w-full flex-row items-center mt-4 gap-2"
-						style={{ justifyContent: "flex-end" }}
+						<Text className="font-semibold text-gray-700">Cancel</Text>
+					</TouchableOpacity>
+					<TouchableOpacity
+						onPress={handleSave}
+						disabled={editingSection}
+						className="px-4 py-2 rounded-lg bg-indigo-600 disabled:bg-indigo-400"
 					>
-						<TouchableOpacity
-							onPress={handleClose}
-							className="px-4 py-2 rounded-lg bg-white border border-gray-300"
-						>
-							<Text className="font-semibold text-gray-700">Cancel</Text>
-						</TouchableOpacity>
-						<TouchableOpacity
-							onPress={handleSave}
-							disabled={editingSection}
-							className="px-4 py-2 rounded-lg bg-indigo-600 disabled:bg-indigo-400"
-						>
-							<Text className="font-semibold text-white">Save</Text>
-						</TouchableOpacity>
-					</View>
+						<Text className="font-semibold text-white">Save</Text>
+					</TouchableOpacity>
 				</View>
-			)}
+			</View>
 		</AppModal>
 	);
 };

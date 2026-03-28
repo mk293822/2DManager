@@ -15,6 +15,7 @@ const BussinessUserDetailsHeaderRight = ({
 	phone_number,
 	default_commission_percent,
 	bussinessUserType,
+	default_draw_times,
 }: {
 	editBussinessUserDetails: (
 		variables: Partial<BussinessUser>,
@@ -26,10 +27,10 @@ const BussinessUserDetailsHeaderRight = ({
 	phone_number: string;
 	default_commission_percent: number;
 	bussinessUserType: BussinessUserType;
+	default_draw_times: number;
 }) => {
 	const [open, setOpen] = useState(false);
 
-	const userId = Array.isArray(id) ? id[0] : id;
 	const router = useRouter();
 
 	return (
@@ -62,7 +63,7 @@ const BussinessUserDetailsHeaderRight = ({
 					onPress={() =>
 						router.push({
 							pathname: "/bussiness-user-details/section-sales",
-							params: { id: userId, bussinessUserType },
+							params: { id: id, bussinessUserType },
 						})
 					}
 					style={{
@@ -81,11 +82,11 @@ const BussinessUserDetailsHeaderRight = ({
 				bussinessUserType={bussinessUserType}
 				open={open}
 				onClose={() => setOpen(false)}
-				id={id}
 				editBussinessUserDetails={editBussinessUserDetails}
 				name={name}
 				phone_number={phone_number}
 				default_commission_percent={default_commission_percent}
+				default_draw_times={default_draw_times}
 			/>
 		</>
 	);
