@@ -101,7 +101,7 @@ const Login = () => {
 						}}
 						value={password}
 						textContentType="password"
-						className="bg-gray-100 rounded-lg px-4 py-3 text-base"
+						className="bg-gray-100 rounded-lg px-4 py-3 text-base text-gray-900"
 						placeholder="Enter password"
 						placeholderTextColor="#9ca3af"
 					/>

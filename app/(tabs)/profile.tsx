@@ -1,6 +1,7 @@
 import PageWrapper from "@/components/page-wrapper";
 import ChangePasswordModal from "@/components/profile/change-password-modal";
 import EditUserProfileModal from "@/components/profile/edit-user-profile-modal";
+import InlineLoadingButton from "@/components/ui/inline-loading-button";
 import { EVENT_NAMES } from "@/event-names";
 import { useAuthContext } from "@/hooks/auth/use-auth-context";
 import { eventBus } from "@/lib/event-bus";
@@ -21,6 +22,7 @@ const Profile = () => {
 		changingPassword,
 		authLoading,
 		error,
+		loggingOut,
 	} = useAuthContext();
 	const [openPasModal, setOpenPasModal] = useState(false);
 	const [openEditModal, setOpenEditModal] = useState(false);
@@ -143,15 +145,12 @@ const Profile = () => {
 
 					{/* ===== LOGOUT ===== */}
 					<View className="bg-white border border-red-200 rounded-2xl p-6">
-						<TouchableOpacity
+						<InlineLoadingButton
 							onPress={() => logout()}
-							activeOpacity={0.85}
-							className="bg-red-600 rounded-xl py-3 items-center"
-						>
-							<Text className="text-white font-extrabold text-base">
-								Log Out
-							</Text>
-						</TouchableOpacity>
+							label="Log Out"
+							loading={loggingOut}
+							bgColor="bg-red-500"
+						/>
 					</View>
 				</ScrollView>
 			</PageWrapper>

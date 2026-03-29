@@ -247,7 +247,8 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({
 						editable
 						onPressIn={() => handleFieldPress("twoD", twoDRef)}
 						showSoftInputOnFocus={false}
-						className="bg-white shadow shadow-black rounded-lg px-4 py-3 border border-gray-200 focus:border-indigo-600"
+						placeholderTextColor={"#9ca3af"}
+						className="bg-white shadow text-gray-900 shadow-black rounded-lg px-4 py-3 border border-gray-200 focus:border-indigo-600"
 						accessibilityLabel="Two-D Field"
 						accessibilityState={{ selected: activeField === "twoD" }}
 					/>
@@ -263,11 +264,12 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({
 								? Number(amount1Value).toLocaleString()
 								: (ENGLISH_TO_BURMESE_MAP[amount1Value] ?? amount1Value)
 						}
+						placeholderTextColor={"#9ca3af"}
 						onChangeText={setAmount1Value}
 						editable
 						onPressIn={() => handleFieldPress("amount1", amount1Ref)}
 						showSoftInputOnFocus={false}
-						className="bg-white shadow shadow-black rounded-lg px-4 py-3 border border-gray-200 focus:border-indigo-600"
+						className="bg-white shadow text-gray-900 shadow-black rounded-lg px-4 py-3 border border-gray-200 focus:border-indigo-600"
 						accessibilityLabel="Amount 1 Field"
 						accessibilityState={{ selected: activeField === "amount1" }}
 					/>
@@ -283,11 +285,12 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({
 								? Number(amount2Value).toLocaleString()
 								: amount2Value
 						}
+						placeholderTextColor={"#9ca3af"}
 						onChangeText={setAmount2Value}
 						editable={!SPECIAL_KEYS1.includes(twoDValue)}
 						onPressIn={() => handleFieldPress("amount2", amount2Ref)}
 						showSoftInputOnFocus={false}
-						className={`bg-white shadow shadow-black rounded-lg px-4 py-3 border border-gray-200 focus:border-indigo-600 ${SPECIAL_KEYS1.includes(twoDValue) ? "border-red-600" : ""}`}
+						className={`bg-white shadow text-gray-900 shadow-black rounded-lg px-4 py-3 border border-gray-200 focus:border-indigo-600 ${SPECIAL_KEYS1.includes(twoDValue) ? "border-red-600" : ""}`}
 						accessibilityLabel="Amount 2 Field"
 						accessibilityState={{ selected: activeField === "amount2" }}
 					/>

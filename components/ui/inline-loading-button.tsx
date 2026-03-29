@@ -6,15 +6,22 @@ type Props = {
 	loading: boolean;
 	label: string;
 	icon?: keyof typeof AntDesign.glyphMap;
+	bgColor?: string;
 };
 
-const InlineLoadingButton = ({ onPress, label, loading, icon }: Props) => {
+const InlineLoadingButton = ({
+	onPress,
+	label,
+	loading,
+	icon,
+	bgColor = "bg-indigo-500",
+}: Props) => {
 	return (
 		<TouchableOpacity
 			activeOpacity={0.85}
 			onPress={onPress}
 			disabled={loading}
-			className="bg-indigo-500 px-6 py-3 rounded-xl shadow"
+			className={`${bgColor} px-6 py-3 rounded-xl shadow`}
 		>
 			{loading ? (
 				<View className="items-center justify-center">

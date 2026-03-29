@@ -26,8 +26,9 @@ const PhoneNumberInput = ({ label, value, onChange, error }: Props) => {
 				}}
 				keyboardType="phone-pad"
 				placeholder="09 123 456 789"
+				placeholderTextColor={"#9ca3af"}
 				textContentType="telephoneNumber"
-				className="border border-gray-300 rounded-lg px-3 py-2"
+				className="border border-gray-300 rounded-lg px-3 py-2 text-gray-900"
 			/>
 
 			{error && <Text className="text-red-500 text-sm">{error}</Text>}

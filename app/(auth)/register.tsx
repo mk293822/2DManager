@@ -121,7 +121,7 @@ const Register = () => {
 						value={password}
 						secureTextEntry
 						textContentType="password"
-						className="bg-gray-100 rounded-lg px-4 py-3 text-base"
+						className="bg-gray-100 rounded-lg px-4 py-3 text-base text-gray-900"
 						placeholder="Create password"
 						placeholderTextColor="#9ca3af"
 					/>
@@ -140,7 +140,7 @@ const Register = () => {
 						value={passwordConfirm}
 						secureTextEntry
 						textContentType="newPassword"
-						className="bg-gray-100 rounded-lg px-4 py-3 text-base"
+						className="bg-gray-100 rounded-lg px-4 py-3 text-base text-gray-900"
 						placeholder="Confirm password"
 						placeholderTextColor="#9ca3af"
 					/>

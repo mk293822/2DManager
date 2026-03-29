@@ -45,7 +45,7 @@ export interface UseAuthInterface {
 		password: string;
 	}) => Promise<MutationResult<UserWithTokens, ParsedErrors<RegisterFields>>>;
 
-	logout: () => Promise<void>;
+	logout: (variables: void) => Promise<MutationResult<void, void>>;
 
 	changePassword: (variables: {
 		current_password: string;
@@ -60,6 +60,7 @@ export interface UseAuthInterface {
 
 	loggingIn: boolean;
 	registering: boolean;
+	loggingOut: boolean;
 	changingPassword: boolean;
 	updatingProfile: boolean;
 	isAuthenticated: boolean;
@@ -267,40 +268,45 @@ export function useAuth(): UseAuthInterface {
 	);
 
 	// ------------------- LOGOUT -------------------
-	const logout = useCallback(async () => {
-		clearAuthQueue(); // stop pending requests
-		try {
+	const { mutate: logout, isMutating: loggingOut } = useMutation<
+		void,
+		void,
+		void
+	>(
+		async () => {
+			clearAuthQueue();
 			const refresh = await SecureStore.getItemAsync("refreshToken");
 			if (refresh) {
-				const res = await api.post("/auth/logout/", { refresh });
+				await api.post("/auth/logout/", { refresh });
+			}
+		},
+		{
+			onSuccess: () => {
+				clearAllCache();
+				setUser(null);
+				setIsAuthenticated(false);
+				clearTokens();
+				router.replace("/login");
 
 				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
 					type: "success",
-					title: "Logout Success",
-					description: res.data.message || "Logged out successfully!",
+					title: "Logged out",
+					description: "Logout successful",
 				});
-			}
-		} catch (err: unknown) {
-			let message = "Server logout failed.";
-			if (isAxiosError(err)) message = getErrorMessage(err);
-			if (err instanceof Error) message = err.message;
+			},
+			onError: (err: unknown) => {
+				let message = "Logout failed.";
+				if (isAxiosError(err)) message = getErrorMessage(err);
+				else if (err instanceof Error) message = err.message;
 
-			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-				type: "error",
-				title: "Logout Warning",
-				description: message,
-			});
-		} finally {
-			clearAllCache(); // clear all cached API data
-
-			setUser(null);
-			setIsAuthenticated(false);
-
-			await clearTokens();
-
-			router.replace("/login");
-		}
-	}, [setUser]);
+				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+					type: "error",
+					title: "Logout Warning",
+					description: message,
+				});
+			},
+		},
+	);
 
 	return {
 		user,
@@ -316,7 +322,7 @@ export function useAuth(): UseAuthInterface {
 		registering,
 		changingPassword,
 		updatingProfile,
-
+		loggingOut,
 		fetchUser,
 	};
 }
