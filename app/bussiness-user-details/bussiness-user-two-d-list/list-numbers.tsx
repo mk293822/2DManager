@@ -20,7 +20,7 @@ const UserTwoDListNumbers = () => {
 		bussinessUserType: BussinessUserType;
 	}>();
 	const { twoDList, loading, error, refetch } = useSectionTwoDListHook(
-		bussinessUserType === "commission_user" ? "sold_number" : "sold_number",
+		bussinessUserType === "commission_user" ? "sold_number" : "resold_number",
 		id,
 	);
 	const { sections } = useManageContext();
