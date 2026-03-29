@@ -24,12 +24,6 @@ jobs:
     params:
       platform: android
       profile: production
-  submit_android_build:
-    name: Submit Android Build
-    needs: [build_android]
-    type: submit
-    params:
-      build_id: ${{ needs.build_android.outputs.build_id }}
   publish_android_update:
     name: Publish Android update
     needs: [get_android_build]
