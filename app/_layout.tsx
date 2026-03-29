@@ -9,8 +9,39 @@ import { clearAllCache } from "@/hooks/use-cache";
 import { scheduleCacheClearAtMidnight } from "@/lib/datetime-helper";
 import OfflineActionHandler from "@/lib/offline-action-handler";
 
+// ✅ ADD THIS
+import { Loading } from "@/components/loading";
+import * as Updates from "expo-updates";
+import { useEffect, useState } from "react";
+
 export default function RootLayout() {
 	scheduleCacheClearAtMidnight(clearAllCache);
+
+	const [isUpdating, setIsUpdating] = useState(true);
+
+	useEffect(() => {
+		async function checkUpdate() {
+			try {
+				const update = await Updates.checkForUpdateAsync();
+
+				if (update.isAvailable) {
+					await Updates.fetchUpdateAsync();
+					await Updates.reloadAsync(); // 🔥 reload app with new update
+				}
+			} catch (e) {
+				console.log("Update error:", e);
+			} finally {
+				setIsUpdating(false);
+			}
+		}
+
+		checkUpdate();
+	}, []);
+
+	if (isUpdating) {
+		return <Loading />;
+	}
+
 	return (
 		<>
 			<AuthContextProvider>
