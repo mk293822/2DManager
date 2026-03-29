@@ -40,7 +40,7 @@ export default function RootLayout() {
 	}, []);
 
 	if (isUpdating) {
-		return <Loading />;
+		return <Loading message="Checking for update" />;
 	}
 
 	return (
