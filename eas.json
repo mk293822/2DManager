@@ -8,14 +8,7 @@
 			"developmentClient": true,
 			"distribution": "internal",
 			"channel": "development",
-			"android": { "buildType": "apk" },
-			"env": {
-				"EXPO_PUBLIC_TOW_D_API_URL": "https://dev.thaistock2d.com",
-				"EXPO_PUBLIC_THREE_D_API_URL": "https://dev.2dboss.com/api/v2/v1/2dstock",
-				"EXPO_PUBLIC_BACKEND_API_URL": "https://dev.minkhant29.pythonanywhere.com/api",
-				"EXPO_PUBLIC_DEFAULT_COMMISSION_PERCENT": "10",
-				"EXPO_PUBLIC_DEFAULT_DRAW_TIMES": "80"
-			}
+			"android": { "buildType": "apk" }
 		},
 		"preview": {
 			"distribution": "internal",
@@ -23,29 +16,14 @@
 			"android": { "buildType": "apk" },
 			"ios": {
 				"simulator": false // Required for iOS OTA updates
-			},
-			"env": {
-				"EXPO_PUBLIC_TOW_D_API_URL": "https://staging.thaistock2d.com",
-				"EXPO_PUBLIC_THREE_D_API_URL": "https://staging.2dboss.com/api/v2/v1/2dstock",
-				"EXPO_PUBLIC_BACKEND_API_URL": "https://staging.minkhant29.pythonanywhere.com/api",
-				"EXPO_PUBLIC_DEFAULT_COMMISSION_PERCENT": "10",
-				"EXPO_PUBLIC_DEFAULT_DRAW_TIMES": "80"
 			}
 		},
 		"production": {
-			"autoIncrement": true,
 			"channel": "production",
 			"android": { "buildType": "apk" },
 			"distribution": "internal",
 			"ios": {
 				"simulator": false // Required for iOS OTA updates
-			},
-			"env": {
-				"EXPO_PUBLIC_TOW_D_API_URL": "https://api.thaistock2d.com",
-				"EXPO_PUBLIC_THREE_D_API_URL": "https://api.2dboss.com/api/v2/v1/2dstock",
-				"EXPO_PUBLIC_BACKEND_API_URL": "https://minkhant29.pythonanywhere.com/api",
-				"EXPO_PUBLIC_DEFAULT_COMMISSION_PERCENT": "10",
-				"EXPO_PUBLIC_DEFAULT_DRAW_TIMES": "80"
 			}
 		}
 	}
