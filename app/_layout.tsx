@@ -9,28 +9,30 @@ import { clearAllCache } from "@/hooks/use-cache";
 import { scheduleCacheClearAtMidnight } from "@/lib/datetime-helper";
 import OfflineActionHandler from "@/lib/offline-action-handler";
 
-// ✅ ADD THIS
 import { Loading } from "@/components/loading";
 import * as Updates from "expo-updates";
 import { useEffect, useState } from "react";
-
 export default function RootLayout() {
 	const [isUpdating, setIsUpdating] = useState(true);
 
 	useEffect(() => {
+		// Always schedule cache clearing
 		scheduleCacheClearAtMidnight(clearAllCache);
+
 		async function checkUpdate() {
 			try {
 				const update = await Updates.checkForUpdateAsync();
-
 				if (update.isAvailable) {
 					await Updates.fetchUpdateAsync();
-					await Updates.reloadAsync(); // 🔥 reload app with new update
+					await Updates.reloadAsync(); // reload app with new update
 				}
 			} catch (e) {
 				console.log("Update error:", e);
+				setIsUpdating(false); // show app if update fails
 			} finally {
-				setIsUpdating(false);
+				// only set false if no reload is triggered
+				const isReloading = await Updates.checkForUpdateAsync();
+				if (!isReloading.isAvailable) setIsUpdating(false);
 			}
 		}
 
