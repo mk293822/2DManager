@@ -9,6 +9,7 @@
 			"distribution": "internal",
 			"channel": "development",
 			"android": { "buildType": "apk" },
+			"environment": "development",
 			"env": {
 				"EXPO_PUBLIC_TOW_D_API_URL": "https://dev.thaistock2d.com",
 				"EXPO_PUBLIC_THREE_D_API_URL": "https://dev.2dboss.com/api/v2/v1/2dstock",
@@ -21,6 +22,7 @@
 			"distribution": "internal",
 			"channel": "preview",
 			"android": { "buildType": "apk" },
+			"environment": "preview",
 			"env": {
 				"EXPO_PUBLIC_TOW_D_API_URL": "https://staging.thaistock2d.com",
 				"EXPO_PUBLIC_THREE_D_API_URL": "https://staging.2dboss.com/api/v2/v1/2dstock",
@@ -34,6 +36,7 @@
 			"channel": "production",
 			"android": { "buildType": "apk" },
 			"distribution": "internal",
+			"environment": "production",
 			"env": {
 				"EXPO_PUBLIC_TOW_D_API_URL": "https://api.thaistock2d.com",
 				"EXPO_PUBLIC_THREE_D_API_URL": "https://api.2dboss.com/api/v2/v1/2dstock",
