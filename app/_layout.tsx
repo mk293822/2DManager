@@ -15,11 +15,10 @@ import * as Updates from "expo-updates";
 import { useEffect, useState } from "react";
 
 export default function RootLayout() {
-	scheduleCacheClearAtMidnight(clearAllCache);
-
 	const [isUpdating, setIsUpdating] = useState(true);
 
 	useEffect(() => {
+		scheduleCacheClearAtMidnight(clearAllCache);
 		async function checkUpdate() {
 			try {
 				const update = await Updates.checkForUpdateAsync();
