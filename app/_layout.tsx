@@ -36,7 +36,7 @@ export default function RootLayout() {
 			}
 		}
 
-		checkUpdate();
+		// checkUpdate();
 	}, []);
 
 	if (isUpdating) {
