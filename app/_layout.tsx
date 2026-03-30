@@ -39,9 +39,9 @@ export default function RootLayout() {
 		// checkUpdate();
 	}, []);
 
-	if (isUpdating) {
-		return <Loading message="Checking for update" />;
-	}
+	//if (isUpdating) {
+		//return <Loading message="Checking for update" />;
+	//}
 
 	return (
 		<>
