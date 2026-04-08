@@ -13,7 +13,7 @@ interface Page {
 
 const pages: Page[] = [
 	{
-		name: "manage",
+		name: "index",
 		title: "Manage",
 		icon: "appstore",
 	},
