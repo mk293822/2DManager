@@ -13,19 +13,14 @@ interface Page {
 
 const pages: Page[] = [
 	{
-		name: "index",
-		title: "Home",
-		icon: "home",
+		name: "manage",
+		title: "Manage",
+		icon: "appstore",
 	},
 	{
 		name: "commission-users",
 		title: "Commission Users",
 		icon: "percentage",
-	},
-	{
-		name: "manage",
-		title: "Manage",
-		icon: "appstore",
 	},
 	{
 		name: "resold-users",

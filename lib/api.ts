@@ -1,24 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import * as SecureStore from "expo-secure-store";
 
-export const two_d_api = axios.create({
-	baseURL: process.env.EXPO_PUBLIC_TOW_D_API_URL,
-	timeout: 1000,
-	headers: {
-		"Content-Type": "application/json",
-		Accept: "application/json",
-	},
-});
-
-export const three_d_api = axios.create({
-	baseURL: process.env.EXPO_PUBLIC_THREE_D_API_URL,
-	timeout: 1000,
-	headers: {
-		"Content-Type": "application/json",
-		Accept: "application/json",
-	},
-});
-
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_API_URL;
 
 export const api = axios.create({
