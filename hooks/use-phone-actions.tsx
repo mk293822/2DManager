@@ -4,21 +4,8 @@ import { Linking } from "react-native";
 
 export const usePhoneActions = () => {
 	const call = async (phoneNumber: string) => {
-		const url = `tel:${phoneNumber}`;
-
 		try {
-			const supported = await Linking.canOpenURL(url);
-
-			if (!supported) {
-				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-					title: "Error",
-					description: "Unable to open dialer.",
-					type: "error",
-				});
-				return;
-			}
-
-			await Linking.openURL(url);
+			await Linking.openURL(`tel:${phoneNumber}`);
 		} catch {
 			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
 				title: "Error",
@@ -29,21 +16,8 @@ export const usePhoneActions = () => {
 	};
 
 	const message = async (phoneNumber: string) => {
-		const url = `sms:${phoneNumber}`;
-
 		try {
-			const supported = await Linking.canOpenURL(url);
-
-			if (!supported) {
-				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-					title: "Error",
-					description: "Unable to open messages.",
-					type: "error",
-				});
-				return;
-			}
-
-			await Linking.openURL(url);
+			await Linking.openURL(`sms:${phoneNumber}`);
 		} catch {
 			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
 				title: "Error",
