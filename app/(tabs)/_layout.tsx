@@ -82,13 +82,13 @@ const TabsLayout = () => {
 				},
 				tabBarStyle: {
 					borderRadius: 50,
-					marginHorizontal: 20,
+					marginHorizontal: 30,
 					marginBottom: 30,
 					height: 60,
 					position: "absolute",
 					overflow: "hidden",
 					borderWidth: 1,
-					paddingHorizontal: 14,
+					paddingHorizontal: 6,
 					backgroundColor: "rgba(49, 46, 129, 0.75)",
 				},
 			}}

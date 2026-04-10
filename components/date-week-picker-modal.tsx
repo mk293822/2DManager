@@ -78,6 +78,23 @@ export default function DateWeekPickerModal({
 		initialWeek || null,
 	);
 
+	// Set the initial states
+	useEffect(() => {
+		if (initialDate) {
+			setYear(initialDate.year);
+			setMonth(initialDate.month);
+			setDay(initialDate.day);
+		} else if (initialWeek && initialWeek.start_date) {
+			setYear(initialWeek.start_date.getFullYear());
+			setSelectedWeek(initialWeek);
+		} else {
+			setYear(new Date().getFullYear());
+			setMonth(0);
+			setDay(1);
+			setSelectedWeek(null);
+		}
+	}, [initialDate, initialWeek]);
+
 	// Years
 	const years = useMemo(() => {
 		const currentYear = new Date().getFullYear();
@@ -229,7 +246,7 @@ export default function DateWeekPickerModal({
 				{renderColumn(years, year, setYear)}
 			</View>
 			<View className="flex-1 items-center">
-				{renderColumn(months, month, setMonth, (m) =>
+				{renderColumn(months, month + 1, setMonth, (m) =>
 					new Date(0, m).toLocaleString("default", { month: "short" }),
 				)}
 			</View>
