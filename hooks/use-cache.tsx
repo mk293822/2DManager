@@ -53,12 +53,15 @@ function notify<T>(key: string, value: T) {
 // -------------------------
 // Get Cache (SAFE)
 // -------------------------
-export function getCache<T>(key: string): T | null {
+export function getCache<T>(
+	key: string,
+	isConnected: boolean | null,
+): T | null {
 	const item = cache[key];
 
 	if (!item) return null;
 
-	if (isExpired(item)) {
+	if (isExpired(item) && isConnected) {
 		delete cache[key];
 		return null;
 	}
@@ -88,13 +91,6 @@ export function updateCache<T>(
 }
 
 // -------------------------
-// Invalidate Cache (optional)
-// -------------------------
-export const invalidateCache = (key: string) => {
-	delete cache[key];
-};
-
-// -------------------------
 // ERROR NORMALIZER
 // -------------------------
 export function getErrorMessage(
@@ -122,11 +118,13 @@ export function useCache<T>(
 	key: string,
 	fetcher: () => Promise<T>,
 ): UseCacheTypes<T> {
-	const [data, setData] = useState<T | null>(() => getCache<T>(key));
-	const [isLoading, setIsLoading] = useState(!getCache(key));
+	const isConnected = useInternet();
+	const [data, setData] = useState<T | null>(() =>
+		getCache<T>(key, isConnected),
+	);
+	const [isLoading, setIsLoading] = useState(!getCache(key, isConnected));
 	const [error, setError] = useState<Error | null>(null);
 
-	const isConnected = useInternet();
 	const { authLoading, isAuthenticated } = useAuthContext();
 	const isMounted = useRef(true);
 
@@ -158,7 +156,7 @@ export function useCache<T>(
 
 		if (authLoading || !isAuthenticated) return;
 
-		const cached = getCache<T>(key);
+		const cached = getCache<T>(key, isConnected);
 		if (cached) {
 			setData(cached);
 			setIsLoading(false);
@@ -201,7 +199,7 @@ export function useCache<T>(
 		return () => {
 			isMounted.current = false;
 		};
-	}, [key, fetcher, isAuthenticated, authLoading]);
+	}, [key, fetcher, isAuthenticated, authLoading, isConnected]);
 
 	// -------------------------
 	// REFETCH
