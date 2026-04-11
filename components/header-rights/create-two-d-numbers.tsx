@@ -7,13 +7,11 @@ import { TouchableOpacity, View } from "react-native";
 
 const CreateTwoDNumbersHeaderRight = ({
 	id,
-	user_name,
 	section,
 	bussinessUserType,
 	draw_times,
 }: {
 	id: string;
-	user_name: string;
 	section: SectionName;
 	bussinessUserType: BussinessUserType;
 	draw_times: number;
@@ -33,7 +31,6 @@ const CreateTwoDNumbersHeaderRight = ({
 						params: {
 							id: id,
 							section: section,
-							userName: user_name,
 							draw_times,
 							bussinessUserType,
 						},

@@ -5,6 +5,7 @@ import TwoDListsRow from "@/components/two-d-lists/two-d-lists-row";
 import { useManageContext } from "@/hooks/manage/use-manage-context";
 import useSectionTwoDListHook from "@/hooks/two-d-list/use-section-two-d-list-hook";
 import { useCalculatedNumbersData } from "@/hooks/use-calculated-numbers-data";
+import { changeSectionName } from "@/lib/helpers";
 import { chunkIntoPairs } from "@/lib/two-d-list-helper";
 import { BussinessUserType } from "@/types/bussiness-user-types";
 import { SectionName } from "@/types/manage-types";
@@ -13,9 +14,8 @@ import React, { useState } from "react";
 import { FlatList, RefreshControl, Text, View } from "react-native";
 
 const UserTwoDListNumbers = () => {
-	const { id, user_name, section, bussinessUserType } = useLocalSearchParams<{
+	const { id, section, bussinessUserType } = useLocalSearchParams<{
 		id: string;
-		user_name: string;
 		section: SectionName;
 		bussinessUserType: BussinessUserType;
 	}>();
@@ -34,7 +34,7 @@ const UserTwoDListNumbers = () => {
 
 	if (loading) return <Loading />;
 
-	if (!id || !user_name || !section || !twoDList) {
+	if (!id || !section || !twoDList) {
 		return (
 			<View className="flex-1 items-center justify-center bg-white p-4">
 				<Text className="text-red-600 font-semibold text-center mb-4">
@@ -65,7 +65,7 @@ const UserTwoDListNumbers = () => {
 		<>
 			<Stack.Screen
 				options={{
-					headerTitle: user_name || "User",
+					headerTitle: changeSectionName(section),
 				}}
 			/>
 

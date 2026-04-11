@@ -6,6 +6,7 @@ import { EVENT_NAMES } from "@/event-names";
 import useSectionTwoDListHook from "@/hooks/two-d-list/use-section-two-d-list-hook";
 import { ENGLISH_TO_BURMESE_MAP } from "@/lib/custom-keyboard-helper";
 import { eventBus } from "@/lib/event-bus";
+import { changeSectionName } from "@/lib/helpers";
 import { BussinessUserType } from "@/types/bussiness-user-types";
 import { SectionName } from "@/types/manage-types";
 import { NumberItem, TwoDListType } from "@/types/two-d-list-types";
@@ -21,14 +22,12 @@ import {
 } from "react-native";
 
 const UserTwoDList = () => {
-	const { id, userName, draw_times, bussinessUserType, section } =
-		useLocalSearchParams<{
-			id: string;
-			section: SectionName;
-			userName: string;
-			draw_times: string;
-			bussinessUserType: BussinessUserType;
-		}>();
+	const { id, draw_times, bussinessUserType, section } = useLocalSearchParams<{
+		id: string;
+		section: SectionName;
+		draw_times: string;
+		bussinessUserType: BussinessUserType;
+	}>();
 
 	const {
 		twoDList,
@@ -231,12 +230,11 @@ const UserTwoDList = () => {
 		<>
 			<Stack.Screen
 				options={{
-					headerTitle: userName || "User",
+					headerTitle: changeSectionName(section),
 					headerRight: () => (
 						<UserTwoDListHeaderRight
 							bussinessUserType={bussinessUserType}
 							id={id}
-							user_name={userName ?? "User"}
 							section={section}
 						/>
 					),

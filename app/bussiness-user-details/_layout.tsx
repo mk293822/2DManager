@@ -51,6 +51,7 @@ export default function CommissionUsersDetailsLayout() {
 								minHeight: 64,
 								justifyContent: "center",
 								paddingBottom: 6,
+								marginLeft: -10,
 							}}
 						>
 							<Text

@@ -1,7 +1,7 @@
 import { ManageContext } from "@/contexts/contexts";
 import useManageHook from "@/hooks/manage/use-manage-hook";
 import { SectionRange } from "@/types/manage-types";
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 
 const ManageProvider = ({ children }: { children: React.ReactNode }) => {
 	const [selectedSectionRange, setSelectedSectionRange] =
@@ -12,13 +12,10 @@ const ManageProvider = ({ children }: { children: React.ReactNode }) => {
 
 	const data = useManageHook(selectedSectionRange);
 
-	const contextValue = useMemo(
-		() => ({ ...data, selectedSectionRange, setSelectedSectionRange }),
-		[data, selectedSectionRange],
-	);
-
 	return (
-		<ManageContext.Provider value={contextValue}>
+		<ManageContext.Provider
+			value={{ ...data, selectedSectionRange, setSelectedSectionRange }}
+		>
 			{children}
 		</ManageContext.Provider>
 	);

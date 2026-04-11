@@ -13,6 +13,7 @@ import {
 	SPECIAL_KEYS2,
 } from "@/lib/custom-keyboard-helper";
 import { eventBus } from "@/lib/event-bus";
+import { changeSectionName } from "@/lib/helpers";
 import { BussinessUserType } from "@/types/bussiness-user-types";
 import { SectionName } from "@/types/manage-types";
 import {
@@ -211,12 +212,11 @@ const CreateTwoDNumbersPage = () => {
 		<>
 			<Stack.Screen
 				options={{
-					headerTitle: user?.name || "User",
+					headerTitle: changeSectionName(section),
 					headerRight: () =>
 						section_sale && (
 							<CreateTwoDNumbersHeaderRight
 								id={section_sale.id}
-								user_name={user?.name || ""}
 								section={section}
 								bussinessUserType={bussinessUserType}
 								draw_times={section_sale.draw_times}

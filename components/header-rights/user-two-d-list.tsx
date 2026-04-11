@@ -7,12 +7,10 @@ import { TouchableOpacity, View } from "react-native";
 
 const UserTwoDListHeaderRight = ({
 	id,
-	user_name,
 	section,
 	bussinessUserType,
 }: {
 	id: string;
-	user_name: string;
 	bussinessUserType: BussinessUserType;
 	section: SectionName;
 }) => {
@@ -31,7 +29,6 @@ const UserTwoDListHeaderRight = ({
 							"/bussiness-user-details/bussiness-user-two-d-list/list-numbers",
 						params: {
 							id: id,
-							user_name: user_name,
 							section: section,
 							bussinessUserType,
 						},
