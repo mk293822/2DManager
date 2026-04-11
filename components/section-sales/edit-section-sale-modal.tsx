@@ -5,12 +5,13 @@ import { BussinessUserSectionEditFields } from "@/hooks/bussiness-user-details/u
 import { MutationResult } from "@/hooks/use-mutation";
 import { isToday } from "@/lib/datetime-helper";
 import { eventBus } from "@/lib/event-bus";
-import { ParsedErrors } from "@/lib/helpers";
+import { changeSectionName, ParsedErrors } from "@/lib/helpers";
 import {
 	BussinessUserType,
 	SectionSale,
 	SectionSaleGroup,
 } from "@/types/bussiness-user-types";
+import { SectionName } from "@/types/manage-types";
 import React, { useEffect, useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import AppModal from "../ui/app-modal";
@@ -32,6 +33,7 @@ type EditManageSectionModalProps = {
 	bussinessUserType: BussinessUserType;
 	date: Date;
 	editingSection: boolean;
+	section: SectionName;
 };
 
 type FormState = {
@@ -49,6 +51,7 @@ const EditSectionSaleModal = ({
 	bussinessUserType,
 	date,
 	editingSection,
+	section,
 }: EditManageSectionModalProps) => {
 	const [form, setForm] = useState<FormState>({
 		total_amount: sectionObj.total_amount,
@@ -125,7 +128,7 @@ const EditSectionSaleModal = ({
 		>
 			<View className="bg-gray-100 w-full flex-col rounded-2xl p-6 py-8 shadow-lg">
 				<Text className="text-xl font-bold text-indigo-700 mb-4">
-					Edit Section Sale
+					Edit {changeSectionName(section)} Section
 				</Text>
 
 				<ScrollView

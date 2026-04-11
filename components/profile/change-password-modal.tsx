@@ -91,7 +91,7 @@ const ChangePasswordModal = ({
 		>
 			<View className="bg-gray-100 w-full flex-col rounded-2xl p-6 py-8 shadow-lg">
 				<Text className="text-xl font-bold text-indigo-700 mb-4">
-					Create Commission User
+					Change Password
 				</Text>
 
 				<ScrollView

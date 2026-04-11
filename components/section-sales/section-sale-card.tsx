@@ -335,6 +335,7 @@ const SectionSaleCard = ({
 				onClose={() => setOpenEditModal(false)}
 				open={openEditModal}
 				sectionObj={sale}
+				section={section}
 				bussinessUserType={bussinessUserType}
 				editBussinessUserSection={editBussinessUserSection}
 				editingSection={editingSection}
