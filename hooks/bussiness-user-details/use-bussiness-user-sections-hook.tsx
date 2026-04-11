@@ -21,6 +21,7 @@ import { SectionName, SectionRange } from "@/types/manage-types";
 import { isAxiosError } from "axios";
 import { useEffect } from "react";
 import { getCache, useCache } from "../use-cache";
+import { useInternet } from "../use-internet";
 import { MutationResult, useMutation } from "../use-mutation";
 
 export type BussinessUserSectionEditFields =
@@ -72,6 +73,7 @@ const useBussinessUserSectionsHook = (
 		id: id,
 		userType: bussinessUserType,
 	});
+	const isConnected = useInternet();
 	// -------------------
 	// CACHES
 	// -------------------
@@ -114,6 +116,7 @@ const useBussinessUserSectionsHook = (
 						data.date,
 						(prev: SectionSaleGroup[] | null | undefined) =>
 							upsertByDate(prev ?? [], data),
+						isConnected,
 						setSectionSales,
 						cacheKey,
 						{
@@ -171,6 +174,7 @@ const useBussinessUserSectionsHook = (
 						data.date,
 						(prev: SectionSaleGroup[] | null | undefined) =>
 							upsertByDate(prev ?? [], data),
+						isConnected,
 						setSectionSales,
 						cacheKey,
 						{
@@ -253,6 +257,7 @@ const useBussinessUserSectionsHook = (
 						MODEL,
 						date,
 						updater,
+						isConnected,
 						setSectionSales,
 						cacheKey,
 						{
@@ -314,15 +319,17 @@ const useBussinessUserSectionsHook = (
 			if (event.model === "sectionTwoDList" && event.action === "create") {
 				await refetchSectionSales();
 				queueMicrotask(() => {
-					const data = getCache<SectionSaleGroup[] | null>(cacheKey)?.find(
-						(s) => isToday(s.date),
-					);
+					const data = getCache<SectionSaleGroup[] | null>(
+						cacheKey,
+						isConnected,
+					)?.find((s) => isToday(s.date));
 					if (data) {
 						syncCachesByDate<SectionSaleGroup[]>(
 							MODEL,
 							data.date,
 							(prev: SectionSaleGroup[] | null | undefined) =>
 								upsertByDate(prev ?? [], data),
+							isConnected,
 							undefined,
 							cacheKey,
 							{
@@ -340,7 +347,7 @@ const useBussinessUserSectionsHook = (
 		return () => {
 			eventBus.off(EVENT_NAMES.ONLINE_ACTION, handler);
 		};
-	}, [cacheKey, refetchSectionSales, bussinessUserType, id]);
+	}, [cacheKey, refetchSectionSales, bussinessUserType, id, isConnected]);
 
 	return {
 		sectionSales,

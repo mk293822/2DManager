@@ -1,8 +1,8 @@
 // BussinessUserPage.tsx
-import DeleteBussinessUserModal from "@/components/bussiness-user-details/delete-bussiness-user-modal";
 import BussinessUserDetailsHeaderRight from "@/components/header-rights/bussiness-user-details";
 import PageWrapper from "@/components/page-wrapper";
 import SectionSaleList from "@/components/section-sales/section-sale-list";
+import ConfirmDeleteModal from "@/components/ui/confirm-delete-modal";
 import { EVENT_NAMES } from "@/event-names";
 import useBussinessUserDetailsHook from "@/hooks/bussiness-user-details/use-bussiness-user-details-hook";
 import useBussinessUserSectionsHook from "@/hooks/bussiness-user-details/use-bussiness-user-sections-hook";
@@ -28,7 +28,8 @@ const BussinessUserPage = () => {
 	}>();
 	const router = useRouter();
 	const { call, message } = usePhoneActions();
-	const { deleteBussinessUser } = useBussinessUserHook(bussinessUserType);
+	const { deleteBussinessUser, deletingUser } =
+		useBussinessUserHook(bussinessUserType);
 	const [refreshing, setRefreshing] = useState(false);
 	const [open, setOpen] = useState(false);
 
@@ -81,6 +82,12 @@ const BussinessUserPage = () => {
 				description: res.error,
 			});
 		}
+		setOpen(false);
+		if (router.canGoBack()) {
+			router.back();
+			return;
+		}
+		router.replace("/");
 	};
 
 	// Flatten all sections into a list
@@ -271,11 +278,13 @@ const BussinessUserPage = () => {
 				/>
 			</PageWrapper>
 
-			<DeleteBussinessUserModal
-				handleDelete={handleDeleteUser}
+			<ConfirmDeleteModal
 				open={open}
 				onClose={() => setOpen(false)}
-				user_name={bussinessUserDetails.name}
+				loading={deletingUser}
+				onConfirm={handleDeleteUser}
+				title={`Delete User ${bussinessUserDetails.name}?`}
+				description={`This action cannot be undone. Are you sure you want to permanently delete user ${bussinessUserDetails.name}?`}
 			/>
 		</>
 	);

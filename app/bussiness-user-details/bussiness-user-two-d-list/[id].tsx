@@ -1,8 +1,11 @@
 // UserTwoDList.tsx
 import UserTwoDListHeaderRight from "@/components/header-rights/user-two-d-list";
 import PageWrapper from "@/components/page-wrapper";
+import ConfirmDeleteModal from "@/components/ui/confirm-delete-modal";
+import { EVENT_NAMES } from "@/event-names";
 import useSectionTwoDListHook from "@/hooks/two-d-list/use-section-two-d-list-hook";
 import { ENGLISH_TO_BURMESE_MAP } from "@/lib/custom-keyboard-helper";
+import { eventBus } from "@/lib/event-bus";
 import { BussinessUserType } from "@/types/bussiness-user-types";
 import { SectionName } from "@/types/manage-types";
 import { NumberItem, TwoDListType } from "@/types/two-d-list-types";
@@ -27,11 +30,19 @@ const UserTwoDList = () => {
 			bussinessUserType: BussinessUserType;
 		}>();
 
-	const { twoDList, loading, error, refetch } = useSectionTwoDListHook(
+	const {
+		twoDList,
+		loading,
+		error,
+		refetch,
+		deleteTwoDList,
+		deletingTwoDList,
+	} = useSectionTwoDListHook(
 		bussinessUserType === "commission_user" ? "sold_number" : "resold_number",
 		id,
 	);
 	const [refreshing, setRefreshing] = useState(false);
+	const [open, setOpen] = useState(false);
 
 	const onRefresh = async () => {
 		setRefreshing(true);
@@ -94,6 +105,20 @@ const UserTwoDList = () => {
 		item: TwoDListType;
 		index: number;
 	}) => {
+		const handleDeleteTwoDList = async (id: string) => {
+			const res = await deleteTwoDList(id);
+
+			if (res.error) {
+				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+					type: "error",
+					title: "Error",
+					description: res.error,
+				});
+				return;
+			}
+			setOpen(false);
+		};
+
 		const drawTimes = Number(draw_times) ?? 1;
 		const totalDrawAmount = item.total_draw_value * drawTimes;
 		const balance =
@@ -244,6 +269,15 @@ const UserTwoDList = () => {
 						</Text>
 					</View>
 				</View>
+
+				<ConfirmDeleteModal
+					open={open}
+					onClose={() => setOpen(false)}
+					loading={deletingTwoDList}
+					onConfirm={() => handleDeleteTwoDList(item.id)}
+					title={`Delete Two D List #${index}?`}
+					description={`This action cannot be undone. Are you sure you want to permanently delete this Two D List #${index}?`}
+				/>
 			</View>
 		);
 	};

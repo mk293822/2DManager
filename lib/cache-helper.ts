@@ -78,6 +78,7 @@ export function syncCachesByDate<T>(
 	model: Model,
 	date: string,
 	updater: CacheUpdater<T>,
+	isConnected: boolean | null,
 	setData?: (updater: CacheUpdater<T>) => void,
 	currentKey?: string,
 	keyParams?: Record<string, string>,
@@ -93,6 +94,6 @@ export function syncCachesByDate<T>(
 		updateCache(dayKey, updater);
 	}
 
-	const weekData = getCache(weekKey);
+	const weekData = getCache(weekKey, isConnected);
 	if (weekData) updateCache(weekKey, updater);
 }

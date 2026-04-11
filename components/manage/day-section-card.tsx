@@ -1,6 +1,8 @@
+import { EVENT_NAMES } from "@/event-names";
 import { SectionSummaryEditFields } from "@/hooks/manage/use-manage-hook";
 import { MutationResult } from "@/hooks/use-mutation";
 import { isToday } from "@/lib/datetime-helper";
+import { eventBus } from "@/lib/event-bus";
 import {
 	changeSectionName,
 	formatKs,
@@ -12,8 +14,8 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
+import ConfirmDeleteModal from "../ui/confirm-delete-modal";
 import InlineLoadingButton from "../ui/inline-loading-button";
-import DeleteManageSectionModal from "./delete-manage-section-modal";
 import EditManageSectionModal from "./edit-manage-section-modal";
 
 type Props = {
@@ -87,6 +89,23 @@ const DaySectionCard = ({
 			</View>
 		);
 	}
+
+	const handleDeleteSection = async () => {
+		const res = await deleteSection({
+			id: section.id,
+			date: section.date,
+		});
+
+		if (res.error) {
+			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+				type: "error",
+				title: "Error",
+				description: res.error,
+			});
+			return;
+		}
+		setOpenDeleteModal(false);
+	};
 
 	return (
 		<>
@@ -270,14 +289,13 @@ const DaySectionCard = ({
 				editingSection={editingSection}
 				isDrawNumberEdit={openModal.type === "draw_number_edit"}
 			/>
-			<DeleteManageSectionModal
-				section_id={section.id}
+			<ConfirmDeleteModal
 				open={openDeleteModal}
 				onClose={() => setOpenDeleteModal(false)}
-				sectionName={sectionName}
-				deleteSection={deleteSection}
-				deletingSection={deletingSection}
-				date={section.date}
+				loading={deletingSection}
+				onConfirm={handleDeleteSection}
+				title={`Delete ${changeSectionName(sectionName)} Section?`}
+				description={`This action cannot be undone. Are you sure you want to permanently delete ${changeSectionName(sectionName)} Section?`}
 			/>
 		</>
 	);

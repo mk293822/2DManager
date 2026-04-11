@@ -21,6 +21,7 @@ import {
 import { isAxiosError } from "axios";
 import { useEffect } from "react";
 import { getCache, useCache } from "../use-cache";
+import { useInternet } from "../use-internet";
 import { MutationResult, useMutation } from "../use-mutation";
 
 export type SectionSummaryEditFields =
@@ -64,6 +65,8 @@ const MODEL = "sectionSummaries";
 const useManageHook = (range: SectionRange): ManageHookType => {
 	const params = getParamsForSectionRange(range);
 	const cacheKey = createKey(MODEL, getKeyForSectionRange(range));
+	const isConnected = useInternet();
+
 	// -------------------
 	// FETCH / CACHE
 	// -------------------
@@ -103,6 +106,7 @@ const useManageHook = (range: SectionRange): ManageHookType => {
 					data.date,
 					(prev: SectionSummaries[] | null | undefined) =>
 						upsertByDate(prev ?? [], data),
+					isConnected,
 					setData,
 					cacheKey,
 				);
@@ -155,6 +159,7 @@ const useManageHook = (range: SectionRange): ManageHookType => {
 					data.date,
 					(prev: SectionSummaries[] | null | undefined) =>
 						upsertByDate(prev ?? [], data),
+					isConnected,
 					setData,
 					cacheKey,
 				);
@@ -238,6 +243,7 @@ const useManageHook = (range: SectionRange): ManageHookType => {
 					MODEL,
 					date,
 					updater,
+					isConnected,
 					setData,
 					cacheKey,
 				);
@@ -284,15 +290,17 @@ const useManageHook = (range: SectionRange): ManageHookType => {
 			) {
 				await refetch();
 				queueMicrotask(() => {
-					const data = getCache<SectionSummaries[] | null>(cacheKey)?.find(
-						(s) => isToday(s.date),
-					);
+					const data = getCache<SectionSummaries[] | null>(
+						cacheKey,
+						isConnected,
+					)?.find((s) => isToday(s.date));
 					if (data) {
 						syncCachesByDate<SectionSummaries[]>(
 							MODEL,
 							data.date,
 							(prev: SectionSummaries[] | null | undefined) =>
 								upsertByDate(prev ?? [], data),
+							isConnected,
 							undefined,
 							cacheKey,
 						);
@@ -306,7 +314,7 @@ const useManageHook = (range: SectionRange): ManageHookType => {
 		return () => {
 			eventBus.off(EVENT_NAMES.ONLINE_ACTION, handler);
 		};
-	}, [refetch, cacheKey, sections]);
+	}, [refetch, cacheKey, sections, isConnected]);
 
 	return {
 		sections,

@@ -21,8 +21,8 @@ import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { SectinDetailRow } from "../info-components";
+import ConfirmDeleteModal from "../ui/confirm-delete-modal";
 import InlineLoadingButton from "../ui/inline-loading-button";
-import DeleteSectionSaleModal from "./delete-section-sale-modal";
 import EditSectionSaleModal from "./edit-section-sale-modal";
 
 type Props = {
@@ -164,6 +164,7 @@ const SectionSaleCard = ({
 		} else {
 			refetchSectionSummary();
 		}
+		setOpen(false);
 	};
 
 	return (
@@ -320,12 +321,13 @@ const SectionSaleCard = ({
 				)}
 			</View>
 
-			<DeleteSectionSaleModal
+			<ConfirmDeleteModal
 				open={open}
 				onClose={() => setOpen(false)}
-				handleDelete={handleDelete}
-				sectionName={section}
-				deletingSection={deletingSection}
+				loading={deletingSection}
+				onConfirm={handleDelete}
+				title={`Delete ${changeSectionName(section)} Section?`}
+				description={`This action cannot be undone. Are you sure you want to permanently delete ${changeSectionName(section)} Section?`}
 			/>
 
 			<EditSectionSaleModal

@@ -19,6 +19,8 @@ export type TwoDListHookType = {
 		section: SectionName;
 	}) => Promise<MutationResult<TwoDListType, string>>;
 	refetch: () => Promise<void>;
+	deleteTwoDList: (variables: string) => Promise<MutationResult<void, string>>;
+	deletingTwoDList: boolean;
 };
 
 const MODEL = "sectionTwoDList" as const;
@@ -88,6 +90,27 @@ const useSectionTwoDListHook = (
 		},
 	);
 
+	const { mutate: deleteTwoDList, isMutating: deletingTwoDList } = useMutation<
+		void,
+		string,
+		string
+	>(async (id) => await api.delete(`${endpoint}${id}/`), {
+		onSuccess: (_, id) => {
+			setData((prev) => (prev ? prev.filter((item) => item.id !== id) : []));
+		},
+		onError: (err) => {
+			let message = "Delete failed.";
+
+			if (isAxiosError(err)) {
+				message = err.response?.data?.detail || message;
+			} else if (err instanceof Error) {
+				message = err.message;
+			}
+
+			return message;
+		},
+	});
+
 	return {
 		loading,
 		error,
@@ -95,6 +118,8 @@ const useSectionTwoDListHook = (
 		createTwoDList,
 		refetch,
 		creatingTwoDList,
+		deleteTwoDList,
+		deletingTwoDList,
 	};
 };
 

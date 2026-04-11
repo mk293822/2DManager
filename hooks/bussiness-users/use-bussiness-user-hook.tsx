@@ -22,6 +22,7 @@ import { isAxiosError } from "axios";
 import { useEffect } from "react";
 import { BussinessUserEditFields } from "../bussiness-user-details/use-bussiness-user-details-hook";
 import { getErrorMessage, updateCache, useCache } from "../use-cache";
+import { useInternet } from "../use-internet";
 import { MutationResult, useMutation } from "../use-mutation";
 
 // -------------------------
@@ -56,6 +57,7 @@ const useBussinessUserHook = (
 	const cacheKey = createKey("bussinessUsers", {
 		userType: bussinessUserType,
 	});
+	const isConnected = useInternet();
 	// -------------------
 	// STATE
 	// -------------------
@@ -200,6 +202,7 @@ const useBussinessUserHook = (
 						"sectionSales",
 						event.meta.date,
 						updater,
+						isConnected,
 						undefined,
 						undefined,
 						{
@@ -301,7 +304,7 @@ const useBussinessUserHook = (
 			eventBus.off(EVENT_NAMES.ONLINE_ACTION, handleSectionSummaryDelete);
 			eventBus.off(EVENT_NAMES.ONLINE_ACTION, handleSectionSummaryUpdate);
 		};
-	}, [bussinessUserType, cacheKey, bussinessUsers]);
+	}, [bussinessUserType, cacheKey, bussinessUsers, isConnected]);
 
 	return {
 		loading,
