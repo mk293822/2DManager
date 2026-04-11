@@ -316,7 +316,10 @@ const useBussinessUserSectionsHook = (
 	// -------------------
 	useEffect(() => {
 		const handler = async (event: AppEvents["ONLINE_ACTION"]) => {
-			if (event.model === "sectionTwoDList" && event.action === "create") {
+			if (
+				event.model === "sectionTwoDList" &&
+				(event.action === "create" || event.action === "delete")
+			) {
 				await refetchSectionSales();
 				queueMicrotask(() => {
 					const data = getCache<SectionSaleGroup[] | null>(

@@ -156,38 +156,7 @@ const UserTwoDList = () => {
 								activeOpacity={0.85}
 								hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
 								className="p-2"
-							>
-								<AntDesign
-									name="edit"
-									color={"#4f46e5"}
-									size={14}
-								/>
-
-								<View
-									style={{
-										position: "absolute",
-										top: -0,
-										bottom: -0,
-										left: -0,
-										right: -0,
-										borderWidth: 1,
-										borderColor: "#4f46e5",
-										borderStyle: "dashed",
-										borderRadius: 4,
-									}}
-									pointerEvents="none"
-								/>
-							</TouchableOpacity>
-						</View>
-						<View
-							style={{
-								position: "relative",
-							}}
-						>
-							<TouchableOpacity
-								activeOpacity={0.85}
-								hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-								className="p-2"
+								onPress={() => setOpen(true)}
 							>
 								<AntDesign
 									name="delete"

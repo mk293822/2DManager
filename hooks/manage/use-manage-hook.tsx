@@ -284,7 +284,8 @@ const useManageHook = (range: SectionRange): ManageHookType => {
 		const handler = async (event: AppEvents["ONLINE_ACTION"]) => {
 			if (
 				(event.model === "bussinessUsers" && event.action === "delete") ||
-				(event.model === "sectionTwoDList" && event.action === "create") ||
+				(event.model === "sectionTwoDList" &&
+					(event.action === "create" || event.action === "delete")) ||
 				(event.model === "sectionSales" &&
 					(event.action === "update" || event.action === "delete"))
 			) {

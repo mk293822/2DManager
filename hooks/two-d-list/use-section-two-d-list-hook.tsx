@@ -97,6 +97,11 @@ const useSectionTwoDListHook = (
 	>(async (id) => await api.delete(`${endpoint}${id}/`), {
 		onSuccess: (_, id) => {
 			setData((prev) => (prev ? prev.filter((item) => item.id !== id) : []));
+			eventBus.emit(EVENT_NAMES.ONLINE_ACTION, {
+				action: "delete",
+				model: MODEL,
+				id: id,
+			});
 		},
 		onError: (err) => {
 			let message = "Delete failed.";
