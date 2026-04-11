@@ -278,12 +278,12 @@ export function useAuth(): UseAuthInterface {
 			const refresh = await SecureStore.getItemAsync("refreshToken");
 			if (refresh) {
 				await api.post("/auth/logout/", { refresh });
+			}
 				clearAllCache();
 				setUser(null);
 				setIsAuthenticated(false);
 				clearTokens();
 				router.replace("/login");
-			}
 		},
 		{
 			onSuccess: () => {
