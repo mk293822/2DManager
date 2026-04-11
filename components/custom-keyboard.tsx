@@ -3,6 +3,8 @@ import { EVENT_NAMES } from "@/event-names";
 import {
 	BURMESE_KEYS_MAP,
 	ENGLISH_TO_BURMESE_MAP,
+	sanitizeAmount,
+	sanitizeTwoD,
 	SPECIAL_KEYS1,
 	SPECIAL_KEYS2,
 } from "@/lib/custom-keyboard-helper";
@@ -56,7 +58,7 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({
 		[],
 	);
 
-	// Play tap sound with haptic feedback
+	// Play haptic feedback
 	const playTap = useCallback(
 		async (keyType: "normal" | "delete" | "enter" = "normal") => {
 			try {
@@ -201,7 +203,10 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({
 						ref={twoDRef}
 						placeholder="Two-D"
 						value={ENGLISH_TO_BURMESE_MAP[twoDValue] ?? twoDValue}
-						onChangeText={setTwoDValue}
+						onChangeText={(text) => {
+							const clean = sanitizeTwoD(text);
+							setTwoDValue(clean);
+						}}
 						editable
 						onPressIn={() => handleFieldPress("twoD", twoDRef)}
 						showSoftInputOnFocus={false}
@@ -223,7 +228,10 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({
 								: (ENGLISH_TO_BURMESE_MAP[amount1Value] ?? amount1Value)
 						}
 						placeholderTextColor={"#9ca3af"}
-						onChangeText={setAmount1Value}
+						onChangeText={(text) => {
+							const clean = sanitizeAmount(text);
+							setAmount1Value(clean);
+						}}
 						editable
 						onPressIn={() => handleFieldPress("amount1", amount1Ref)}
 						showSoftInputOnFocus={false}
@@ -244,7 +252,10 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({
 								: amount2Value
 						}
 						placeholderTextColor={"#9ca3af"}
-						onChangeText={setAmount2Value}
+						onChangeText={(text) => {
+							const clean = sanitizeAmount(text);
+							setAmount2Value(clean);
+						}}
 						editable={!SPECIAL_KEYS1.includes(twoDValue)}
 						onPressIn={() => handleFieldPress("amount2", amount2Ref)}
 						showSoftInputOnFocus={false}

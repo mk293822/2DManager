@@ -15,3 +15,24 @@ export const ENGLISH_TO_BURMESE_MAP: Record<string, string> =
 	Object.fromEntries(
 		Object.entries(BURMESE_KEYS_MAP).map(([mm, en]) => [en, mm]),
 	);
+
+export function sanitizeTwoD(value: string) {
+	// allow only numbers or known mapped keys
+	const cleaned = value.trim();
+
+	// if it's a mapped Burmese key, keep it
+	if (ENGLISH_TO_BURMESE_MAP[cleaned]) return cleaned;
+
+	// allow only digits for numeric input
+	if (/^\d+$/.test(cleaned)) return cleaned;
+
+	return "";
+}
+
+export function sanitizeAmount(value: string) {
+	const cleaned = value.replace(/,/g, "").trim();
+
+	const onlyNumbers = cleaned.replace(/[^\d]/g, "");
+
+	return onlyNumbers;
+}

@@ -97,6 +97,7 @@ const TwoDLists = () => {
 								style={{
 									marginRight: 15,
 								}}
+								hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
 							>
 								<AntDesign
 									name="arrow-left"
@@ -149,7 +150,7 @@ const TwoDLists = () => {
 								onRefresh={onRefresh}
 							/>
 						}
-						contentContainerStyle={{ paddingBottom: 120 }}
+						contentContainerStyle={{ paddingBottom: 50 }}
 					/>
 				) : (
 					<View className="flex-col items-center justify-center h-40">

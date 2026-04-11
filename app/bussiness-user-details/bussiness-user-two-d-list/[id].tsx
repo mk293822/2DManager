@@ -125,48 +125,46 @@ const UserTwoDList = () => {
 					elevation: 3,
 				}}
 			>
-				<View className="flex flex-row justify-between mb-4 items-center">
-					<Text className="text-gray-400 text-md font-semibold">
+				<View className="flex flex-row justify-between mb-4 items-center px-2">
+					<Text className="text-gray-400 text-lg font-semibold">
 						#{displayIndex}
 					</Text>
 					<Text className="text-gray-500 text-md">
 						Created: {new Date(item.created_at).toLocaleTimeString()}
 					</Text>
 
-					<View className="flex-row items-center justify-end gap-3 mr-2">
-						<View
-							style={{
-								position: "relative",
-							}}
+					<View
+						style={{
+							position: "relative",
+						}}
+					>
+						<TouchableOpacity
+							activeOpacity={0.85}
+							hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+							className="p-2"
+							onPress={() => setSelectedItem(item)}
 						>
-							<TouchableOpacity
-								activeOpacity={0.85}
-								hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-								className="p-2"
-								onPress={() => setSelectedItem(item)}
-							>
-								<AntDesign
-									name="delete"
-									color={"#b91c1c"}
-									size={14}
-								/>
+							<AntDesign
+								name="delete"
+								color={"#b91c1c"}
+								size={14}
+							/>
 
-								<View
-									style={{
-										position: "absolute",
-										top: -0,
-										bottom: -0,
-										left: -0,
-										right: -0,
-										borderWidth: 1,
-										borderColor: "#b91c1c",
-										borderStyle: "dashed",
-										borderRadius: 4,
-									}}
-									pointerEvents="none"
-								/>
-							</TouchableOpacity>
-						</View>
+							<View
+								style={{
+									position: "absolute",
+									top: -0,
+									bottom: -0,
+									left: -0,
+									right: -0,
+									borderWidth: 1,
+									borderColor: "#b91c1c",
+									borderStyle: "dashed",
+									borderRadius: 4,
+								}}
+								pointerEvents="none"
+							/>
+						</TouchableOpacity>
 					</View>
 				</View>
 

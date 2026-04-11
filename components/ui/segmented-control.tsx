@@ -1,5 +1,3 @@
-// file: components/SegmentedControl.tsx
-
 import React, { useEffect, useRef, useState } from "react";
 import { Animated, Text, TouchableOpacity, View } from "react-native";
 
@@ -20,78 +18,86 @@ function SegmentedControl<T extends string>({
 	onChange,
 }: Props<T>) {
 	const translateX = useRef(new Animated.Value(0)).current;
-	const [width, setWidth] = useState(0);
+
+	const [labelWidths, setLabelWidths] = useState<number[]>(
+		new Array(options.length).fill(0),
+	);
 
 	const index = options.findIndex((o) => o.value === value);
 
+	// -------------------------
+	// Animate pill position
+	// -------------------------
 	useEffect(() => {
-		if (width === 0) return;
+		if (labelWidths[index] === 0) return;
+
+		const x = labelWidths.slice(0, index).reduce((sum, w) => sum + w, 0);
 
 		Animated.timing(translateX, {
-			toValue: index,
+			toValue: x,
 			duration: 200,
 			useNativeDriver: true,
 		}).start();
-	}, [value, width]);
+	}, [value, labelWidths]);
 
-	const itemWidth = width / options.length;
-
-	const translateStyle = {
-		transform: [
-			{
-				translateX: translateX.interpolate({
-					inputRange: options.map((_, i) => i),
-					outputRange: options.map((_, i) => i * itemWidth),
-				}),
-			},
-		],
+	// -------------------------
+	// measure exact label width
+	// -------------------------
+	const onLabelLayout = (i: number, width: number) => {
+		setLabelWidths((prev) => {
+			const next = [...prev];
+			next[i] = width; // 👈 NO padding guesswork
+			return next;
+		});
 	};
+
+	const pillWidth = labelWidths[index] || 0;
 
 	return (
 		<View
-			onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
 			style={{
 				flexDirection: "row",
 				backgroundColor: "#f3f4f6",
 				borderRadius: 24,
 				padding: 3,
+				position: "relative",
 			}}
 		>
 			{/* Sliding pill */}
-			{width > 0 && (
+			{pillWidth > 0 && (
 				<Animated.View
 					style={{
 						position: "absolute",
 						top: 3,
 						left: 3,
-						width: itemWidth - 6,
 						height: 32,
 						borderRadius: 20,
 						backgroundColor: "#4f46e5",
-						...translateStyle,
+						width: pillWidth,
+						transform: [{ translateX }],
 					}}
 				/>
 			)}
 
-			{options.map((opt) => {
+			{/* Options */}
+			{options.map((opt, i) => {
 				const isActive = value === opt.value;
 
 				return (
 					<TouchableOpacity
 						key={opt.value}
 						onPress={() => onChange(opt.value)}
+						onLayout={(e) => onLabelLayout(i, e.nativeEvent.layout.width)}
 						style={{
-							alignItems: "center",
-							justifyContent: "center",
 							paddingVertical: 6,
 							paddingHorizontal: 16,
+							zIndex: 10,
 						}}
 					>
 						<Text
 							style={{
 								color: isActive ? "white" : "#4f46e5",
 								fontWeight: "bold",
-								textAlign: "center",
 							}}
 						>
 							{opt.label}
