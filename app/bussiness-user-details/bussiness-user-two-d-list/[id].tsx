@@ -6,9 +6,16 @@ import { ENGLISH_TO_BURMESE_MAP } from "@/lib/custom-keyboard-helper";
 import { BussinessUserType } from "@/types/bussiness-user-types";
 import { SectionName } from "@/types/manage-types";
 import { NumberItem, TwoDListType } from "@/types/two-d-list-types";
+import AntDesign from "@expo/vector-icons/AntDesign";
 import { Stack, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
-import { FlatList, RefreshControl, Text, View } from "react-native";
+import {
+	FlatList,
+	RefreshControl,
+	Text,
+	TouchableOpacity,
+	View,
+} from "react-native";
 
 const UserTwoDList = () => {
 	const { id, userName, draw_times, bussinessUserType, section } =
@@ -31,6 +38,13 @@ const UserTwoDList = () => {
 		await refetch();
 		setRefreshing(false);
 	};
+
+	const sortedList = React.useMemo(() => {
+		return [...(twoDList ?? [])].sort(
+			(a, b) =>
+				new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+		);
+	}, [twoDList]);
 
 	const renderNumberBox = (val: NumberItem) => {
 		if (val.type === "normal" && val.number) {
@@ -73,7 +87,13 @@ const UserTwoDList = () => {
 		);
 	};
 
-	const renderTwoDItem = ({ item }: { item: TwoDListType }) => {
+	const renderTwoDItem = ({
+		item,
+		index,
+	}: {
+		item: TwoDListType;
+		index: number;
+	}) => {
 		const drawTimes = Number(draw_times) ?? 1;
 		const totalDrawAmount = item.total_draw_value * drawTimes;
 		const balance =
@@ -84,7 +104,7 @@ const UserTwoDList = () => {
 		return (
 			<View
 				key={item.id}
-				className="mb-6 bg-white rounded-2xl px-4 py-4 shadow"
+				className="mb-6 bg-white rounded-2xl px-4 py-6 shadow"
 				style={{
 					shadowColor: "#000",
 					shadowOffset: { width: 0, height: 3 },
@@ -93,9 +113,81 @@ const UserTwoDList = () => {
 					elevation: 3,
 				}}
 			>
-				<Text className="text-gray-500 text-md mb-4 text-center">
-					Created: {new Date(item.created_at).toLocaleTimeString()}
-				</Text>
+				<View className="flex flex-row justify-between mb-4 items-center">
+					<Text className="text-gray-400 text-md font-semibold">
+						#{(twoDList?.length ?? 0) - index}
+					</Text>
+					<Text className="text-gray-500 text-md">
+						Created: {new Date(item.created_at).toLocaleTimeString()}
+					</Text>
+
+					<View className="flex-row items-center justify-end gap-3 mr-2">
+						<View
+							style={{
+								position: "relative",
+							}}
+						>
+							<TouchableOpacity
+								activeOpacity={0.85}
+								hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+								className="p-2"
+							>
+								<AntDesign
+									name="edit"
+									color={"#4f46e5"}
+									size={14}
+								/>
+
+								<View
+									style={{
+										position: "absolute",
+										top: -0,
+										bottom: -0,
+										left: -0,
+										right: -0,
+										borderWidth: 1,
+										borderColor: "#4f46e5",
+										borderStyle: "dashed",
+										borderRadius: 4,
+									}}
+									pointerEvents="none"
+								/>
+							</TouchableOpacity>
+						</View>
+						<View
+							style={{
+								position: "relative",
+							}}
+						>
+							<TouchableOpacity
+								activeOpacity={0.85}
+								hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+								className="p-2"
+							>
+								<AntDesign
+									name="delete"
+									color={"#b91c1c"}
+									size={14}
+								/>
+
+								<View
+									style={{
+										position: "absolute",
+										top: -0,
+										bottom: -0,
+										left: -0,
+										right: -0,
+										borderWidth: 1,
+										borderColor: "#b91c1c",
+										borderStyle: "dashed",
+										borderRadius: 4,
+									}}
+									pointerEvents="none"
+								/>
+							</TouchableOpacity>
+						</View>
+					</View>
+				</View>
 
 				{item.numbers_data.map((val, ind) => (
 					<View
@@ -155,6 +247,7 @@ const UserTwoDList = () => {
 			</View>
 		);
 	};
+
 	return (
 		<>
 			<Stack.Screen
@@ -179,7 +272,7 @@ const UserTwoDList = () => {
 				emptyMessage="No 2D list data found."
 			>
 				<FlatList
-					data={twoDList?.reverse() ?? []}
+					data={sortedList}
 					renderItem={renderTwoDItem}
 					keyExtractor={(item) => item.id}
 					refreshControl={

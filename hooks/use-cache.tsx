@@ -14,32 +14,34 @@ type UseCacheTypes<T> = {
 	setData: (newData: T | ((prev: T | null) => T)) => void;
 };
 
+const DEFAULT_TTL = process.env.EXPO_PUBLIC_DEFAULT_CACHE_TTL ?? 86400000;
+
+// -------------------------
+// CACHE TYPES
+// -------------------------
+type CacheItem<T = any> = {
+	data: T;
+	timestamp: number;
+	ttl: number;
+};
+
 // -------------------------
 // GLOBAL CACHE + LISTENERS
 // -------------------------
-const cache: Record<string, any> = {};
+const cache: Record<string, CacheItem> = {};
 const pending: Record<string, Promise<any>> = {};
 const listeners: Record<string, Set<(data: any) => void>> = {};
 
 // -------------------------
-// Update Cache
+// HELPERS
 // -------------------------
-export function updateCache<T>(
-	key: string,
-	updater: (prev: T | undefined) => T,
-) {
-	const prev = cache[key];
-	const next = updater(prev);
+const isExpired = (item: CacheItem) => {
+	return Date.now() - item.timestamp > item.ttl;
+};
 
-	// update cache
-	cache[key] = next;
-
-	notify(key, next);
-}
-
-// ------------------------
+// -------------------------
 // Notify all listeners
-// ------------------------
+// -------------------------
 function notify<T>(key: string, value: T) {
 	queueMicrotask(() => {
 		if (listeners[key]) {
@@ -49,19 +51,49 @@ function notify<T>(key: string, value: T) {
 }
 
 // -------------------------
-// Get Cache
+// Get Cache (SAFE)
 // -------------------------
 export function getCache<T>(key: string): T | null {
-	return cache[key] as T | null;
+	const item = cache[key];
+
+	if (!item) return null;
+
+	if (isExpired(item)) {
+		delete cache[key];
+		return null;
+	}
+
+	return item.data as T;
 }
 
 // -------------------------
-// Clear All the Cache and Pending Requests
+// Update Cache
 // -------------------------
-export const clearAllCache = () => {
-	Object.keys(cache).forEach((k) => delete cache[k]);
-	Object.keys(pending).forEach((k) => delete pending[k]);
+export function updateCache<T>(
+	key: string,
+	updater: (prev: T | undefined) => T,
+) {
+	const prevItem = cache[key];
+	const prev = prevItem?.data;
+
+	const next = updater(prev);
+
+	cache[key] = {
+		data: next,
+		timestamp: Date.now(),
+		ttl: prevItem?.ttl ?? DEFAULT_TTL,
+	};
+
+	notify(key, next);
+}
+
+// -------------------------
+// Invalidate Cache (optional)
+// -------------------------
+export const invalidateCache = (key: string) => {
+	delete cache[key];
 };
+
 // -------------------------
 // ERROR NORMALIZER
 // -------------------------
@@ -90,9 +122,10 @@ export function useCache<T>(
 	key: string,
 	fetcher: () => Promise<T>,
 ): UseCacheTypes<T> {
-	const [data, setData] = useState<T | null>(cache[key] || null);
-	const [isLoading, setIsLoading] = useState(!cache[key]);
+	const [data, setData] = useState<T | null>(() => getCache<T>(key));
+	const [isLoading, setIsLoading] = useState(!getCache(key));
 	const [error, setError] = useState<Error | null>(null);
+
 	const isConnected = useInternet();
 	const { authLoading, isAuthenticated } = useAuthContext();
 	const isMounted = useRef(true);
@@ -122,9 +155,12 @@ export function useCache<T>(
 	// -------------------------
 	useEffect(() => {
 		isMounted.current = true;
+
 		if (authLoading || !isAuthenticated) return;
-		if (cache[key]) {
-			setData(cache[key]);
+
+		const cached = getCache<T>(key);
+		if (cached) {
+			setData(cached);
 			setIsLoading(false);
 			setError(null);
 			return;
@@ -139,16 +175,22 @@ export function useCache<T>(
 
 				const result = await pending[key];
 
-				cache[key] = result;
+				cache[key] = {
+					data: result,
+					timestamp: Date.now(),
+					ttl: DEFAULT_TTL,
+				};
+
 				delete pending[key];
 
-				// Notify all subscribers
 				notify(key, result);
 
 				if (isMounted.current) setData(result);
 			} catch (e: unknown) {
 				delete pending[key];
-				if (isMounted.current) setError(new Error(getErrorMessage(e)));
+				if (isMounted.current) {
+					setError(new Error(getErrorMessage(e)));
+				}
 			} finally {
 				if (isMounted.current) setIsLoading(false);
 			}
@@ -166,6 +208,7 @@ export function useCache<T>(
 	// -------------------------
 	const refetch = async () => {
 		setIsLoading(true);
+
 		if (!isConnected) {
 			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
 				type: "error",
@@ -174,25 +217,29 @@ export function useCache<T>(
 			});
 			setIsLoading(false);
 			return;
-		} else {
-			setError(null);
+		}
 
-			delete cache[key];
-			delete pending[key];
+		setError(null);
 
-			try {
-				const result = await fetcher();
-				cache[key] = result;
+		delete cache[key];
+		delete pending[key];
 
-				// Notify all subscribers
-				notify(key, result);
+		try {
+			const result = await fetcher();
 
-				setData(result);
-			} catch (e: unknown) {
-				setError(new Error(getErrorMessage(e)));
-			} finally {
-				setIsLoading(false);
-			}
+			cache[key] = {
+				data: result,
+				timestamp: Date.now(),
+				ttl: DEFAULT_TTL,
+			};
+
+			notify(key, result);
+
+			setData(result);
+		} catch (e: unknown) {
+			setError(new Error(getErrorMessage(e)));
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
@@ -206,9 +253,12 @@ export function useCache<T>(
 					? (newData as (prev: T | null) => T)(prev)
 					: newData;
 
-			cache[key] = value;
+			cache[key] = {
+				data: value,
+				timestamp: Date.now(),
+				ttl: DEFAULT_TTL,
+			};
 
-			// Notify all subscribers
 			notify(key, value);
 
 			return value;
