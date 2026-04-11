@@ -8,15 +8,8 @@ import {
 } from "@/lib/custom-keyboard-helper";
 import { eventBus } from "@/lib/event-bus";
 import { isNumber } from "@/lib/helpers";
-import { Audio } from "expo-av";
 import * as Haptics from "expo-haptics";
-import React, {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 
 interface CustomKeyboardProps {
@@ -50,9 +43,6 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({
 	const amount1Ref = useRef<TextInput>(null);
 	const amount2Ref = useRef<TextInput>(null);
 	const [isR, setIsR] = useState<boolean>(false);
-	const deleteDelay = useRef<ReturnType<typeof setTimeout> | null>(null);
-	const deleteInterval = useRef<ReturnType<typeof setInterval> | null>(null);
-	const clickSound = useRef<Audio.Sound | null>(null);
 
 	// Key rows
 	const topRow = useMemo(() => ["အပူး", "အုပ်စု", "ထိပ်", "ပိတ်"], []);
@@ -66,43 +56,11 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({
 		[],
 	);
 
-	// Load tap sound
-	useEffect(() => {
-		let mounted = true;
-
-		async function loadSound() {
-			try {
-				const { sound } = await Audio.Sound.createAsync(
-					require("../assets/sounds/tap.wav"),
-				);
-				clickSound.current = sound;
-				await clickSound.current.setVolumeAsync(0.1);
-			} catch (e) {
-				console.warn("Could not load sound:", e);
-			}
-		}
-
-		if (mounted) loadSound();
-
-		return () => {
-			mounted = false;
-			clickSound.current?.unloadAsync();
-			if (deleteDelay.current) clearTimeout(deleteDelay.current);
-			if (deleteInterval.current) clearInterval(deleteInterval.current);
-		};
-	}, []);
-
 	// Play tap sound with haptic feedback
 	const playTap = useCallback(
 		async (keyType: "normal" | "delete" | "enter" = "normal") => {
-			if (!clickSound.current) return;
-
 			try {
-				const status = await clickSound.current.getStatusAsync();
-				if (status.isLoaded) await clickSound.current.stopAsync();
-
 				await Promise.all([
-					clickSound.current?.playFromPositionAsync(0),
 					keyType === "delete"
 						? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
 						: keyType === "enter"
@@ -357,21 +315,6 @@ const CustomKeyboard: React.FC<CustomKeyboardProps> = ({
 						"flex-1  border border-gray-200 mx-1 shadow-gray-800 shadow-lg py-3 rounded-lg items-center bg-red-600"
 					}
 					accessibilityRole="button"
-					onPressIn={() => {
-						deleteDelay.current = setTimeout(() => {
-							deleteInterval.current = setInterval(() => handleDelete(), 50);
-						}, 500);
-					}}
-					onPressOut={() => {
-						if (deleteDelay.current) {
-							clearTimeout(deleteDelay.current);
-							deleteDelay.current = null;
-						}
-						if (deleteInterval.current) {
-							clearInterval(deleteInterval.current);
-							deleteInterval.current = null;
-						}
-					}}
 					accessibilityLabel={"Delete"}
 					accessibilityHint={"Deletes one character"}
 				>
