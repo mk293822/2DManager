@@ -42,7 +42,7 @@ const UserTwoDList = () => {
 		id,
 	);
 	const [refreshing, setRefreshing] = useState(false);
-	const [open, setOpen] = useState(false);
+	const [selectedItem, setSelectedItem] = useState<TwoDListType | null>(null);
 
 	const onRefresh = async () => {
 		setRefreshing(true);
@@ -105,26 +105,13 @@ const UserTwoDList = () => {
 		item: TwoDListType;
 		index: number;
 	}) => {
-		const handleDeleteTwoDList = async (id: string) => {
-			const res = await deleteTwoDList(id);
-
-			if (res.error) {
-				eventBus.emit(EVENT_NAMES.NOTIFICATION, {
-					type: "error",
-					title: "Error",
-					description: res.error,
-				});
-				return;
-			}
-			setOpen(false);
-		};
-
 		const drawTimes = Number(draw_times) ?? 1;
 		const totalDrawAmount = item.total_draw_value * drawTimes;
 		const balance =
 			bussinessUserType === "commission_user"
 				? item.total_amount - totalDrawAmount
 				: totalDrawAmount - item.total_amount;
+		const displayIndex = (twoDList?.length ?? 0) - index;
 
 		return (
 			<View
@@ -140,7 +127,7 @@ const UserTwoDList = () => {
 			>
 				<View className="flex flex-row justify-between mb-4 items-center">
 					<Text className="text-gray-400 text-md font-semibold">
-						#{(twoDList?.length ?? 0) - index}
+						#{displayIndex}
 					</Text>
 					<Text className="text-gray-500 text-md">
 						Created: {new Date(item.created_at).toLocaleTimeString()}
@@ -156,7 +143,7 @@ const UserTwoDList = () => {
 								activeOpacity={0.85}
 								hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
 								className="p-2"
-								onPress={() => setOpen(true)}
+								onPress={() => setSelectedItem(item)}
 							>
 								<AntDesign
 									name="delete"
@@ -238,15 +225,6 @@ const UserTwoDList = () => {
 						</Text>
 					</View>
 				</View>
-
-				<ConfirmDeleteModal
-					open={open}
-					onClose={() => setOpen(false)}
-					loading={deletingTwoDList}
-					onConfirm={() => handleDeleteTwoDList(item.id)}
-					title={`Delete Two D List #${index}?`}
-					description={`This action cannot be undone. Are you sure you want to permanently delete this Two D List #${index}?`}
-				/>
 			</View>
 		);
 	};
@@ -292,6 +270,35 @@ const UserTwoDList = () => {
 					}}
 				/>
 			</PageWrapper>
+
+			<ConfirmDeleteModal
+				open={!!selectedItem}
+				onClose={() => setSelectedItem(null)}
+				loading={deletingTwoDList}
+				onConfirm={async () => {
+					if (!selectedItem) return;
+
+					const res = await deleteTwoDList(selectedItem.id);
+
+					if (res.error) {
+						eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+							type: "error",
+							title: "Error",
+							description: res.error,
+						});
+						return;
+					}
+
+					setSelectedItem(null);
+				}}
+				title={`Delete Two D List #${
+					selectedItem
+						? (twoDList?.length ?? 0) -
+							sortedList.findIndex((i) => i.id === selectedItem.id)
+						: ""
+				}?`}
+				description="This action cannot be undone. Are you sure?"
+			/>
 		</>
 	);
 };
