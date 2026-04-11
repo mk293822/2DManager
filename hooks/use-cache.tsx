@@ -51,6 +51,14 @@ function notify<T>(key: string, value: T) {
 }
 
 // -------------------------
+// Clear entire cache
+// -------------------------
+export const clearAllCache = () => {
+	Object.keys(cache).forEach((k) => delete cache[k]);
+	Object.keys(pending).forEach((k) => delete pending[k]);
+};
+
+// -------------------------
 // Get Cache (SAFE)
 // -------------------------
 export function getCache<T>(
