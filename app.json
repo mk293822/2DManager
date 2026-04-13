@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "TwoDManager",
-    "slug": "two-d-manager",
+    "name": "2DManager",
+    "slug": "2d-manager",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -13,7 +13,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#22303d",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -34,9 +34,9 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#22303d",
           "dark": {
-            "backgroundColor": "#000000"
+            "backgroundColor": "#22303d"
           }
         }
       ]
@@ -48,7 +48,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "784af5d8-5526-4f45-baa2-515f14020ae0"
+        "projectId": "2a1533cc-3e09-461d-b4fe-56a51c7acccb"
       }
     },
     "updates": {
