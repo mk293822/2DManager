@@ -19,39 +19,38 @@ function SegmentedControl<T extends string>({
 }: Props<T>) {
 	const translateX = useRef(new Animated.Value(0)).current;
 
+	const H_PADDING = 16;
+
 	const [labelWidths, setLabelWidths] = useState<number[]>(
 		new Array(options.length).fill(0),
 	);
 
 	const index = options.findIndex((o) => o.value === value);
 
-	// -------------------------
-	// Animate pill position
-	// -------------------------
-	useEffect(() => {
-		if (labelWidths[index] === 0) return;
-
-		const x = labelWidths.slice(0, index).reduce((sum, w) => sum + w, 0);
-
-		Animated.timing(translateX, {
-			toValue: x,
-			duration: 200,
-			useNativeDriver: true,
-		}).start();
-	}, [value, labelWidths]);
-
-	// -------------------------
-	// measure exact label width
-	// -------------------------
+	// Measure text width only
 	const onLabelLayout = (i: number, width: number) => {
 		setLabelWidths((prev) => {
 			const next = [...prev];
-			next[i] = width; // 👈 NO padding guesswork
+			next[i] = width;
 			return next;
 		});
 	};
 
-	const pillWidth = labelWidths[index] || 0;
+	// Animate position
+	useEffect(() => {
+		if (index === -1 || labelWidths[index] === 0) return;
+
+		const x = labelWidths
+			.slice(0, index)
+			.reduce((sum, w) => sum + w + H_PADDING * 2, 0);
+
+		Animated.spring(translateX, {
+			toValue: x,
+			useNativeDriver: true,
+		}).start();
+	}, [value, labelWidths]);
+
+	const pillWidth = (labelWidths[index] || 0) + H_PADDING * 2;
 
 	return (
 		<View
@@ -87,14 +86,14 @@ function SegmentedControl<T extends string>({
 					<TouchableOpacity
 						key={opt.value}
 						onPress={() => onChange(opt.value)}
-						onLayout={(e) => onLabelLayout(i, e.nativeEvent.layout.width)}
 						style={{
 							paddingVertical: 6,
-							paddingHorizontal: 16,
+							paddingHorizontal: H_PADDING,
 							zIndex: 10,
 						}}
 					>
 						<Text
+							onLayout={(e) => onLabelLayout(i, e.nativeEvent.layout.width)}
 							style={{
 								color: isActive ? "white" : "#4f46e5",
 								fontWeight: "bold",
