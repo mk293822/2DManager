@@ -2,6 +2,7 @@
 import CustomKeyboard from "@/components/custom-keyboard";
 import CreateTwoDNumbersHeaderRight from "@/components/header-rights/create-two-d-numbers";
 import PageWrapper from "@/components/page-wrapper";
+import InvaildLinePasteModal from "@/components/two-d-lists/invalid-line-paste-modal";
 import InlineLoadingButton from "@/components/ui/inline-loading-button";
 import { EVENT_NAMES } from "@/event-names";
 import useBussinessUserDetailsHook from "@/hooks/bussiness-user-details/use-bussiness-user-details-hook";
@@ -9,8 +10,9 @@ import useBussinessUserSectionsHook from "@/hooks/bussiness-user-details/use-bus
 import useSectionTwoDListHook from "@/hooks/two-d-list/use-section-two-d-list-hook";
 import {
 	ENGLISH_TO_BURMESE_MAP,
-	SPECIAL_KEYS1,
-	SPECIAL_KEYS2,
+	isSpecialGroupValue1,
+	isSpecialGroupValue2,
+	parseTwoDLine,
 } from "@/lib/custom-keyboard-helper";
 import { eventBus } from "@/lib/event-bus";
 import { changeSectionName } from "@/lib/helpers";
@@ -20,12 +22,20 @@ import {
 	DigitRelatedItem,
 	NormalItem,
 	NumberItem,
+	PasteLineType,
+	PreviewDataType,
 	SpecialGroupItem,
 } from "@/types/two-d-list-types";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { router, Stack, useLocalSearchParams } from "expo-router";
-import React, { useState } from "react";
-import { FlatList, Text, TouchableOpacity, View } from "react-native";
+import * as Clipboard from "expo-clipboard";
+import {
+	router,
+	Stack,
+	useFocusEffect,
+	useLocalSearchParams,
+} from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
+import { AppState, FlatList, Text, TouchableOpacity, View } from "react-native";
 
 const CreateTwoDNumbersPage = () => {
 	const { section, id, bussinessUserType } = useLocalSearchParams<{
@@ -58,6 +68,37 @@ const CreateTwoDNumbersPage = () => {
 	const [twoDValue, setTwoDValue] = useState<string>("");
 	const [amount1Value, setAmount1Value] = useState<string>("");
 	const [amount2Value, setAmount2Value] = useState<string>("");
+	const [hasClipboardData, setHasClipboardData] = useState(false);
+	const [pastePreviewOpen, setPastePreviewOpen] = useState(false);
+
+	const [previewData, setPreviewData] = useState<PreviewDataType | null>(null);
+
+	const checkClipboard = async () => {
+		try {
+			const text = await Clipboard.getStringAsync();
+			setHasClipboardData(!!text.trim());
+		} catch {
+			setHasClipboardData(false);
+		}
+	};
+
+	useEffect(() => {
+		checkClipboard();
+
+		const sub = AppState.addEventListener("change", (state) => {
+			if (state === "active") {
+				checkClipboard();
+			}
+		});
+
+		return () => sub.remove();
+	}, []);
+
+	useFocusEffect(
+		useCallback(() => {
+			checkClipboard();
+		}, []),
+	);
 
 	const deleteItem = (index: number) => {
 		setList((prev) => prev?.filter((_, i) => i !== index) || null);
@@ -67,10 +108,10 @@ const CreateTwoDNumbersPage = () => {
 		let err = "";
 
 		if (!twoDValue.trim()) err = "Two-D field is required!";
-		else if (SPECIAL_KEYS1.includes(twoDValue)) {
+		else if (isSpecialGroupValue1(twoDValue)) {
 			if (!amount1Value) err = "Amount 1 field is required!";
 			if (amount2Value.trim()) err = "Amount 2 field is not required!";
-		} else if (SPECIAL_KEYS2.includes(amount1Value)) {
+		} else if (isSpecialGroupValue2(amount1Value)) {
 			if (twoDValue.length > 1)
 				err = "Two-D value can't be more than one digit!";
 			if (!amount2Value) err = "Amount 2 field is required!";
@@ -89,13 +130,13 @@ const CreateTwoDNumbersPage = () => {
 		}
 
 		let value: NumberItem;
-		if (SPECIAL_KEYS1.includes(twoDValue)) {
+		if (isSpecialGroupValue1(twoDValue)) {
 			value = {
 				type: "special_group",
 				value: twoDValue,
 				amount1: Number(amount1Value) ?? 0,
 			} as SpecialGroupItem;
-		} else if (SPECIAL_KEYS2.includes(amount1Value)) {
+		} else if (isSpecialGroupValue2(amount1Value)) {
 			value = {
 				type: "digit_related",
 				number: twoDValue.charAt(0),
@@ -208,6 +249,70 @@ const CreateTwoDNumbersPage = () => {
 		</View>
 	);
 
+	const handlePaste = async () => {
+		try {
+			const clipboardContent = await Clipboard.getStringAsync();
+
+			const lines = clipboardContent
+				.split("\n")
+				.map((l) => l.trim())
+				.filter(Boolean);
+
+			const parsedLines: PasteLineType[] = [];
+
+			for (const line of lines) {
+				const result = parseTwoDLine(line);
+
+				parsedLines.push({
+					id: Math.random().toString(),
+					raw: line,
+					type: result.ok ? "valid" : "invalid",
+					parsed: result.ok && result.data ? result.data : undefined,
+					error: result.ok ? undefined : result.error,
+				});
+			}
+
+			const hasInvalid = parsedLines.some((l) => l.type === "invalid");
+
+			if (hasInvalid) {
+				setPreviewData({ lines: parsedLines });
+				setPastePreviewOpen(true);
+				return;
+			}
+
+			// ✅ insert directly (order preserved)
+			setList((prev) => [
+				...(prev ?? []),
+				...parsedLines.map((l) => l.parsed!).filter(Boolean),
+			]);
+		} catch {
+			eventBus.emit(EVENT_NAMES.NOTIFICATION, {
+				title: "Paste Error",
+				description: "Failed to read clipboard",
+				type: "error",
+			});
+		}
+	};
+
+	const confirmPaste = () => {
+		if (!previewData) return;
+
+		const validItems: NumberItem[] = [];
+
+		for (const line of previewData.lines) {
+			const result = parseTwoDLine(line.raw);
+
+			if (result.ok && result.data) {
+				validItems.push(result.data);
+			}
+		}
+
+		setList((prev) => [...(prev ?? []), ...validItems]);
+
+		setPastePreviewOpen(false);
+		setPreviewData(null);
+	};
+
 	return (
 		<>
 			<Stack.Screen
@@ -246,6 +351,17 @@ const CreateTwoDNumbersPage = () => {
 							<Text className="text-gray-500 text-xl font-bold text-center">
 								No Item Yet
 							</Text>
+							{hasClipboardData && (
+								<TouchableOpacity
+									onPress={handlePaste}
+									className="mt-6 bg-blue-600 px-6 py-3 rounded-lg items-center mx-16"
+									activeOpacity={0.8}
+								>
+									<Text className="text-white font-extrabold">
+										Paste Numbers
+									</Text>
+								</TouchableOpacity>
+							)}
 						</View>
 					}
 					ListFooterComponent={
@@ -272,6 +388,13 @@ const CreateTwoDNumbersPage = () => {
 					onEnter={onEnter}
 				/>
 			</PageWrapper>
+			<InvaildLinePasteModal
+				pastePreviewOpen={pastePreviewOpen}
+				setPastePreviewOpen={setPastePreviewOpen}
+				previewData={previewData}
+				setPreviewData={setPreviewData}
+				confirmPaste={confirmPaste}
+			/>
 		</>
 	);
 };

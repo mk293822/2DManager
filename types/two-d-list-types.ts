@@ -62,3 +62,26 @@ export type NumberEntry = {
 	items: NumberItem[];
 	value: number;
 };
+export type PasteLineType = {
+	id: string;
+	raw: string;
+	type: "valid" | "invalid";
+	parsed?: NumberItem;
+	error?: string;
+};
+
+export type PreviewDataType = {
+	lines: PasteLineType[];
+};
+
+type ParseSuccess = {
+	ok: true;
+	data: NumberItem | null;
+};
+
+type ParseError = {
+	ok: false;
+	error: string;
+};
+
+export type ParseResult = ParseSuccess | ParseError;
