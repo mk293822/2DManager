@@ -155,7 +155,7 @@ Supports full **00–99 tracking system**.
 </p>
 
 <p align="center">
-  <img src="./screenshots/resold_2d_list.jpg" width="90%" />
+  <img src="./screenshots/resold_2d_list.jpg" width="80%" />
 </p>
 
 ### Features
@@ -257,7 +257,10 @@ Supports full **00–99 tracking system**.
 <p align="center">
   <img src="./screenshots/profile.jpg" width="45%" />
   <img src="./screenshots/edit_profile.jpg" width="45%" />
-  <img src="./screenshots/change_password.jpg" width="45%" />
+</p>
+
+<p align="center">
+  <img src="./screenshots/change_password.jpg" width="80%" />
 </p>
 
 - Profile editing
@@ -268,15 +271,8 @@ Supports full **00–99 tracking system**.
 
 # 🔐 Authentication
 
-## Login
-
 <p align="center">
   <img src="./screenshots/login.jpg" width="45%" />
-</p>
-
-## Sign Up
-
-<p align="center">
   <img src="./screenshots/sign_in.jpg" width="45%" />
 </p>
 
