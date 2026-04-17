@@ -150,12 +150,9 @@ A lightweight query-based caching system is used to optimize API performance.
 Supports full **00–99 tracking system**.
 
 <p align="center">
-  <img src="./screenshots/normal_2d_list.jpg" width="45%" />
-  <img src="./screenshots/normal_2d_list_1.jpg" width="45%" />
-</p>
-
-<p align="center">
-  <img src="./screenshots/resold_2d_list.jpg" width="80%" />
+  <img src="./screenshots/normal_2d_list.jpg" width="30%" />
+  <img src="./screenshots/normal_2d_list_1.jpg" width="30%" />
+  <img src="./screenshots/resold_2d_list.jpg" width="30%" />
 </p>
 
 ### Features
