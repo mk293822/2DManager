@@ -25,7 +25,7 @@
 
 All production and preview builds are managed via Expo EAS:
 
-🔗 https://expo.dev/accounts/minkhant2938/projects/2d-manager/builds
+🔗 <https://expo.dev/accounts/minkhant2938/projects/2d-manager/builds>
 
 - 📱 Latest Android APK available here
 - 🔄 Automatically updated after each build
@@ -137,7 +137,7 @@ A lightweight query-based caching system is used to optimize API performance.
 ## 🗑️ Delete Action
 
 <p align="center">
-  <img src="./screenshots/home.png" width="80%" />
+  <img src="./screenshots/manage_delete.jpg" width="80%" />
 </p>
 
 - Deletes section data
@@ -155,7 +155,7 @@ Supports full **00–99 tracking system**.
 </p>
 
 <p align="center">
-  <img src="./screenshots/resold_2d_list.jpg" width="80%" />
+  <img src="./screenshots/resold_2d_list.jpg" width="90%" />
 </p>
 
 ### Features
@@ -172,8 +172,8 @@ Supports full **00–99 tracking system**.
 ## Commission & Resold Users
 
 <p align="center">
-  <img src="./screenshots/commission_users.png" width="45%" />
-  <img src="./screenshots/resold_users.png" width="45%" />
+  <img src="./screenshots/commission_users.jpg" width="45%" />
+  <img src="./screenshots/resold_users.jpg" width="45%" />
 </p>
 
 - User listing system
@@ -185,7 +185,7 @@ Supports full **00–99 tracking system**.
 ## ➕ Create User
 
 <p align="center">
-  <img src="./screenshots/create_commission_user.png" width="80%" />
+  <img src="./screenshots/create_commission_user.jpg" width="80%" />
 </p>
 
 - Simple user creation form
@@ -196,14 +196,14 @@ Supports full **00–99 tracking system**.
 ## 👤 User Details
 
 <p align="center">
-  <img src="./screenshots/commission_user_1.png" width="30%" />
-  <img src="./screenshots/commission_user_2.png" width="30%" />
-  <img src="./screenshots/commission_user_3.png" width="30%" />
+  <img src="./screenshots/commission_user_1.jpg" width="30%" />
+  <img src="./screenshots/commission_user_2.jpg" width="30%" />
+  <img src="./screenshots/commission_user_3.jpg" width="30%" />
 </p>
 
 <p align="center">
-  <img src="./screenshots/commission_user_edit.png" width="45%" />
-  <img src="./screenshots/delete_commission_user_1.png" width="45%" />
+  <img src="./screenshots/commission_user_edit.jpg" width="45%" />
+  <img src="./screenshots/delete_commission_user_1.jpg" width="45%" />
 </p>
 
 - View user analytics
@@ -215,8 +215,8 @@ Supports full **00–99 tracking system**.
 # ➕ Number Creation System
 
 <p align="center">
-  <img src="./screenshots/create_number_1.png" width="45%" />
-  <img src="./screenshots/create_number_2.png" width="45%" />
+  <img src="./screenshots/create_number_1.jpg" width="45%" />
+  <img src="./screenshots/create_number_2.jpg" width="45%" />
 </p>
 
 - Custom keyboard input
@@ -228,14 +228,14 @@ Supports full **00–99 tracking system**.
 # 📜 Number History
 
 <p align="center">
-  <img src="./screenshots/number_history_1.png" width="45%" />
-  <img src="./screenshots/number_history_2.png" width="45%" />
+  <img src="./screenshots/number_history_1.jpg" width="45%" />
+  <img src="./screenshots/number_history_2.jpg" width="45%" />
 </p>
 
 ## 📊 Format View
 
 <p align="center">
-  <img src="./screenshots/number_history_2d_format.png" width="80%" />
+  <img src="./screenshots/number_history_2d_format.jpg" width="80%" />
 </p>
 
 - History tracking system
@@ -255,9 +255,9 @@ Supports full **00–99 tracking system**.
 # 👤 Profile System
 
 <p align="center">
-  <img src="./screenshots/profile.png" width="45%" />
-  <img src="./screenshots/edit_profile.png" width="45%" />
-  <img src="./screenshots/change_password.png" width="45%" />
+  <img src="./screenshots/profile.jpg" width="45%" />
+  <img src="./screenshots/edit_profile.jpg" width="45%" />
+  <img src="./screenshots/change_password.jpg" width="45%" />
 </p>
 
 - Profile editing
@@ -271,13 +271,13 @@ Supports full **00–99 tracking system**.
 ## Login
 
 <p align="center">
-  <img src="./screenshots/login.png" width="45%" />
+  <img src="./screenshots/login.jpg" width="45%" />
 </p>
 
 ## Sign Up
 
 <p align="center">
-  <img src="./screenshots/sign_in.png" width="45%" />
+  <img src="./screenshots/sign_in.jpg" width="45%" />
 </p>
 
 ---
