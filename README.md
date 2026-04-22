@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/images/logo.png" width="160" />
+  <img src="./assets/images/icon.png" width="160" />
 </p>
 
 # 📱 2D Manager Frontend
