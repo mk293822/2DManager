@@ -113,11 +113,6 @@ const TabsLayout = () => {
 						headerTitleStyle: {
 							fontWeight: "900",
 						},
-
-						headerRightContainerStyle: {
-							display: "flex",
-							alignItems: "center",
-						},
 					}}
 				/>
 			))}
