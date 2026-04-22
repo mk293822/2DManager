@@ -2,7 +2,7 @@
   <img src="./assets/images/icon.png" width="160" />
 </p>
 
-# 📱 2D Manager Frontend
+<h1 align="center">2D Manager Frontend</h1>
 
 <p align="center">
   <img src="https://img.shields.io/badge/React%20Native-Mobile-blue?style=for-the-badge&logo=react" />
