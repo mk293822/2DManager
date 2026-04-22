@@ -13,6 +13,11 @@ import { eventBus } from "@/lib/event-bus";
 import * as Updates from "expo-updates";
 import { useEffect, useState } from "react";
 
+import { vexo } from 'vexo-analytics';
+// Vexo
+const VEXO_API_KEY = process.env.EXPO_PUBLIC_VEXO_API_KEY;
+vexo(VEXO_API_KEY)
+
 export default function RootLayout() {
 	const [isCheckingUpdate, setIsCheckingUpdate] = useState(true);
 	const [updateMessage, setUpdateMessage] = useState("Checking updates...");
