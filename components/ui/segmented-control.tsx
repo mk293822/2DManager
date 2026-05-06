@@ -48,7 +48,7 @@ function SegmentedControl<T extends string>({
 			toValue: x,
 			useNativeDriver: true,
 		}).start();
-	}, [value, labelWidths]);
+	}, [value, labelWidths, index, translateX]);
 
 	const pillWidth = (labelWidths[index] || 0) + H_PADDING * 2;
 

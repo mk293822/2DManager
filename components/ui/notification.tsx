@@ -74,7 +74,7 @@ export const NotificationCard = ({
 				useNativeDriver: true,
 			}),
 		]).start();
-	}, []);
+	});
 
 	const theme: {
 		bg: string;
